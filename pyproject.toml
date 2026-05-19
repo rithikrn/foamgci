@@ -8,7 +8,7 @@ version = "0.2.0"
 description = "Verification utilities for unsteady OpenFOAM CFD: Roache GCI, autocorrelation-corrected SEM, KPSS stationarity, fieldMinMax parsing."
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [{ name = "<TODO: fill in>" }]
+authors = [{ name = "Rithik R Nambiar" }]
 requires-python = ">=3.10"
 keywords = ["CFD", "OpenFOAM", "verification", "GCI", "Roache", "KPSS", "autocorrelation"]
 classifiers = [
@@ -35,9 +35,9 @@ dev  = ["pytest>=7", "matplotlib>=3.5"]
 foamgci = "foamgci.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/USERNAME/foamgci"
-Issues   = "https://github.com/USERNAME/foamgci/issues"
-Source   = "https://github.com/USERNAME/foamgci"
+Homepage = "https://github.com/rithikrn/foamgci"
+Issues   = "https://github.com/rithikrn/foamgci/issues"
+Source   = "https://github.com/rithikrn/foamgci"
 
 [tool.setuptools.packages.find]
 include = ["foamgci*"]
