@@ -224,7 +224,7 @@ verification section is appreciated:
 
 > Mach-3 forward-step grid-convergence study performed with
 > `foamgci` v0.2.0 (Roache GCI + Geyer τ_int + KPSS stationarity),
-> https://github.com/USERNAME/foamgci.
+> https://github.com/rithikrn/foamgci.
 
 A JOSS paper is planned. The current preferred citation form is the
 GitHub URL + commit hash for the release used.
