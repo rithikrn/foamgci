@@ -29,13 +29,13 @@ temporal, not spatial.
 ## Installation
 
 ```bash
-pip install git+https://github.com/USERNAME/foamgci.git
+pip install git+https://github.com/rithikrn/foamgci.git
 ```
 
 Or, for development:
 
 ```bash
-git clone https://github.com/USERNAME/foamgci.git
+git clone https://github.com/rithikrn/foamgci.git
 cd foamgci
 pip install -e ".[dev]"
 pytest -v
