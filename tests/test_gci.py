@@ -165,3 +165,32 @@ def test_monotonic_triplet_still_computes():
 def test_hierarchy_requires_three_grids() -> None:
     with pytest.raises(ValueError, match="at least 3"):
         gci_over_hierarchy([1.0, 2.0], [2.0, 1.0])
+
+
+def test_oscillatory_reports_celik_half_span_uncertainty() -> None:
+    """Oscillatory regime: GCI is NaN but Celik's half-span uncertainty
+    U = 0.5*(phi_max - phi_min)/|phi_fine| is reported."""
+    g = roache_gci(
+        phi_coarse=10.0, phi_medium=10.4, phi_fine=10.1,
+        h_coarse=4.0, h_medium=2.0, h_fine=1.0,
+    )
+    assert g.regime == "oscillatory"
+    assert math.isnan(g.gci_fine_21_pct)
+    expected = 100.0 * 0.5 * (10.4 - 10.0) / 10.1
+    assert math.isclose(g.u_oscillatory_pct, expected, rel_tol=1e-12)
+
+
+def test_asymptotic_ratio_exact_for_nonconstant_r() -> None:
+    """phi(h) = phi_e + C h^p with r21 != r32 must give R_asym = 1.
+    (The pre-0.3.1 formula returned ~1.61 here.)"""
+    phi_e, C, p_true = 5.0, 0.05, 2.0
+    h3 = 1.0
+    h2 = h3 / 1.333
+    h1 = h2 / 1.5
+    g = roache_gci(
+        phi_coarse=phi_e + C * h3 ** p_true,
+        phi_medium=phi_e + C * h2 ** p_true,
+        phi_fine=phi_e + C * h1 ** p_true,
+        h_coarse=h3, h_medium=h2, h_fine=h1,
+    )
+    assert math.isclose(g.asymptotic_ratio, 1.0, abs_tol=1e-9)
