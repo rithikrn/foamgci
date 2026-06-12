@@ -30,6 +30,7 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
+from ._version import __version__
 from .report import full_report, rayleigh_pitot, GridCase
 
 
@@ -64,6 +65,7 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Verification utilities for unsteady OpenFOAM CFD: "
                     "Roache GCI + autocorrelation-corrected SEM + KPSS.",
     )
+    p.add_argument("--version", action="version", version=f"foamgci {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
     pr = sub.add_parser("report", help="generate a V&V report from fieldMinMax.dat")
     pr.add_argument(
@@ -90,7 +92,7 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="write plain-text report to this path")
     pr.add_argument("--latex", type=Path, default=None,
                     help="write LaTeX table to this path")
-    pr.add_argument("--version", action="version", version="foamgci 0.2.0")
+    pr.add_argument("--version", action="version", version=f"foamgci {__version__}")
     return p
 
 
