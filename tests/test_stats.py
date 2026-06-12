@@ -58,19 +58,6 @@ def test_sem_correction_inflates_under_correlation() -> None:
 
     sem_inflated, n_eff_inflated = sem_autocorr_corrected(x, tau=4.0)
     assert sem_inflated > sem_naive
-    assert n_eff_inflated < n_eff_naive  
-    np.testing.assert_allclose(sem_inflated / sem_naive, 2.0, rtol=1e-12)
-
-def test_sem_correction_inflates_under_correlation() -> None:
-    rng = np.random.default_rng(1)
-    x = rng.standard_normal(5000)
-    sem_naive, n_eff_naive = sem_autocorr_corrected(x, tau=1.0)
-    sigma = np.std(x, ddof=1)
-    np.testing.assert_allclose(sem_naive, sigma / np.sqrt(x.size), rtol=1e-12)
-    np.testing.assert_allclose(n_eff_naive, x.size, rtol=1e-12)
-
-    sem_inflated, n_eff_inflated = sem_autocorr_corrected(x, tau=4.0)
-    assert sem_inflated > sem_naive
     assert n_eff_inflated < n_eff_naive
     np.testing.assert_allclose(sem_inflated / sem_naive, 2.0, rtol=1e-12)
 
