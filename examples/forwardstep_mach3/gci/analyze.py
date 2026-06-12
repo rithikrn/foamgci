@@ -46,7 +46,7 @@ def summarise(grid, window) -> dict:
         px = py = float("nan")
 
     return dict(
-        label=grid.label, folder=grid.folder,
+        label=grid.label,
         n_cells=grid.n_cells, dx=grid.dx,
         n_samples_stat=ws.n,
         p_max_mean=ws.mean, p_max_std=ws.std,
@@ -85,7 +85,9 @@ def main() -> int:
     cases = []
     for grid in GRIDS:
         if not grid.fieldminmax_path.is_file():
-            print(f"  ERROR: missing {grid.fieldminmax_path}")
+            print(f"  ERROR: missing input file {grid.fieldminmax_path}")
+            print("         Populate gci/data/ from your OpenFOAM runs first.")
+            print("         See gci/data/README.md (one `cp` per grid).")
             return 2
         s = summarise(grid, T_STAT)
         cases.append(s)
@@ -134,12 +136,6 @@ def main() -> int:
         rayleigh_pitot_p02=p02,           # inviscid normal-shock lower-bound check
         error_table=err_table,
         greenshields_2010=GREENSHIELDS_2010,
-        mesh_face_counts={
-            g.label: dict(inlet=g.faces_inlet, outlet=g.faces_outlet,
-                          bottom=g.faces_bottom, top=g.faces_top,
-                          obstacle=g.faces_obstacle)
-            for g in GRIDS
-        },
     )
     out_path = Path(__file__).parent / "gci_summary.json"
     out_path.write_text(json.dumps(out, indent=2, default=str))
