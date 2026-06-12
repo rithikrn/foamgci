@@ -174,7 +174,7 @@ foamgci/
 │           ├── analyze.py         #     reads gci/data/*.dat -> gci_summary.json
 │           ├── make_*.py          #     paper figures
 │           ├── run_all.sh         #     analyze + figures
-│           └── data/              #     the four committed fieldMinMax.dat inputs
+│           └── data/              #     expected coarse/medium/fine/extrafine QoI inputs
 ├── README.md  LIMITATIONS.md  CONTRIBUTING.md  CHANGELOG.md  LICENSE
 ├── pyproject.toml
 └── .github/workflows/tests.yml    # CI: Linux + macOS, Py 3.10-3.12
