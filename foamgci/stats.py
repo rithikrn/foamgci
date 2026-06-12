@@ -303,6 +303,8 @@ class WindowStats:
     kpss_stationary_5pct: bool
     t_start: float
     t_end: float
+    resampled: bool = False     # True if the series was linearly resampled
+                                # onto a uniform grid (see window_stats notes)
 
 
 def window_stats(
@@ -336,6 +338,16 @@ def window_stats(
         unless the series is first put on a uniform grid. The reported
         ``mean`` is always the trapezoidal time-average of the original
         samples, which is unbiased regardless of spacing.
+
+        Caveat: linear interpolation low-pass filters the series, which
+        deflates ``std`` slightly and inflates serial correlation (and
+        hence tau_int). The two biases act on SEM in opposite
+        directions and do not cancel exactly. For mildly non-uniform
+        spacing (OpenFOAM adaptive time stepping at fixed maxCo) the
+        net bias is small; for strongly clustered sampling, prefer
+        sampling with ``writeControl adjustableRunTime`` so the raw
+        samples are already uniform in time. ``WindowStats.resampled``
+        records whether resampling occurred.
 
     Returns
     -------
@@ -378,7 +390,8 @@ def window_stats(
     # Build the series used for the autocorrelation-based quantities.
     dt = np.diff(tw)
     nonuniform = float(dt.std() / dt.mean()) if dt.mean() > 0 else 0.0
-    if resample and nonuniform > 1e-6:
+    did_resample = bool(resample and nonuniform > 1e-6)
+    if did_resample:
         dt_med = float(np.median(dt))
         n_uniform = max(int(np.floor(span / dt_med)) + 1, 10)
         t_uniform = tw[0] + dt_med * np.arange(n_uniform)
@@ -403,4 +416,5 @@ def window_stats(
         kpss_stationary_5pct=kp["stationary_5pct"],
         t_start=float(t_start),
         t_end=float(t_end),
+        resampled=did_resample,
     )
