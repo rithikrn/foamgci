@@ -1,31 +1,26 @@
 # Grid-convergence inputs (`fieldMinMax.dat`)
 
-`analyze.py` reads four files from this folder, one per grid:
+`analyze.py` expects four files in this folder, one per grid:
 
-| file            | grid       |
-|-----------------|------------|
-| `coarse.dat`    | Coarse     |
-| `medium.dat`    | Medium     |
-| `fine.dat`      | Fine       |
+| file | grid |
+|---|---|
+| `coarse.dat` | Coarse |
+| `medium.dat` | Medium |
+| `fine.dat` | Fine |
 | `extrafine.dat` | Extra-fine |
 
-Each is the `fieldMinMax` function-object output of one OpenFOAM run.
-They are **KB-sized and committed to the repo** so anyone can reproduce
-the figures without rerunning OpenFOAM.
+Each file is the OpenFOAM `fieldMinMax` function-object output from one grid-refinement run.
 
-## How to populate them from your HPC run
+## Current status
 
-After a grid finishes, its min/max history is at
-`<grid>/postProcessing/fieldMinMax/0/fieldMinMax.dat`. Copy each into
-this folder under the name above:
+The `.dat` files are intentionally not committed yet because the simulation campaign will be rerun. To reproduce the workflow now, run the OpenFOAM cases first and copy the generated files into this folder.
+
+## How to populate this folder
+
+After each grid finishes, copy:
 
 ```bash
-cp ../../coarse_grid/postProcessing/fieldMinMax/0/fieldMinMax.dat     coarse.dat
-cp ../../medium_grid/postProcessing/fieldMinMax/0/fieldMinMax.dat     medium.dat
-cp ../../fine_grid/postProcessing/fieldMinMax/0/fieldMinMax.dat       fine.dat
-cp ../../extrafine_grid/postProcessing/fieldMinMax/0/fieldMinMax.dat  extrafine.dat
-```
-
-(`submit.sh` does this copy automatically for you at the end of each
-run.) Then commit the four `.dat` files — that is what makes the study
-reproducible for the next reader.
+cp <coarse_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat     coarse.dat
+cp <medium_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat     medium.dat
+cp <fine_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat       fine.dat
+cp <extrafine_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat  extrafine.dat
