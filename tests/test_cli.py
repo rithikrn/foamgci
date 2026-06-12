@@ -23,9 +23,9 @@ def test_cli_report_runs(tmp_path: Path) -> None:
     files = {}
     means = {"coarse": 11.99, "medium": 12.02, "fine": 12.05, "extra-fine": 12.058}
     hs = {"coarse": 0.025, "medium": 0.0125, "fine": 0.00625, "extra-fine": 0.003125}
-    for label, m in means.items():
+    for i, (label, m) in enumerate(means.items()):
         f = tmp_path / f"{label}.dat"
-        _make_minmax(f, mean=m, seed=hash(label) & 0xffff)
+        _make_minmax(f, mean=m, seed=200 + i)  # deterministic; not hash(label)
         files[label] = f
     out_text = tmp_path / "rep.txt"
     out_tex = tmp_path / "tab.tex"
