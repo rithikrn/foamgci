@@ -197,7 +197,7 @@ instructions. The short version:
 ```bash
 pip install -e .                       # install the library
 cd examples/forwardstep_mach3/gci
-./run_all.sh                           # -> gci_summary.json + figures/
+bash run_all.sh                           # -> gci_summary.json + figures/
 ```
 
 | label       | cells   | $h$       | $r$ |
