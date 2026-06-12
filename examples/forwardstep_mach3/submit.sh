@@ -14,7 +14,7 @@ module purge
 module load openfoam
 
 blockMesh            2>&1 | tee log.blockMesh
-decomposePar         2>&1 | tee log.checkMesh
+decomposePar         2>&1 | tee log.decompose
 mpirun -np "$SLURM_NTASKS" rhoCentralFoam -parallel  2>&1 | tee log.run
 reconstructPar       2>&1 | tee log.reconstruct
 rm -rf processor*
