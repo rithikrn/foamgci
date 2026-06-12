@@ -1,182 +1,151 @@
-"""
-analyze.py
-----------
-End-to-end GCI analysis on the four-grid forward-step study.
-
-For each grid specified in data.py:
-  1. parses postProcessing/fieldMinMax1/0/fieldMinMax.dat
-  2. time-averages p_max, rho_max, |U|_max over the stationary window
-  3. records the late-time location of the peak-pressure cell
-
-Then computes Roache GCI on TWO overlapping triplets:
-  A : {Coarse, Medium, Fine}
-  B : {Medium, Fine, Extra-fine}
-The shift in observed order p between A and B indicates whether the
-asymptotic range has been reached (Celik et al. 2008 sec. 2.3).
-
-Writes:
-  gci_summary.json  -- structured results consumed by figure scripts.
-"""
 from __future__ import annotations
 
 import json
 import sys
 from pathlib import Path
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).parent))
+from data import GRIDS, GREENSHIELDS_2010, T_STAT  # noqa: E402
 
-from data import GRIDS, COARSE, MEDIUM, FINE, EXTRA_FINE, \
-                 GREENSHIELDS_2010, T_STAT
-from parse_fieldminmax import summarise_case, StationaryStats
-from gci import gci_triplet
+from foamgci.reader import read_fieldminmax            # noqa: E402
+from foamgci.stats import window_stats                 # noqa: E402
+from foamgci.gci import gci_over_hierarchy             # noqa: E402
+from foamgci.report import rayleigh_pitot              # noqa: E402
+
+U_FIELD_NAMES = ("mag(U)", "U")
 
 
-def banner(title: str) -> None:
-    print("=" * 72)
-    print(title)
-    print("=" * 72)
+def _mean_std(path: Path, field: str, window) -> tuple[float, float]:
+    """Trapezoidal time-mean and sample std of a field's max over window."""
+    d = read_fieldminmax(path, field=field)
+    ws = window_stats(d.time, d.max, window[0], window[1])
+    return ws.mean, ws.std
+
+
+def summarise(grid, window) -> dict:
+    path = grid.fieldminmax_path
+    dp = read_fieldminmax(path, field="p")
+    ws = window_stats(dp.time, dp.max, window[0], window[1])
+
+    rho_mean, rho_std = _mean_std(path, "rho", window)
+    u_mean = u_std = float("nan")
+    for name in U_FIELD_NAMES:
+        try:
+            u_mean, u_std = _mean_std(path, name, window)
+            break
+        except (ValueError, RuntimeError):
+            continue
+
+    # Median peak-pressure location over the window (robust to ties).
+    m = (dp.time >= window[0]) & (dp.time <= window[1])
+    if dp.loc_max is not None and m.any():
+        px, py = (float(v) for v in np.median(dp.loc_max[m], axis=0)[:2])
+    else:
+        px = py = float("nan")
+
+    return dict(
+        label=grid.label, folder=grid.folder,
+        n_cells=grid.n_cells, dx=grid.dx,
+        n_samples_stat=ws.n,
+        p_max_mean=ws.mean, p_max_std=ws.std,
+        p_max_sem=ws.sem, p_max_tau_int=ws.tau_int,
+        p_max_n_eff=ws.n_eff,
+        kpss_stat=ws.kpss_stat, kpss_p=ws.kpss_p,
+        kpss_stationary=bool(ws.kpss_stationary_5pct),
+        rho_max_mean=rho_mean, rho_max_std=rho_std,
+        U_mag_max_mean=u_mean, U_mag_max_std=u_std,
+        peak_loc_x=px, peak_loc_y=py,
+    )
+
+
+def triplet_dict(g, label: str) -> dict:
+    """Map a foamgci GCIResult onto the JSON schema the figures expect."""
+    return dict(
+        label=label,
+        phi1=g.phi_fine, phi2=g.phi_medium, phi3=g.phi_coarse,
+        h1=g.h_fine, h2=g.h_medium, h3=g.h_coarse,
+        r=g.r21,
+        eps21=g.phi_fine - g.phi_medium,
+        eps32=g.phi_medium - g.phi_coarse,
+        R=(g.phi_fine - g.phi_medium) / (g.phi_medium - g.phi_coarse),
+        regime=g.regime,
+        p_obs=g.p_apparent,
+        phi_ext=g.phi_exact,
+        gci_fine_pct=g.gci_fine_21_pct,
+        gci_med_pct=g.gci_medium_32_pct,
+        asymptotic_ratio=g.asymptotic_ratio,
+        note=g.note,
+    )
 
 
 def main() -> int:
-    # ------------------------------------------------------------------
-    # Step 1: parse each case's fieldMinMax.dat
-    # ------------------------------------------------------------------
-    banner(f"Parsing fieldMinMax over stationary window t in {T_STAT}")
-    cases: list[StationaryStats] = []
-    for g in GRIDS:
-        path = g.fieldminmax_path
-        print(f"  {g.label:11s} <- {path}")
-        if not path.is_file():
-            print(f"    ERROR: file missing; check {g.case_dir}")
+    print(f"Stationary window t in {T_STAT}\n")
+    cases = []
+    for grid in GRIDS:
+        if not grid.fieldminmax_path.is_file():
+            print(f"  ERROR: missing {grid.fieldminmax_path}")
             return 2
-        stats = summarise_case(
-            case_label=g.label, folder=g.folder,
-            n_cells=g.n_cells, dx=g.dx,
-            fieldminmax_path=path,
-            window=T_STAT,
-        )
-        if stats.n_samples_stat < 10:
-            print(f"    WARN: only {stats.n_samples_stat} samples in "
-                  f"{T_STAT} -- run may not have reached stationary "
-                  "regime; numbers below are NOT trustworthy.")
-        cases.append(stats)
+        s = summarise(grid, T_STAT)
+        cases.append(s)
+        print(f"  {s['label']:11s} N={s['n_samples_stat']:4d}  "
+              f"<p_max>={s['p_max_mean']:.5f}  sigma={s['p_max_std']:.4f}  "
+              f"tau={s['p_max_tau_int']:.2f}  SEM={s['p_max_sem']:.5f}  "
+              f"N_eff={s['p_max_n_eff']:.0f}  KPSS_p={s['kpss_p']:.2f}")
 
-    # ------------------------------------------------------------------
-    # Step 2: per-grid table
-    # ------------------------------------------------------------------
-    print()
-    banner("Per-grid stationary statistics")
-    print(f"{'Grid':12s}  {'cells':>8s}  {'dx':>9s}  "
-          f"{'<p_max>':>9s}  {'sigma_p':>8s}  "
-          f"{'<rho_max>':>10s}  {'<|U|_max>':>10s}")
-    for s in cases:
-        print(f"{s.label:12s}  {s.n_cells:>8d}  {s.dx:>9.5f}  "
-              f"{s.p_max_mean:>9.4f}  {s.p_max_std:>8.4f}  "
-              f"{s.rho_max_mean:>10.4f}  {s.U_mag_max_mean:>10.4f}")
+    by = {c["label"]: c for c in cases}
+    order = ["Coarse", "Medium", "Fine", "Extra-fine"]
+    means = [by[k]["p_max_mean"] for k in order]
+    hs = [by[k]["dx"] for k in order]
 
-    print()
-    print(f"{'Grid':12s}  {'peak (x, y)':>18s}")
-    for s in cases:
-        print(f"{s.label:12s}  ({s.peak_loc_x:.5f}, {s.peak_loc_y:.5f})")
-
-    # Convenient handles by label.
-    by = {s.label: s for s in cases}
-
-    # ------------------------------------------------------------------
-    # Step 3: Roache GCI on both triplets
-    # ------------------------------------------------------------------
-    print()
-    banner("Roache GCI -- primary metric <p_max>_stat")
-
-    tA = gci_triplet(
-        by["Fine"].p_max_mean,
-        by["Medium"].p_max_mean,
-        by["Coarse"].p_max_mean,
-        by["Fine"].dx, by["Medium"].dx, by["Coarse"].dx,
-        label="A : C-M-F",
-    )
-    tB = gci_triplet(
-        by["Extra-fine"].p_max_mean,
-        by["Fine"].p_max_mean,
-        by["Medium"].p_max_mean,
-        by["Extra-fine"].dx, by["Fine"].dx, by["Medium"].dx,
-        label="B : M-F-XF",
-    )
-
+    gcis = gci_over_hierarchy(means, hs, order)   # [(C,M,F), (M,F,XF)]
+    tA = triplet_dict(gcis[0], "A : C-M-F")
+    tB = triplet_dict(gcis[1], "B : M-F-XF")
     for t in (tA, tB):
-        print(f"\nTriplet {t.label}  ({t.regime})")
-        print(f"  phi_1={t.phi1:.5f}  phi_2={t.phi2:.5f}  "
-              f"phi_3={t.phi3:.5f}")
-        print(f"  eps21={t.eps21:+.6f}  eps32={t.eps32:+.6f}  "
-              f"R={t.R:+.4f}")
-        if t.regime == "monotonic":
-            print(f"  p_obs={t.p_obs:.3f}  phi_ext={t.phi_ext:.5f}")
-            print(f"  GCI_12={t.gci_fine_pct:.4f}%  "
-                  f"GCI_23={t.gci_med_pct:.4f}%  AR={t.asymptotic_ratio:.4f}")
-        print(f"  {t.note}")
+        print(f"\nTriplet {t['label']}: regime={t['regime']}  "
+              f"R={t['R']:+.4f}  p_obs={t['p_obs']:.4f}  "
+              f"phi_ext={t['phi_ext']:.5f}  GCI_fine={t['gci_fine_pct']:.4f}%")
+        print(f"  {t['note']}")
 
-    # ------------------------------------------------------------------
-    # Step 4: pick best phi_ext for error reporting
-    # ------------------------------------------------------------------
-    if tB.regime == "monotonic":
-        phi_star = tB.phi_ext
-        phi_star_source = tB.label
-    elif tA.regime == "monotonic":
-        phi_star = tA.phi_ext
-        phi_star_source = tA.label
+    # Pick phi_star from the deepest monotonic triplet, else extra-fine.
+    if gcis[1].regime == "monotonic":
+        phi_star, src = gcis[1].phi_exact, tB["label"]
+    elif gcis[0].regime == "monotonic":
+        phi_star, src = gcis[0].phi_exact, tA["label"]
     else:
-        # Fall back to extra-fine value.
-        phi_star = by["Extra-fine"].p_max_mean
-        phi_star_source = "Extra-fine (no monotonic triplet available)"
+        phi_star, src = by["Extra-fine"]["p_max_mean"], "Extra-fine (no monotonic triplet)"
 
-    print()
-    banner(f"Relative error vs phi_ext = {phi_star:.5f}  "
-           f"(source: {phi_star_source})")
-    print(f"{'Grid':12s}  {'dx':>9s}  {'<p_max>':>9s}  "
-          f"{'|f-f*|':>10s}  {'rel %':>8s}")
-    err_table = []
-    for s in cases:
-        err = abs(s.p_max_mean - phi_star)
-        rel = 100.0 * err / abs(phi_star) if phi_star else float("nan")
-        print(f"{s.label:12s}  {s.dx:>9.5f}  {s.p_max_mean:>9.4f}  "
-              f"{err:>10.5f}  {rel:>8.4f}")
-        err_table.append(dict(label=s.label, dx=s.dx,
-                              p_max=s.p_max_mean, err=err, rel_pct=rel))
+    p02 = rayleigh_pitot(GREENSHIELDS_2010["M_inflow"], GREENSHIELDS_2010["gamma"])
+    err_table = [
+        dict(label=c["label"], dx=c["dx"], p_max=c["p_max_mean"],
+             err=abs(c["p_max_mean"] - phi_star),
+             rel_pct=100.0 * abs(c["p_max_mean"] - phi_star) / abs(phi_star))
+        for c in cases
+    ]
 
-    # ------------------------------------------------------------------
-    # Step 5: dump JSON for downstream figure scripts
-    # ------------------------------------------------------------------
-    out = {
-        "stationary_window": list(T_STAT),
-        "cases": [
-            dict(
-                label=s.label, folder=s.folder,
-                n_cells=s.n_cells, dx=s.dx,
-                n_samples_stat=s.n_samples_stat,
-                p_max_mean=s.p_max_mean, p_max_std=s.p_max_std,
-                rho_max_mean=s.rho_max_mean, rho_max_std=s.rho_max_std,
-                U_mag_max_mean=s.U_mag_max_mean,
-                U_mag_max_std=s.U_mag_max_std,
-                peak_loc_x=s.peak_loc_x, peak_loc_y=s.peak_loc_y,
-            )
-            for s in cases
-        ],
-        "triplet_A_CMF": tA.as_dict(),
-        "triplet_B_MFXF": tB.as_dict(),
-        "phi_star": phi_star,
-        "phi_star_source": phi_star_source,
-        "error_table": err_table,
-        "greenshields_2010": GREENSHIELDS_2010,
-        "mesh_face_counts": {
+    out = dict(
+        stationary_window=list(T_STAT),
+        cases=cases,
+        triplet_A_CMF=tA,
+        triplet_B_MFXF=tB,
+        phi_star=phi_star,
+        phi_star_source=src,
+        rayleigh_pitot_p02=p02,           # inviscid normal-shock lower-bound check
+        error_table=err_table,
+        greenshields_2010=GREENSHIELDS_2010,
+        mesh_face_counts={
             g.label: dict(inlet=g.faces_inlet, outlet=g.faces_outlet,
                           bottom=g.faces_bottom, top=g.faces_top,
                           obstacle=g.faces_obstacle)
             for g in GRIDS
         },
-    }
+    )
     out_path = Path(__file__).parent / "gci_summary.json"
     out_path.write_text(json.dumps(out, indent=2, default=str))
-    print(f"\nWrote {out_path}")
+    print(f"\nphi_star = {phi_star:.5f} ({src});  "
+          f"Rayleigh-Pitot p02 = {p02:.4f} (lower-bound check)")
+    print(f"Wrote {out_path}")
     return 0
 
 
