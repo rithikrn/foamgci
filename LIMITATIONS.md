@@ -65,6 +65,52 @@ quickly whether it fits their workflow.
   emit a GCI when `R_asym` strays from unity. Interpretation is
   the user's responsibility.
 
+## Space-time error confounding (important)
+
+- **CFL-limited time stepping couples Δt to h.** With
+  `adjustTimeStep yes` and fixed `maxCo`, halving the mesh spacing
+  roughly halves the time step. The "apparent order" from the
+  refinement hierarchy therefore reflects a **mixture of spatial and
+  temporal discretization error** (rhoCentralFoam time integration is
+  first-order). Roache GCI formally quantifies spatial error only.
+  Mitigation: run at least one grid pair at a fixed, conservative Δt
+  (small enough for the finest grid) and compare the apparent order
+  against the CFL-limited result. `foamgci` does not do this for you
+  and does not warn about it.
+
+## QoI smoothness
+
+- **A spatial extremum is a non-smooth functional.** The Richardson
+  expansion `phi(h) = phi_exact + C h^p + ...` assumed by GCI has no
+  formal basis for the max/min of a shock-captured field, whose
+  location can jump between cells under refinement. Treat
+  `fieldMinMax`-based GCI as a heuristic indicator; prefer integrated
+  QoIs (forces, surface/volume averages) for formally defensible
+  convergence claims. For inviscid shock/shear-layer benchmarks
+  (e.g. the forward-facing step), statistics may not converge under
+  refinement at all, because resolved Kelvin-Helmholtz structure on
+  slip lines grows without a viscous cutoff — a divergent or
+  oscillatory regime flag on the coarsest triplet can be physics, not
+  a bug.
+
+## Statistical estimator caveats
+
+- **Resampling bias.** Non-uniformly sampled windows are linearly
+  interpolated onto a uniform grid before tau_int/KPSS. Interpolation
+  low-pass filters the series: it slightly deflates the sample std and
+  inflates serial correlation. The net SEM bias is small for mildly
+  non-uniform spacing. `WindowStats.resampled` records whether
+  resampling occurred.
+
+- **Geyer IPS is proven monotone for reversible Markov chains.** For
+  general stationary time series (CFD signals) it is a well-behaved
+  heuristic, not a theorem.
+
+- **KPSS p-values are clamped.** Only the published critical values at
+  10/5/2.5/1 % are tabulated, so reported p-values are linear
+  interpolations clamped to [0.01, 0.10] and rendered as `>=0.100` /
+  `<=0.010` at the ends. Do not propagate them as exact probabilities.
+
 ## Reproducibility
 
 - Results depend on the OpenFOAM solver, scheme, time step, and
