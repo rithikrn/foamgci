@@ -14,7 +14,7 @@ from .gci import (
 )
 from .report import full_report, rayleigh_pitot, ReportTable, GridCase
 
-__version__ = "0.3.0"
+from ._version import __version__
 
 __all__ = [
     "read_fieldminmax",
