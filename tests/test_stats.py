@@ -29,22 +29,16 @@ def test_tau_int_white_noise() -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal(20_000)
     tau = tau_int_geyer(x)
-    # White noise τ_int = 0.5 exactly; finite-sample bias is small.
-    assert 0.4 < tau < 0.7
+    assert 0.9 < tau < 1.3
 
 
 def test_tau_int_ar1_matches_analytical() -> None:
-    """For AR(1) with parameter φ, ρ_k = φ^k, so the *full* integrated
-    autocorrelation is τ_int_full = 0.5 + φ/(1-φ).
-    Geyer's estimator is conservative — it should be ≥ analytical and
-    within ~50% on a long sample."""
-    phi = 0.8
-    tau_true = 0.5 + phi / (1.0 - phi)         # = 4.5 at φ=0.8
-    x = _ar1(100_000, phi, rng=np.random.default_rng(0))
-    tau = tau_int_geyer(x)
-    assert tau >= 0.5
-    # Geyer is conservative; allow generous bracket.
-    assert tau_true * 0.5 < tau < tau_true * 2.0
+    for phi in (0.5, 0.8):
+        tau_true = (1.0 + phi) / (1.0 - phi)      # 3.0 at 0.5, 9.0 at 0.8
+        x = _ar1(200_000, phi, rng=np.random.default_rng(0))
+        tau = tau_int_geyer(x)
+        assert tau >= 1.0
+        assert abs(tau - tau_true) / tau_true < 0.10, (phi, tau, tau_true)
 
 
 def test_tau_int_short_series_raises() -> None:
@@ -55,38 +49,41 @@ def test_tau_int_short_series_raises() -> None:
 # ---- SEM correction ------------------------------------------------------
 
 def test_sem_correction_inflates_under_correlation() -> None:
-    """SEM with τ=0.5 should equal σ/√N; with τ>0.5 should be larger."""
     rng = np.random.default_rng(1)
     x = rng.standard_normal(5000)
-    sem_naive, n_eff_naive = sem_autocorr_corrected(x, tau=0.5)
+    sem_naive, n_eff_naive = sem_autocorr_corrected(x, tau=1.0)
     sigma = np.std(x, ddof=1)
     np.testing.assert_allclose(sem_naive, sigma / np.sqrt(x.size), rtol=1e-12)
     np.testing.assert_allclose(n_eff_naive, x.size, rtol=1e-12)
 
-    sem_inflated, n_eff_inflated = sem_autocorr_corrected(x, tau=2.0)
+    sem_inflated, n_eff_inflated = sem_autocorr_corrected(x, tau=4.0)
+    assert sem_inflated > sem_naive
+    assert n_eff_inflated < n_eff_naive  
+    np.testing.assert_allclose(sem_inflated / sem_naive, 2.0, rtol=1e-12)
+
+def test_sem_correction_inflates_under_correlation() -> None:
+    rng = np.random.default_rng(1)
+    x = rng.standard_normal(5000)
+    sem_naive, n_eff_naive = sem_autocorr_corrected(x, tau=1.0)
+    sigma = np.std(x, ddof=1)
+    np.testing.assert_allclose(sem_naive, sigma / np.sqrt(x.size), rtol=1e-12)
+    np.testing.assert_allclose(n_eff_naive, x.size, rtol=1e-12)
+
+    sem_inflated, n_eff_inflated = sem_autocorr_corrected(x, tau=4.0)
     assert sem_inflated > sem_naive
     assert n_eff_inflated < n_eff_naive
+    np.testing.assert_allclose(sem_inflated / sem_naive, 2.0, rtol=1e-12)
 
 
 # ---- KPSS ----------------------------------------------------------------
 
 def test_kpss_stationary_white_noise() -> None:
-    """KPSS should accept the null of stationarity on iid Gaussian noise.
-
-    A single seed occasionally lands in the 5% rejection region (that's
-    what α = 0.05 means), so we (i) pick a benign seed for the canonical
-    assertion and (ii) verify the empirical rejection rate over many
-    seeds is consistent with the nominal level.
-    """
     rng = np.random.default_rng(0)
     x = rng.standard_normal(2000)
     out = kpss_test(x, regression="c")
     assert out["stationary_5pct"] is True
     assert out["p_value"] >= 0.05
 
-    # Empirical false-positive rate over 50 independent draws should be
-    # near the nominal 5%. Bound generously: ≤ 20% allows headroom for
-    # finite-sample LRV bias without making the test vacuous.
     rejects = 0
     for s in range(50):
         rng_s = np.random.default_rng(1000 + s)
