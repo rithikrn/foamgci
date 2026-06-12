@@ -126,7 +126,7 @@ def test_window_stats_end_to_end() -> None:
     assert ws.n > 600  # most of the series
     assert 4.9 < ws.mean < 5.1
     assert ws.std > 0.0
-    assert ws.tau_int >= 0.5
+    assert ws.tau_int >= 1.0
     assert ws.sem > 0.0
     assert ws.kpss_stationary_5pct is True
 
