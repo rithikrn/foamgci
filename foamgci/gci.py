@@ -217,24 +217,48 @@ def roache_gci(
         )
     r21 = h_medium / h_fine
     r32 = h_coarse / h_medium
-    p = apparent_order(phi_fine, phi_medium, phi_coarse, r21, r32)
-    phi_exact = richardson_extrapolation(phi_fine, phi_medium, r21, p)
 
-    eps21 = abs(phi_fine - phi_medium)
-    eps32 = abs(phi_medium - phi_coarse)
+    d21 = phi_fine - phi_medium
+    d32 = phi_medium - phi_coarse
+    eps21 = abs(d21)
+    eps32 = abs(d32)
     e21_rel = eps21 / max(abs(phi_fine), 1e-300)
     e32_rel = eps32 / max(abs(phi_medium), 1e-300)
+
+    if eps21 < 1e-14 or eps32 < 1e-14:
+        regime, note = "degenerate", "vanishing residual; observed order undefined"
+    else:
+        R_conv = d21 / d32
+        if R_conv < 0.0:
+            regime = "oscillatory"
+            note = f"R={R_conv:.3f} < 0: sign change between successive differences"
+        elif R_conv > 1.0:
+            regime = "divergent"
+            note = f"R={R_conv:.3f} > 1: residual grows under refinement (pre-asymptotic)"
+        else:
+            regime, note = "monotonic", "monotonic convergence; GCI valid"
+
+    if regime != "monotonic":
+        nan = float("nan")
+        return GCIResult(
+            label_coarse=label_coarse, label_medium=label_medium,
+            label_fine=label_fine,
+            h_coarse=h_coarse, h_medium=h_medium, h_fine=h_fine,
+            phi_coarse=phi_coarse, phi_medium=phi_medium, phi_fine=phi_fine,
+            r21=r21, r32=r32,
+            p_apparent=nan, phi_exact=nan,
+            gci_fine_21_pct=nan, gci_medium_32_pct=nan, asymptotic_ratio=nan,
+            Fs=Fs, e21_relative=e21_rel, e32_relative=e32_rel,
+            regime=regime, note=note,
+        )
+
+    p = apparent_order(phi_fine, phi_medium, phi_coarse, r21, r32)
+    phi_exact = richardson_extrapolation(phi_fine, phi_medium, r21, p)
     gci21 = Fs * e21_rel / (r21 ** p - 1.0)
     gci32 = Fs * e32_rel / (r32 ** p - 1.0)
-    # Asymptotic-range diagnostic (Celik et al. 2008, Eq. 10):
-    #   GCI_{32} ≈ r_{21}^p * GCI_{21}  ⇔  R ≡ r_{21}^p * eps21/eps32 → 1
-    # We use raw absolute differences eps_ij rather than the relative
-    # GCIs, since the per-triplet denominators (phi_fine vs phi_medium)
-    # differ slightly and prevent the ratio from approaching unity exactly
-    # in the discrete asymptotic limit.
     R = r21 ** p * eps21 / max(eps32, 1e-300)
 
-    return GCIResult(
+     return GCIResult(
         label_coarse=label_coarse,
         label_medium=label_medium,
         label_fine=label_fine,
@@ -249,6 +273,8 @@ def roache_gci(
         Fs=Fs,
         e21_relative=e21_rel,
         e32_relative=e32_rel,
+        regime="monotonic",
+        note=note,
     )
 
 
