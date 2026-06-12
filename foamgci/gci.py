@@ -1,54 +1,3 @@
-"""foamgci.gci — Roache Grid Convergence Index.
-
-Implements the GCI formulation of
-
-    Roache, P.J. (1994), "Perspective: A method for uniform reporting of grid
-    refinement studies", J. Fluids Eng., 116, 405–413.
-
-with the four-grid extension and asymptotic-range diagnostic described in
-
-    Celik, I.B., Ghia, U., Roache, P.J., Freitas, C.J., Coleman, H., Raad,
-    P.E. (2008), "Procedure for estimation and reporting of uncertainty due
-    to discretization in CFD applications", J. Fluids Eng., 130, 078001.
-
-A *triplet* consists of three grids with cell sizes :math:`h_1 < h_2 < h_3`
-(fine, medium, coarse) and a converged scalar quantity of interest
-:math:`\\phi_i` on each. Define the refinement ratios
-
-.. math::
-    r_{21} = h_2 / h_1, \\qquad r_{32} = h_3 / h_2.
-
-For a refinement study with constant ratio :math:`r_{21}=r_{32}=r`, the
-**apparent order** :math:`\\hat p` is
-
-.. math::
-    \\hat p = \\frac{1}{\\ln r}\\,
-        \\Bigl|\\ln\\!\\bigl|(\\phi_3 - \\phi_2)/(\\phi_2 - \\phi_1)\\bigr|
-        \\Bigr|.
-
-Celik's iterative form handles non-constant :math:`r` and is implemented
-in :func:`apparent_order`. The **Richardson-extrapolated** exact-grid
-value is
-
-.. math::
-    \\phi_{\\text{exact}} \\approx \\phi_1 + \\frac{\\phi_1 - \\phi_2}{r_{21}^{\\hat p} - 1}.
-
-The **GCI on the fine grid** with the standard safety factor :math:`F_s=1.25`
-is
-
-.. math::
-    \\text{GCI}_{21}^{\\text{fine}} = F_s \\frac{|\\phi_1 - \\phi_2|}{|\\phi_1| (r_{21}^{\\hat p} - 1)}.
-
-A pair of overlapping triplets (coarse–medium–fine, medium–fine–extra-fine)
-should give GCIs that are in the **asymptotic ratio**
-
-.. math::
-    R = \\frac{r_{21}^{\\hat p} \\cdot \\text{GCI}^{\\text{fine}}_{21}}{\\text{GCI}^{\\text{medium}}_{32}}
-        \\approx 1.
-
-Values far from unity indicate that the grids are not in the asymptotic
-range and the GCI uncertainty band should not be trusted at face value.
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -67,41 +16,7 @@ def apparent_order(
     p_min: float = 0.1, p_max: float = 6.0, tol: float = 1e-8,
     max_iter: int = 100,
 ) -> float:
-    """Iteratively solve for Celik et al. (2008) apparent order :math:`\\hat p`.
-
-    The fixed-point iteration is
-
-    .. math::
-        p_{k+1} = \\frac{1}{\\ln r_{21}}\\,
-        \\Bigl|\\ln|\\epsilon_{32}/\\epsilon_{21}| + q(p_k)\\Bigr|, \\\\
-        q(p) = \\ln\\!\\Bigl(\\frac{r_{21}^{p} - s}{r_{32}^{p} - s}\\Bigr),
-        \\qquad s = \\operatorname{sign}(\\epsilon_{32}/\\epsilon_{21}),
-
-    where :math:`\\epsilon_{32}=\\phi_3-\\phi_2`,
-    :math:`\\epsilon_{21}=\\phi_2-\\phi_1`. For a uniform refinement
-    :math:`r_{21}=r_{32}\\Rightarrow q\\equiv 0` and the iteration
-    collapses to the closed-form expression.
-
-    Parameters
-    ----------
-    phi1, phi2, phi3 : float
-        Quantity of interest on fine, medium, coarse grid (in that order).
-    r21, r32 : float
-        Refinement ratios :math:`h_2/h_1`, :math:`h_3/h_2`. Both > 1.
-    p_min, p_max : float
-        Apparent order is clipped to ``[p_min, p_max]`` after each step
-        for numerical stability (Celik recommendation).
-
-    Returns
-    -------
-    p : float
-        Apparent order :math:`\\hat p`.
-
-    Raises
-    ------
-    ValueError
-        If consecutive differences are zero or refinement ratios ≤ 1.
-    """
+    
     if r21 <= 1.0 or r32 <= 1.0:
         raise ValueError("Refinement ratios must be > 1.")
     eps32 = phi3 - phi2
@@ -170,7 +85,7 @@ class GCIResult:
     e21_relative: float         # |φ1-φ2|/|φ1|
     e32_relative: float         # |φ2-φ3|/|φ2|
     regime: str = "monotonic"   # monotonic | oscillatory | divergent | degenerate
-        note: str = ""
+    note: str = ""
 
     def __repr__(self) -> str:  # pragma: no cover — printout
         return (
@@ -258,7 +173,7 @@ def roache_gci(
     gci32 = Fs * e32_rel / (r32 ** p - 1.0)
     R = r21 ** p * eps21 / max(eps32, 1e-300)
 
-     return GCIResult(
+    return GCIResult(
         label_coarse=label_coarse,
         label_medium=label_medium,
         label_fine=label_fine,
@@ -284,12 +199,7 @@ def gci_over_hierarchy(
     labels: Sequence[str] | None = None,
     Fs: float = 1.25,
 ) -> list[GCIResult]:
-    """Compute GCI on every consecutive triplet of a refinement hierarchy.
-
-    Pass the grids **coarse-to-fine** (``hs`` strictly decreasing).
-    For 4 grids :math:`(C, M, F, XF)` this returns two GCIs:
-    one on the ``(C, M, F)`` triplet and one on the ``(M, F, XF)`` triplet.
-    """
+    
     if len(phis) != len(hs):
         raise ValueError("phis and hs must have the same length.")
     n = len(phis)
