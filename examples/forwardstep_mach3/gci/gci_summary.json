@@ -1,0 +1,180 @@
+{
+  "stationary_window": [
+    3.0,
+    10.0
+  ],
+  "cases": [
+    {
+      "label": "Coarse",
+      "folder": "coarse_grid",
+      "n_cells": 4032,
+      "dx": 0.025,
+      "n_samples_stat": 53,
+      "p_max_mean": 12.046156677797034,
+      "p_max_std": 0.17183571432320716,
+      "rho_max_mean": 6.304841184504203,
+      "rho_max_std": 0.25657965998979015,
+      "U_mag_max_mean": 3.075154277415809,
+      "U_mag_max_std": 0.004285642554568777,
+      "peak_loc_x": 0.5875,
+      "peak_loc_y": 0.0125
+    },
+    {
+      "label": "Medium",
+      "folder": "medium_grid",
+      "n_cells": 16128,
+      "dx": 0.0125,
+      "n_samples_stat": 115,
+      "p_max_mean": 12.064926918888512,
+      "p_max_std": 0.15026022433662706,
+      "rho_max_mean": 6.267160324900714,
+      "rho_max_std": 0.27624194168289457,
+      "U_mag_max_mean": 3.085263751287888,
+      "U_mag_max_std": 0.011394996286807702,
+      "peak_loc_x": 0.59375,
+      "peak_loc_y": 0.00625
+    },
+    {
+      "label": "Fine",
+      "folder": "fine_grid",
+      "n_cells": 64512,
+      "dx": 0.00625,
+      "n_samples_stat": 231,
+      "p_max_mean": 12.085466908753823,
+      "p_max_std": 0.13690567796249165,
+      "rho_max_mean": 6.243080662700505,
+      "rho_max_std": 0.2758241243224475,
+      "U_mag_max_mean": 3.2898201827657103,
+      "U_mag_max_std": 0.04769101412871515,
+      "peak_loc_x": 0.596875,
+      "peak_loc_y": 0.003125
+    },
+    {
+      "label": "Extra-fine",
+      "folder": "extrafine_grid",
+      "n_cells": 258048,
+      "dx": 0.003125,
+      "n_samples_stat": 468,
+      "p_max_mean": 12.092837523386553,
+      "p_max_std": 0.12203454586266124,
+      "rho_max_mean": 6.233265019437198,
+      "rho_max_std": 0.2701280569403919,
+      "U_mag_max_mean": 3.481693735020661,
+      "U_mag_max_std": 0.061476000836717684,
+      "peak_loc_x": 0.5921875,
+      "peak_loc_y": 0.0015625
+    }
+  ],
+  "triplet_A_CMF": {
+    "label": "A : C-M-F",
+    "phi1": 12.085466908753823,
+    "phi2": 12.064926918888512,
+    "phi3": 12.046156677797034,
+    "h1": 0.00625,
+    "h2": 0.0125,
+    "h3": 0.025,
+    "r": 2.0,
+    "eps21": -0.020539989865310915,
+    "eps32": -0.018770241091477402,
+    "R": 1.0942848184638962,
+    "regime": "divergent",
+    "p_obs": NaN,
+    "phi_ext": NaN,
+    "gci_fine_pct": NaN,
+    "gci_med_pct": NaN,
+    "asymptotic_ratio": NaN,
+    "note": "R = 1.094 > 1: residual grows with refinement; this triplet is pre-asymptotic"
+  },
+  "triplet_B_MFXF": {
+    "label": "B : M-F-XF",
+    "phi1": 12.092837523386553,
+    "phi2": 12.085466908753823,
+    "phi3": 12.064926918888512,
+    "h1": 0.003125,
+    "h2": 0.00625,
+    "h3": 0.0125,
+    "r": 2.0,
+    "eps21": -0.007370614632730366,
+    "eps32": -0.020539989865310915,
+    "R": 0.35884217475580515,
+    "regime": "monotonic",
+    "p_obs": 1.478578634576306,
+    "phi_ext": 12.09696269706448,
+    "gci_fine_pct": 0.04264067128529419,
+    "gci_med_pct": 0.11890095349081256,
+    "asymptotic_ratio": 1.000609874214077,
+    "note": "monotonic and well within asymptotic range (AR -> 1)"
+  },
+  "phi_star": 12.09696269706448,
+  "phi_star_source": "B : M-F-XF",
+  "error_table": [
+    {
+      "label": "Coarse",
+      "dx": 0.025,
+      "p_max": 12.046156677797034,
+      "err": 0.05080601926744599,
+      "rel_pct": 0.41998988125982134
+    },
+    {
+      "label": "Medium",
+      "dx": 0.0125,
+      "p_max": 12.064926918888512,
+      "err": 0.03203577817596859,
+      "rel_pct": 0.2648249728317553
+    },
+    {
+      "label": "Fine",
+      "dx": 0.00625,
+      "p_max": 12.085466908753823,
+      "err": 0.011495788310657673,
+      "rel_pct": 0.09503036918058207
+    },
+    {
+      "label": "Extra-fine",
+      "dx": 0.003125,
+      "p_max": 12.092837523386553,
+      "err": 0.004125173677927307,
+      "rel_pct": 0.034100904344595076
+    }
+  ],
+  "greenshields_2010": {
+    "rho_contour_min": 0.2568,
+    "rho_contour_max": 6.067,
+    "n_contours": 30,
+    "comparison_time": 4.0,
+    "M_inflow": 3.0,
+    "gamma": 1.4,
+    "Mesh1_cells": 16128,
+    "Mesh2_cells": 64512
+  },
+  "mesh_face_counts": {
+    "Coarse": {
+      "inlet": 40,
+      "outlet": 32,
+      "bottom": 24,
+      "top": 120,
+      "obstacle": 104
+    },
+    "Medium": {
+      "inlet": 80,
+      "outlet": 64,
+      "bottom": 48,
+      "top": 240,
+      "obstacle": 208
+    },
+    "Fine": {
+      "inlet": 160,
+      "outlet": 128,
+      "bottom": 96,
+      "top": 480,
+      "obstacle": 416
+    },
+    "Extra-fine": {
+      "inlet": 320,
+      "outlet": 256,
+      "bottom": 192,
+      "top": 960,
+      "obstacle": 832
+    }
+  }
+}
