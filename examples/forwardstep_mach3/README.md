@@ -69,7 +69,7 @@ row for that grid.
 3. Analyse + plot:
    ```bash
    pip install -e ../..            # install the foamgci library (once)
-   cd gci && ./run_all.sh
+   cd gci && bash run_all.sh
    ```
    Writes `gci/gci_summary.json` (per-grid mean, sigma, tau_int, SEM,
    N_eff, KPSS; regime-aware GCI on both triplets) and the figures.
