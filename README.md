@@ -2,7 +2,7 @@
 
 **Autocorrelation-aware grid-convergence verification for unsteady OpenFOAM CFD.**
 
-`foamgci` reads OpenFOAM `fieldMinMax` output and produces a complete
+`foamgci` reads OpenFOAM output and produces a complete
 grid-convergence-index (GCI) report: Roache GCI on every refinement
 triplet, an autocorrelation-corrected standard error of the mean, a KPSS
 stationarity check, an analytical cross-check, and a paper-ready LaTeX
