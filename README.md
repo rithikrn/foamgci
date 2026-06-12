@@ -129,7 +129,6 @@ foamgci/
 ├── examples/
 │   └── forwardstep_mach3/            # worked example for the abstract
 │       ├── README.md
-│       ├── verify_abstract.py        # regenerates Table 1 from real data
 │       └── data/README.md
 ├── README.md                         # this file
 ├── LIMITATIONS.md                    # what foamgci does not do
@@ -157,7 +156,7 @@ SciTech 2027 abstract. Cell counts (from `log.checkMesh`):
 To regenerate the abstract's Table 1 against your own runs:
 
 ```bash
-python examples/forwardstep_mach3/verify_abstract.py \
+python -m foamgci \
     --coarse     case_C/postProcessing/fieldMinMax/0/fieldMinMax.dat \
     --medium     case_M/postProcessing/fieldMinMax/0/fieldMinMax.dat \
     --fine       case_F/postProcessing/fieldMinMax/0/fieldMinMax.dat \
