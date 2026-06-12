@@ -3,6 +3,45 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] — 2026-06-12
+
+**Correctness of the asymptotic diagnostic + honest reporting.**
+
+### Fixed
+- `asymptotic_ratio` was only valid for constant refinement ratio
+  (r_21 = r_32): a perfectly asymptotic phi(h) = phi_e + C h^p hierarchy
+  with r_21 = 1.5, r_32 = 1.333 returned R ~ 1.61 instead of 1. The
+  diagnostic is now `r21^p * eps21 * (r32^p - 1) / (eps32 * (r21^p - 1))`,
+  which is exact for non-constant ratios and reduces to the old formula
+  when r_21 = r_32. Regression test added (Celik-style non-uniform grids).
+- README: removed the false claim that the four `fieldMinMax.dat` inputs
+  are committed (they are regenerated with the final workflow and will be
+  committed then); fixed the illustrative output table so N scales with
+  the CFL-limited sampling cadence (it showed identical N on all grids,
+  which the shipped controlDict cannot produce); KPSS p shown as >=0.100.
+- Example `controlDict`: added `location true` to `fieldMinMax` (README
+  and analyze.py rely on extremum locations); removed stale modal-analysis
+  (POD/DMD) comments left over from an unrelated campaign.
+
+### Added
+- Celik (2008) oscillatory-convergence uncertainty
+  `GCIResult.u_oscillatory_pct` = half the solution span on the triplet,
+  reported in the text block instead of bare NaNs.
+- Reference cross-check verdict in `ReportTable.as_text()`: explicitly
+  states whether |phi_ext - phi_ref| falls inside the GCI_21 band, and
+  warns that GCI likely understates total uncertainty when it does not.
+- KPSS p-values rendered as `>=0.100` / `<=0.010` at the clamped ends
+  (text and LaTeX) so they are not mistaken for exact probabilities.
+- `WindowStats.resampled` flag + docstring documenting the interpolation
+  bias of uniform-grid resampling (deflated std, inflated tau_int).
+- LIMITATIONS.md sections: space-time error confounding under CFL-limited
+  time stepping; non-smoothness of extremum QoIs (and inviscid statistical
+  non-convergence on shear-layer benchmarks); estimator caveats.
+- Optional CI cross-validation of `kpss_test` against statsmodels
+  (`tests/test_stats_statsmodels.py`, skipped if statsmodels absent).
+- CI: ruff lint step; statsmodels installed on one matrix leg so the
+  cross-validation actually runs.
+
 ## [0.3.0] — 2026-06-12
 
 **Correctness + single-source-of-truth release.**
