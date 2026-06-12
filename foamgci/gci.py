@@ -169,6 +169,8 @@ class GCIResult:
     Fs: float                   # safety factor (1.25 for ≥ 3 grids)
     e21_relative: float         # |φ1-φ2|/|φ1|
     e32_relative: float         # |φ2-φ3|/|φ2|
+    regime: str = "monotonic"   # monotonic | oscillatory | divergent | degenerate
+        note: str = ""
 
     def __repr__(self) -> str:  # pragma: no cover — printout
         return (
