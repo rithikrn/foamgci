@@ -7,7 +7,7 @@ case, not from generality.
 ## Development setup
 
 ```bash
-git clone https://github.com/USERNAME/foamgci.git
+git clone https://github.com/rithikrn/foamgci.git
 cd foamgci
 python -m pip install -e ".[dev]"
 pytest -v
