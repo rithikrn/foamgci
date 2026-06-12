@@ -30,10 +30,10 @@ writeControl    adjustableRunTime;
 writeInterval   0.02;              // ~500 snapshots over 10 FT; ~400 usable
                                    // after dropping the transient.
 
-purgeWrite      0;                 // KEEP all snapshots — modal analysis
-                                   // needs the full time series. Do NOT use
-                                   // purgeWrite=10 (the tutorial default), it
-                                   // destroys your dataset.
+purgeWrite      0;                 // KEEP all snapshots: the GCI time series
+                                   // and any later post-processing need the
+                                   // full history. Do NOT use purgeWrite=10
+                                   // (the tutorial default).
 
 writeFormat     binary;            // CRITICAL: ASCII would 5–10x your disk
                                    // and slow the run noticeably.
@@ -55,8 +55,7 @@ maxDeltaT       1;
 // ------------------------- function objects -------------------------------
 functions
 {
-    // Cell-centered Mach number, useful for ParaView debugging
-    // and as a secondary modal target.
+    // Cell-centered Mach number, useful for ParaView debugging.
     MachNo
     {
         type            MachNo;
@@ -65,8 +64,8 @@ functions
         executeControl  writeTime;
     }
 
-    // Schlieren-like |grad(rho)| — best visual for mode shapes, since
-    // POD/DMD mode plots look like canonical experimental schlieren.
+    // Schlieren-like |grad(rho)| for qualitative comparison against
+    // Greenshields et al. (2010) Fig. 6 / Woodward-Colella Fig. 4.
     gradRho
     {
         type            grad;
@@ -76,12 +75,15 @@ functions
         executeControl  writeTime;
     }
 
-    // Min/max diagnostic to catch divergence early in the log.
+    // PRIMARY QoI source for foamgci: spatial extrema time series.
+    // `location true` records (x y z) of each extremum — analyze.py
+    // uses the peak-pressure location, so do not disable it.
     fieldMinMax
     {
         type            fieldMinMax;
         libs            ("libfieldFunctionObjects.so");
         mode            magnitude;
+        location        true;
         writeControl    timeStep;
         writeInterval   100;
         log             true;
@@ -90,3 +92,4 @@ functions
 }
 
 // ************************************************************************* //
+
