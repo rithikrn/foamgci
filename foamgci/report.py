@@ -154,6 +154,7 @@ class ReportTable:
             lines.append(
                 f"  triplet ({g.label_coarse}, {g.label_medium}, {g.label_fine}):"
             )
+            lines.append(f"      regime                   = {g.regime}")
             lines.append(f"      apparent order p̂        = {g.p_apparent:.3f}")
             lines.append(f"      Richardson φ_exact       = {g.phi_exact:.6g}")
             lines.append(f"      GCI_fine_21              = {g.gci_fine_21_pct:.4f} %")
