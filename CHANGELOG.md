@@ -8,22 +8,44 @@ All notable changes to **foamgci** are documented here. Versions follow
 **Correctness + single-source-of-truth release.**
 
 ### Fixed
-- `tau_int_geyer`: MCMC convention (τ=1+2Σρ, iid→1, AR(1)→(1+φ)/(1−φ))
-  with true Geyer lag-0 pairing; SEM/N_eff and docstrings reconciled.
-- `window_stats`: resamples non-uniformly spaced (adaptive-Δt) series
-  onto a uniform grid before τ_int/KPSS, and reports a trapezoidal
+- Version is now defined once in `foamgci/_version.py` and read from
+  there by the package, the CLI `--version`, the LaTeX header, and
+  `pyproject.toml` (`dynamic = ["version"]`). No more drift.
+- CI workflow moved to `.github/workflows/tests.yml` (it was at the repo
+  root and never ran). Suite now genuinely runs on every push/PR.
+- `tests/test_report.py` made deterministic: replaced `hash(label)`
+  seeding (Python salts str hashing per process) with fixed seeds, and
+  replaced the statistically-fragile "KPSS never rejects" assertion with
+  stable bounds. Passes under any `PYTHONHASHSEED`.
+- README: corrected the SEM formula to `sigma*sqrt(tau_int/N)` (matching
+  the code and the `tau_int = 1 + 2*sum(rho)` convention), removed the
+  broken `--coarse/--medium` CLI example (the CLI is `report --case ...`),
+  and rewrote the stale repository-layout block.
+- `tau_int_geyer`: MCMC convention (tau=1+2*sum(rho), iid->1,
+  AR(1)->(1+phi)/(1-phi)) with true Geyer lag-0 pairing; SEM/N_eff and
+  docstrings reconciled.
+- `window_stats`: resamples non-uniformly spaced (adaptive-dt) series
+  onto a uniform grid before tau_int/KPSS, and reports a trapezoidal
   time-average.
 - `roache_gci`: classifies the convergence regime (monotonic /
   oscillatory / divergent / degenerate) and returns NaN GCI outside the
   asymptotic range instead of a misleading finite value.
 
 ### Changed
-- The forward-step example runs entirely through `foamgci`
-  (`gci/analyze.py`); the duplicate standalone `gci/gci.py` and
-  `gci/parse_fieldminmax.py` are removed. The example now reports
-  τ_int, SEM, N_eff and KPSS, and frames Rayleigh–Pitot as a lower-bound
-  check rather than the convergence target.
-- `submit.sh` and `gci/run_all.sh` reduced to the essential steps.
+- One canonical function-object name everywhere: `fieldMinMax`, writing
+  to `postProcessing/fieldMinMax/0/fieldMinMax.dat` (previously the repo
+  mixed `fieldMinMax`, `fieldRange`, and `fieldMinMax1`).
+- The forward-step example reads four committed KB-sized inputs from
+  `gci/data/` instead of from gitignored full-run directories, so the
+  figures reproduce from a clean clone. `submit.sh` copies each grid's
+  output into `gci/data/` automatically and now also runs `checkMesh`.
+- The example `controlDict` is trimmed to the single `fieldMinMax`
+  function object needed for GCI; the modal-analysis field writes are
+  commented out as clearly-labelled optional.
+- The example runs entirely through `foamgci` (`gci/analyze.py`); the old
+  duplicate `gci/gci.py` / `gci/parse_fieldminmax.py` and the stale
+  `examples/.../data/` folder are gone.
+- `gci_over_hierarchy` is now part of the public API.
 
 ## [0.2.0] — 2026-05-19
 
