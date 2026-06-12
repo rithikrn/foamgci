@@ -19,6 +19,7 @@ from typing import Sequence
 
 import numpy as np
 
+from ._version import __version__
 from .reader import read_fieldminmax
 from .stats import window_stats, WindowStats
 from .gci import gci_over_hierarchy, GCIResult
@@ -214,7 +215,7 @@ class ReportTable:
                 f"|phi_exact - phi_ref|/phi_ref = {rel:.4f} %"
             )
 
-        latex = rf"""% foamgci v0.2.0 — auto-generated table
+        latex = rf"""% foamgci v{__version__} — auto-generated table
 % field = {self.field!r}, quantity = {self.quantity!r},
 % window = [{self.window[0]:g}, {self.window[1]:g}]{ref_line}
 \begin{{table}}[t]
