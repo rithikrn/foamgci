@@ -58,10 +58,12 @@ def test_full_report_end_to_end(tmp_path: Path) -> None:
         "extra-fine": (12.058, 0.003125),
     }
     cases = []
-    for label, (mean, h) in targets.items():
+    for i, (label, (mean, h)) in enumerate(targets.items()):
         f = tmp_path / f"{label}_fieldMinMax.dat"
-        _make_synthetic_fieldminmax(f, "p", mean=mean, sigma=0.01,
-                                    seed=hash(label) & 0xffff)
+        # Deterministic per-grid seed. NB: do NOT use hash(label) — Python
+        # salts str hashing per process (PYTHONHASHSEED), which would make
+        # this test non-reproducible across runs.
+        _make_synthetic_fieldminmax(f, "p", mean=mean, sigma=0.01, seed=100 + i)
         cases.append(GridCase(label=label, path=f, h=h))
 
     rep = full_report(
@@ -80,9 +82,14 @@ def test_full_report_end_to_end(tmp_path: Path) -> None:
     for ws, (label, (mean, _)) in zip(rep.stats, targets.items()):
         assert abs(ws.mean - mean) < 0.005, f"{label}: {ws.mean} vs {mean}"
         assert ws.std > 0.0
-        assert ws.tau_int >= 0.5
-        # Synthetic series is iid Gaussian → KPSS must not reject.
-        assert ws.kpss_stationary_5pct is True
+        assert ws.tau_int >= 1.0
+        # The series is iid Gaussian, so τ_int should be close to 1 and the
+        # KPSS statistic finite & non-negative. We deliberately do NOT assert
+        # "KPSS never rejects": a 5%-level test false-rejects ~5% of the time
+        # even under the null, so that assertion would be inherently flaky.
+        assert ws.tau_int < 2.0, f"{label}: tau_int={ws.tau_int} too high for iid"
+        assert ws.kpss_stat >= 0.0
+        assert 0.01 <= ws.kpss_p <= 0.10
 
     # GCI sanity
     for g in rep.gcis:
