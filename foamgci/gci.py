@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Sequence
+from typing import Sequence
 
 import numpy as np
 
@@ -80,12 +80,14 @@ class GCIResult:
     phi_exact: float
     gci_fine_21_pct: float      # GCI_21 on the fine grid (%)
     gci_medium_32_pct: float    # GCI_32 on the medium grid (%)
-    asymptotic_ratio: float     # ≈ 1 for asymptotic range
+    asymptotic_ratio: float     # ≈ 1 for asymptotic range (valid for r21 ≠ r32)
     Fs: float                   # safety factor (1.25 for ≥ 3 grids)
     e21_relative: float         # |φ1-φ2|/|φ1|
     e32_relative: float         # |φ2-φ3|/|φ2|
     regime: str = "monotonic"   # monotonic | oscillatory | divergent | degenerate
     note: str = ""
+    u_oscillatory_pct: float = float("nan")  # Celik (2008) oscillatory-convergence
+                                # uncertainty 0.5*(phi_max - phi_min)/|phi_fine|, in %
 
     def __repr__(self) -> str:  # pragma: no cover — printout
         return (
@@ -155,6 +157,13 @@ def roache_gci(
 
     if regime != "monotonic":
         nan = float("nan")
+        # Celik et al. (2008): for oscillatory convergence, estimate the
+        # uncertainty as half the span of the solutions on the triplet.
+        u_osc = nan
+        if regime == "oscillatory":
+            span = max(phi_coarse, phi_medium, phi_fine) - min(
+                phi_coarse, phi_medium, phi_fine)
+            u_osc = 100.0 * 0.5 * span / max(abs(phi_fine), 1e-300)
         return GCIResult(
             label_coarse=label_coarse, label_medium=label_medium,
             label_fine=label_fine,
@@ -164,14 +173,18 @@ def roache_gci(
             p_apparent=nan, phi_exact=nan,
             gci_fine_21_pct=nan, gci_medium_32_pct=nan, asymptotic_ratio=nan,
             Fs=Fs, e21_relative=e21_rel, e32_relative=e32_rel,
-            regime=regime, note=note,
+            regime=regime, note=note, u_oscillatory_pct=u_osc,
         )
 
     p = apparent_order(phi_fine, phi_medium, phi_coarse, r21, r32)
     phi_exact = richardson_extrapolation(phi_fine, phi_medium, r21, p)
     gci21 = Fs * e21_rel / (r21 ** p - 1.0)
     gci32 = Fs * e32_rel / (r32 ** p - 1.0)
-    R = r21 ** p * eps21 / max(eps32, 1e-300)
+    # Asymptotic-range diagnostic, exact for non-constant refinement
+    # ratios: in the asymptotic range eps32 = r21^p (r32^p-1)/(r21^p-1) eps21,
+    # so R -> 1. For r21 == r32 this reduces to r^p * eps21/eps32.
+    R = (r21 ** p) * eps21 * (r32 ** p - 1.0) / (
+        max(eps32, 1e-300) * (r21 ** p - 1.0))
 
     return GCIResult(
         label_coarse=label_coarse,
