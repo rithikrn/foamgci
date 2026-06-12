@@ -17,12 +17,21 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Sequence
 
-import numpy as np
 
 from ._version import __version__
 from .reader import read_fieldminmax
 from .stats import window_stats, WindowStats
 from .gci import gci_over_hierarchy, GCIResult
+
+
+def _fmt_kpss_p(p: float) -> str:
+    """KPSS p-values are interpolated on the published critical values and
+    clamped to [0.01, 0.10]; render the clamped ends honestly."""
+    if p >= 0.10:
+        return ">=0.100"
+    if p <= 0.01:
+        return "<=0.010"
+    return f"{p:.3f}"
 
 
 # ---------------------------------------------------------------------------
@@ -144,7 +153,7 @@ class ReportTable:
                 f"{s.tau_int:>8.2f}"
                 f"{s.sem:>10.4g}"
                 f"{s.n_eff:>8.1f}"
-                f"{s.kpss_p:>9.3f}"
+                f"{_fmt_kpss_p(s.kpss_p):>9}"
             )
 
         # GCI block
@@ -163,6 +172,10 @@ class ReportTable:
             lines.append(f"      asymptotic ratio (≈1)    = {g.asymptotic_ratio:.3f}")
             if g.regime != "monotonic":
                 lines.append(f"      note                     = {g.note}")
+            if g.regime == "oscillatory" and g.u_oscillatory_pct == g.u_oscillatory_pct:
+                lines.append(
+                    f"      U_oscillatory (Celik)    = "
+                    f"{g.u_oscillatory_pct:.4f} %  (half solution span)")
 
         # Reference cross-check
         if self.reference_value is not None and self.gcis:
@@ -177,6 +190,18 @@ class ReportTable:
                          f"{self.stats[-1].mean:.6g}  "
                          f"(error = "
                          f"{100*abs(self.stats[-1].mean - self.reference_value)/abs(self.reference_value):.4f} %)")
+            g_last = self.gcis[-1]
+            band = g_last.gci_fine_21_pct
+            if band == band:  # not NaN
+                covered = rel <= band
+                lines.append(
+                    f"      |phi_ext - ref| vs GCI_21 = {rel:.4f} % vs "
+                    f"{band:.4f} %  -> "
+                    + ("reference COVERED by GCI band"
+                       if covered else
+                       "reference OUTSIDE GCI band: GCI likely understates "
+                       "total uncertainty, or the reference is not directly "
+                       "comparable to this QoI"))
         lines.append("=" * 72)
         return "\n".join(lines)
 
@@ -185,11 +210,13 @@ class ReportTable:
         rows = []
         for c, s in zip(self.cases, self.stats):
             ncells = f"{c.n_cells:,}" if c.n_cells else "—"
+            kp_tex = _fmt_kpss_p(s.kpss_p)
+            kp_tex = kp_tex.replace(">=", "$\\geq$").replace("<=", "$\\leq$")
             rows.append(
                 f"{c.label} & {ncells} & {c.h:.4g} & "
                 f"{s.n:d} & {s.mean:.4f} & {s.std:.4f} & "
                 f"{s.tau_int:.2f} & {s.sem:.4f} & "
-                f"{s.kpss_p:.3f}"
+                f"{kp_tex}"
                 r" \\"
             )
         body = "\n        ".join(rows)
