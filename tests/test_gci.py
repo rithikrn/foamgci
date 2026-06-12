@@ -129,11 +129,37 @@ def test_gci_rejects_bad_ordering() -> None:
 
 
 def test_gci_rejects_stalled_refinement() -> None:
-    with pytest.raises(ValueError, match="exact|stalled"):
-        roache_gci(
-            phi_coarse=2.0, phi_medium=2.0, phi_fine=2.0,
-            h_coarse=4.0, h_medium=2.0, h_fine=1.0,
-        )
+    import math
+    g = roache_gci(
+        phi_coarse=2.0, phi_medium=2.0, phi_fine=2.0,
+        h_coarse=4.0, h_medium=2.0, h_fine=1.0,
+    )
+    assert g.regime == "degenerate"
+    assert math.isnan(g.p_apparent)
+    assert math.isnan(g.gci_fine_21_pct)
+
+def test_divergent_triplet_is_flagged_not_computed():
+    import math
+    from foamgci.gci import roache_gci
+    g = roache_gci(
+        phi_coarse=12.046156677797034, phi_medium=12.064926918888512,
+        phi_fine=12.085466908753823,
+        h_coarse=0.025, h_medium=0.0125, h_fine=0.00625,
+    )
+    assert g.regime == "divergent"
+    assert math.isnan(g.p_apparent) and math.isnan(g.phi_exact)
+
+
+def test_monotonic_triplet_still_computes():
+    from foamgci.gci import roache_gci
+    g = roache_gci(
+        phi_coarse=12.064926918888512, phi_medium=12.085466908753823,
+        phi_fine=12.092837523386553,
+        h_coarse=0.0125, h_medium=0.00625, h_fine=0.003125,
+    )
+    assert g.regime == "monotonic"
+    assert abs(g.p_apparent - 1.4786) < 1e-3
+    assert abs(g.phi_exact - 12.09696) < 1e-3
 
 
 def test_hierarchy_requires_three_grids() -> None:
