@@ -253,7 +253,6 @@ Or as BibTeX:
   title   = {{foamgci}: Verification utilities for unsteady OpenFOAM CFD
              (Roache GCI, autocorrelation-corrected SEM, KPSS stationarity)},
   year    = {2026},
-  version = {0.3.1},
   url     = {https://github.com/rithikrn/foamgci}
 }
 ```
