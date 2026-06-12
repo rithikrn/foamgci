@@ -61,6 +61,14 @@ $\tau_{\mathrm{int}}$ is accounted for, the apparent grid-refinement
 increment between the two finest grids is often smaller than the
 sampling noise — i.e. the remaining difference is temporal, not spatial.
 
+Two caveats apply when interpreting GCI on unsteady, CFL-limited runs,
+spelled out in `LIMITATIONS.md`: (1) refining the mesh also refines the
+time step, so the apparent order mixes spatial and temporal error
+unless a fixed-Δt control run is performed; (2) a spatial extremum is a
+non-smooth functional, so the Richardson expansion is heuristic for
+`fieldMinMax` QoIs — integrated QoIs (forces, surface averages) are the
+formally cleaner target and are on the roadmap.
+
 ## Installation
 
 ```bash
@@ -176,9 +184,12 @@ foamgci/
 
 `examples/forwardstep_mach3/` is the Mach-3 Woodward-Colella
 forward-facing step, used as the template for every future case. It
-ships the full OpenFOAM case (the fine grid), the analysis driver, and
-the four small `fieldMinMax.dat` inputs under `gci/data/`, so the
-figures are reproducible without rerunning OpenFOAM.
+ships the full OpenFOAM case (the fine grid) and the analysis driver.
+The four `fieldMinMax.dat` inputs under `gci/data/` are **not committed
+yet** — the simulation campaign is being rerun with the final tool
+workflow, and the regenerated files will be committed then. Until that
+lands, reproducing the figures requires running the four OpenFOAM cases
+first (see `gci/data/README.md`, one `cp` per grid).
 
 See **`examples/forwardstep_mach3/README.md`** for step-by-step run
 instructions. The short version:
@@ -199,8 +210,11 @@ cd examples/forwardstep_mach3/gci
 ## Output format
 
 `foamgci report` prints a per-grid statistics table and the GCI block.
-The numbers below are illustrative; your run's exact values depend on the
-solver, scheme, and time step you used.
+The numbers below are a synthetic illustration (not solver output); your
+run's exact values depend on the solver, scheme, and time step you used.
+Note that `N` roughly doubles per refinement level: with
+`writeControl timeStep` the sampling cadence follows the CFL-limited
+time step, which halves with `h`.
 
 ```
 ========================================================================
@@ -208,11 +222,11 @@ foamgci V&V report — field 'p', quantity 'max', window [3, 10]
 ========================================================================
 
 Per-grid time-averaged statistics:
-  label        N_cells       h     N    mean     std  tau_int     SEM  N_eff  KPSS_p
-  coarse          4032   0.025   420  11.986  0.0205     3.37  0.0018    125   0.100
-  medium         16128  0.0125   420  12.045  0.0205     2.21  0.0015    190   0.100
-  fine           64512 0.00625   420  12.074  0.0192     2.13  0.0014    197   0.100
-  extra-fine    258048 0.003125  420  12.083  0.0203     3.70  0.0019    114   0.100
+  label        N_cells       h     N    mean     std  tau_int     SEM  N_eff   KPSS_p
+  coarse          4032   0.025   110  11.986  0.0205     3.37  0.0036     33  >=0.100
+  medium         16128  0.0125   210  12.045  0.0205     2.21  0.0021     95  >=0.100
+  fine           64512 0.00625   420  12.074  0.0192     2.13  0.0014    197  >=0.100
+  extra-fine    258048 0.003125  840  12.083  0.0203     3.70  0.0013    227  >=0.100
 
 Roache GCI (triplet medium, fine, extra-fine):
       regime                   = monotonic
@@ -239,7 +253,7 @@ Or as BibTeX:
   title   = {{foamgci}: Verification utilities for unsteady OpenFOAM CFD
              (Roache GCI, autocorrelation-corrected SEM, KPSS stationarity)},
   year    = {2026},
-  version = {0.3.0},
+  version = {0.3.1},
   url     = {https://github.com/rithikrn/foamgci}
 }
 ```
