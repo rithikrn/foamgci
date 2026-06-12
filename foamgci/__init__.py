@@ -40,7 +40,7 @@ from .gci import (
     apparent_order,
     GCIResult,
 )
-from .report import full_report, rayleigh_pitot, ReportTable
+from .report import full_report, rayleigh_pitot, ReportTable, GridCase
 
 __version__ = "0.2.0"
 
@@ -58,5 +58,6 @@ __all__ = [
     "full_report",
     "rayleigh_pitot",
     "ReportTable",
+    "GridCase",
     "__version__",
 ]
