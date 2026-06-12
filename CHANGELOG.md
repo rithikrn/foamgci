@@ -3,6 +3,28 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-06-12
+
+**Correctness + single-source-of-truth release.**
+
+### Fixed
+- `tau_int_geyer`: MCMC convention (τ=1+2Σρ, iid→1, AR(1)→(1+φ)/(1−φ))
+  with true Geyer lag-0 pairing; SEM/N_eff and docstrings reconciled.
+- `window_stats`: resamples non-uniformly spaced (adaptive-Δt) series
+  onto a uniform grid before τ_int/KPSS, and reports a trapezoidal
+  time-average.
+- `roache_gci`: classifies the convergence regime (monotonic /
+  oscillatory / divergent / degenerate) and returns NaN GCI outside the
+  asymptotic range instead of a misleading finite value.
+
+### Changed
+- The forward-step example runs entirely through `foamgci`
+  (`gci/analyze.py`); the duplicate standalone `gci/gci.py` and
+  `gci/parse_fieldminmax.py` are removed. The example now reports
+  τ_int, SEM, N_eff and KPSS, and frames Rayleigh–Pitot as a lower-bound
+  check rather than the convergence target.
+- `submit.sh` and `gci/run_all.sh` reduced to the essential steps.
+
 ## [0.2.0] — 2026-05-19
 
 **Reproducibility release.** Reorients the package toward an
@@ -23,9 +45,6 @@ output and emits a paper-ready Table 1 directly.
   critical values). No `statsmodels` dependency.
 - `foamgci.plot.plot_convergence` — optional two-panel
   convergence figure. Pulls matplotlib only when invoked.
-- `examples/forwardstep_mach3/verify_abstract.py` — driver that
-  regenerates the abstract's Table 1 directly from the user's four
-  OpenFOAM cases.
 
 ### Changed
 - `foamgci.reader.read_fieldminmax` rewritten to handle both
