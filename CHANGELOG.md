@@ -3,7 +3,7 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.1] — 2026-06-12
+## [3.1.0] — 2026-06-12
 
 **Correctness of the asymptotic diagnostic + honest reporting.**
 
@@ -42,7 +42,7 @@ All notable changes to **foamgci** are documented here. Versions follow
 - CI: ruff lint step; statsmodels installed on one matrix leg so the
   cross-validation actually runs.
 
-## [0.3.0] — 2026-06-12
+## [3.0.0] — 2026-06-12
 
 **Correctness + single-source-of-truth release.**
 
@@ -86,7 +86,7 @@ All notable changes to **foamgci** are documented here. Versions follow
   `examples/.../data/` folder are gone.
 - `gci_over_hierarchy` is now part of the public API.
 
-## [0.2.0] — 2026-05-19
+## [2.0.0] — 2026-05-19
 
 **Reproducibility release.** Reorients the package toward an
 end-to-end V&V workflow that ingests the user's actual OpenFOAM
@@ -129,7 +129,7 @@ output and emits a paper-ready Table 1 directly.
 - KPSS rejects a random walk and accepts iid Gaussian noise; the
   trend variant accepts a deterministic linear trend + noise.
 
-## [0.1.0] — 2026-05-19
+## [1.0.0] — 2026-05-19
 
 Initial release. Package skeleton, `reader.py`, `gci.py`, `stats.py`,
 `report.py`, CLI, tests, CI, MIT license, and a worked-synthetic
