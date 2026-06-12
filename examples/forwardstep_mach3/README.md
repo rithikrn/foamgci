@@ -58,8 +58,7 @@ row for that grid.
    # then edit each $d/system/blockMeshDict block counts per the table above
    ```
 2. Submit each. `submit.sh` runs blockMesh -> checkMesh -> decomposePar ->
-   rhoCentralFoam -> reconstructPar, then copies that grid's
-   `postProcessing/fieldMinMax/0/fieldMinMax.dat` into `gci/data/<label>.dat`:
+   rhoCentralFoam -> reconstructPar:
    ```bash
    for d in coarse_grid medium_grid fine_grid extrafine_grid; do
      ( cd $d && sbatch submit.sh ); done
