@@ -225,11 +225,26 @@ Roache GCI (triplet medium, fine, extra-fine):
 
 ## Citing
 
+If you use `foamgci` in published work, please cite it. A plain-text
+acknowledgement:
+
 > Grid-convergence study performed with `foamgci` (Roache GCI + Geyer
 > tau_int + KPSS stationarity), https://github.com/rithikrn/foamgci.
 
-Pin the GitHub URL plus the commit hash (or release tag) of the version
-you used. A JOSS paper is planned.
+Or as BibTeX:
+
+```bibtex
+@software{nambiar_foamgci,
+  author  = {Nambiar, Rithik R.},
+  title   = {{foamgci}: Verification utilities for unsteady OpenFOAM CFD
+             (Roache GCI, autocorrelation-corrected SEM, KPSS stationarity)},
+  year    = {2026},
+  version = {0.3.0},
+  url     = {https://github.com/rithikrn/foamgci}
+}
+```
+
+Pin the version (release tag or commit hash) you actually used.
 
 ## References
 
