@@ -1,96 +1,81 @@
-# Worked example — Mach-3 Woodward–Colella forward-facing step
+# Example: Mach-3 Woodward–Colella forward-facing step
 
-This directory contains the verification driver for the four-grid
-hierarchy whose results populate Table 1 of the AIAA SciTech 2027
-extended abstract.
+Grid-convergence verification of the time-averaged peak pressure on a
+four-grid hierarchy, analysed with the `foamgci` package. This is the
+template for adding further cases.
 
-## Cases
+## Physics
 
-Four identical OpenFOAM cases differ only in the `system/blockMeshDict`
-spacing. All other settings come from the shared `controlDict` listed
-in the abstract appendix.
+Inviscid (Euler) Mach-3 flow over a forward-facing step, solved with
+`rhoCentralFoam` (KNP fluxes, vanLeer limiters, CFL ≤ 0.2). Normalised
+perfect gas: a∞ = 1 at T = 1, so M = U = 3, p∞ = 1. QoI: ⟨max p⟩ over
+the stationary window t ∈ [3, 10].
 
-| label       | cell count | $h$       | refinement ratio vs prev |
-| ----------- | ----------:| --------- | ------------------------ |
-| coarse      |      4,032 | 0.025     | —                        |
-| medium      |     16,128 | 0.0125    | 2                        |
-| fine        |     64,512 | 0.00625   | 2                        |
-| extra-fine  |    258,048 | 0.003125  | 2                        |
+**Reference.** The global pressure maximum sits at the bow-shock
+stagnation foot, so the inviscid normal-shock value p₀₂/p₁ = 12.061 is a
+physical **lower-bound check** — *not* the convergence target. ⟨max p⟩ is
+the time-mean of a fluctuating spatial maximum, which exceeds the steady
+stagnation value and rises slightly under refinement as finer grids
+resolve more transient over-pressure. The convergence target is the
+Richardson value φ★ from the deepest monotonic triplet (≈ 12.10).
 
-Solver: `rhoCentralFoam` (KNP fluxes, vanLeer / vanLeerV limiters,
-CFL ≤ 0.2). `t ∈ [0, 10]` flow-through times; the first ≈ 2 are
-transient and the time-averaging window is `t ∈ [3, 10]`.
+## The committed case is the FINE grid
 
-## What this example does **not** ship
+`0/`, `constant/`, and `system/` here are the **fine** grid. To run the
+study, make four copies and change only the three block counts in
+`system/blockMeshDict`:
 
-To keep the repository small, the **`fieldMinMax.dat` outputs of the
-four runs are not included** — they are tens of MB each. Run your
-own cases to produce them. The pipeline is:
+| label      | n_cells | h        | block 1 | block 2  | block 3   |
+|------------|--------:|----------|---------|----------|-----------|
+| coarse     |   4 032 | 0.025    | (24 8)  | (24 32)  | (96 32)   |
+| medium     |  16 128 | 0.0125   | (48 16) | (48 64)  | (192 64)  |
+| **fine** (committed) | 64 512 | 0.00625 | (96 32) | (96 128) | (384 128) |
+| extra-fine | 258 048 | 0.003125 | (192 64)| (192 256)| (768 256) |
 
-1. Add the `fieldMinMax` function object to each case's
-   `system/controlDict`:
+i.e. in the `blocks (...)` list, set the three `(nx ny 1)` entries to the
+row for that grid; everything else stays identical.
 
-       functions {
-           fieldMinMax {
-               type            fieldMinMax;
-               libs            ("fieldFunctionObjects");
-               writeControl    timeStep;
-               writeInterval   100;
-               fields          (p U rho);
-               location        true;
-               mode            magnitude;
-           }
-       }
+## Run from scratch
 
-   This will produce `postProcessing/fieldMinMax/0/fieldMinMax.dat`
-   in each case directory.
-
-2. Run all four cases (see `submit.sh` in your case repository).
-
-3. Drop the four files into `data/` of this directory (or pass full
-   paths via `--coarse`, `--medium`, `--fine`, `--extra-fine`).
-
-## Running the verification
-
+1. Make the four case directories as siblings of `gci/`:
 ```bash
-# from the foamgci repo root
-python examples/forwardstep_mach3/verify_abstract.py \
-    --coarse     /path/to/coarse/postProcessing/fieldMinMax/0/fieldMinMax.dat \
-    --medium     /path/to/medium/postProcessing/fieldMinMax/0/fieldMinMax.dat \
-    --fine       /path/to/fine/postProcessing/fieldMinMax/0/fieldMinMax.dat \
-    --extra-fine /path/to/extra-fine/postProcessing/fieldMinMax/0/fieldMinMax.dat \
-    --window 3 10
+   for d in coarse_grid medium_grid fine_grid extrafine_grid; do
+     mkdir -p $d && cp -r 0 constant system submit.sh $d/
+   done
+   # then edit each $d/system/blockMeshDict block counts per the table above
 ```
+2. Submit each (writes `postProcessing/fieldRange/0/fieldMinMax.dat`):
+```bash
+   for d in coarse_grid medium_grid fine_grid extrafine_grid; do
+     ( cd $d && sbatch submit.sh ); done
+```
+3. Analyse + plot (uses the `foamgci` package — single source of truth):
+```bash
+   pip install -e ../..
+   cd gci && ./run_all.sh
+```
+   Writes `gci/gci_summary.json` (per-grid mean, σ, τ_int, SEM, N_eff,
+   KPSS; regime-aware GCI on both triplets) and the figures.
 
-Outputs go to `./out/`:
+## Reading the output
 
-- `report.txt` — human-readable Table 1 + analytical cross-check
-- `table1.tex` — drop-in LaTeX block for the abstract
-- `fig_convergence.pdf` — two-panel convergence figure
+- Per grid: `p_max_mean`, the autocorrelation-corrected `p_max_sem`, and
+  `p_max_n_eff` (effective sample count after τ_int correction — well
+  below the raw count).
+- `triplet_A_CMF` is expected **divergent** (R > 1, pre-asymptotic);
+  `triplet_B_MFXF` monotonic, p̂ ≈ 1.5, GCI ≈ 0.04 %.
+- `phi_star` (≈ 12.10) is the converged value; `rayleigh_pitot_p02`
+  (12.061) is the lower-bound check.
 
-## What to compare against the abstract
+## Notes
 
-The script prints the percent error of two quantities relative to
-the analytical Rayleigh-Pitot reference $p_{02}/p_1 = 12.0610$ at
-$M=3$, $\gamma=1.4$:
+- The `fieldRange` function object samples min/max every 100 steps. The
+  raw `fieldMinMax.dat` files are small (KB) — commit them for
+  reproducibility if you wish.
+- If KPSS rejects stationarity on `[3, 10]` for any grid, tighten the
+  window in `gci/data.py` (`T_STAT`) and re-run.
 
-1. The **finest-grid mean** $\langle p_{\max}\rangle_{\text{XF}}$
-2. The **Richardson-extrapolated value** $\phi_{\text{exact}}$ from
-   the medium → fine → extra-fine triplet
+## Adding a new case
 
-Both should be below ~ 0.1 % for a properly resolved case. The
-abstract's specific claim is that the extra-fine result agrees with
-Rayleigh-Pitot to within **0.03 %** — re-run this script and update
-the abstract figure if your number differs from 0.03 %.
-
-## What to put in Table 1
-
-Copy `out/table1.tex` verbatim into your manuscript and replace the
-existing Table 1 environment. The script writes the table in the
-exact format used in the abstract (per-grid block + GCI block).
-
-## Notes on the time-averaging window
-
-If KPSS rejects stationarity on the `[3, 10]` window (`KPSS_p < 0.05`)
-for any grid, the window contains residual transient. Re-run with
-`--window 5 10` or another tightened range and re-verify.
+Copy this directory, swap `system/blockMeshDict` + `0/`, set the QoI
+field and reference in `gci/analyze.py`, and write the case's README.
