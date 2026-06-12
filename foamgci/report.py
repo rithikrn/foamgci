@@ -160,6 +160,8 @@ class ReportTable:
             lines.append(f"      GCI_fine_21              = {g.gci_fine_21_pct:.4f} %")
             lines.append(f"      GCI_medium_32            = {g.gci_medium_32_pct:.4f} %")
             lines.append(f"      asymptotic ratio (≈1)    = {g.asymptotic_ratio:.3f}")
+            if g.regime != "monotonic":
+                lines.append(f"      note                     = {g.note}")
 
         # Reference cross-check
         if self.reference_value is not None and self.gcis:
