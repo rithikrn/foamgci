@@ -77,7 +77,7 @@ functions
     }
 
     // Min/max diagnostic to catch divergence early in the log.
-    fieldRange
+    fieldMinMax
     {
         type            fieldMinMax;
         libs            ("libfieldFunctionObjects.so");
