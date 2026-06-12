@@ -181,8 +181,7 @@ def test_oscillatory_reports_celik_half_span_uncertainty() -> None:
 
 
 def test_asymptotic_ratio_exact_for_nonconstant_r() -> None:
-    """phi(h) = phi_e + C h^p with r21 != r32 must give R_asym = 1.
-    (The pre-0.3.1 formula returned ~1.61 here.)"""
+    """phi(h) = phi_e + C h^p with r21 != r32 must give R_asym = 1."""
     phi_e, C, p_true = 5.0, 0.05, 2.0
     h3 = 1.0
     h2 = h3 / 1.333
