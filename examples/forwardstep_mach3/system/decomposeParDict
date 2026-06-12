@@ -1,0 +1,35 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+numberOfSubdomains 16;             // Match --ntasks in submit.sh exactly.
+
+method          scotch;            // Graph-based partitioning; handles the
+                                   // step geometry better than `simple`.
+
+// `scotch` needs no coeffs. The block below is here as a fallback if your
+// OpenFOAM build wasn't compiled with scotch support — switch `method` to
+// `simple` and uncomment.
+
+// simpleCoeffs
+// {
+//     n               (4 4 1);   // (nx ny nz) — last entry MUST be 1 (2D).
+//     delta           0.001;
+// }
+
+distributed     no;
+roots           ( );
+
+// ************************************************************************* //

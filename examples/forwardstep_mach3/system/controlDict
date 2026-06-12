@@ -1,0 +1,92 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     rhoCentralFoam;
+
+startFrom       startTime;
+startTime       0;
+
+stopAt          endTime;
+endTime         10;                // 10 flow-through times (FT = L/U = 3/3 = 1)
+                                   // First ~2 FT is transient, kept for safety;
+                                   // last 8 FT is the snapshot window.
+
+deltaT          1e-4;              // Conservative; adjustTimeStep will tighten it.
+
+writeControl    adjustableRunTime;
+writeInterval   0.02;              // ~500 snapshots over 10 FT; ~400 usable
+                                   // after dropping the transient.
+
+purgeWrite      0;                 // KEEP all snapshots — modal analysis
+                                   // needs the full time series. Do NOT use
+                                   // purgeWrite=10 (the tutorial default), it
+                                   // destroys your dataset.
+
+writeFormat     binary;            // CRITICAL: ASCII would 5–10x your disk
+                                   // and slow the run noticeably.
+writePrecision  8;
+writeCompression off;              // Compressed binaries are slow to read in
+                                   // Python.
+
+timeFormat      general;
+timePrecision   8;
+
+runTimeModifiable true;
+
+adjustTimeStep  yes;
+maxCo           0.2;               // Tutorial default; do not raise — central
+                                   // schemes go unstable above ~0.5 on strong
+                                   // shocks.
+maxDeltaT       1;
+
+// ------------------------- function objects -------------------------------
+functions
+{
+    // Cell-centered Mach number, useful for ParaView debugging
+    // and as a secondary modal target.
+    MachNo
+    {
+        type            MachNo;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
+        executeControl  writeTime;
+    }
+
+    // Schlieren-like |grad(rho)| — best visual for mode shapes, since
+    // POD/DMD mode plots look like canonical experimental schlieren.
+    gradRho
+    {
+        type            grad;
+        libs            ("libfieldFunctionObjects.so");
+        field           rho;
+        writeControl    writeTime;
+        executeControl  writeTime;
+    }
+
+    // Min/max diagnostic to catch divergence early in the log.
+    fieldRange
+    {
+        type            fieldMinMax;
+        libs            ("libfieldFunctionObjects.so");
+        mode            magnitude;
+        writeControl    timeStep;
+        writeInterval   100;
+        log             true;
+        fields          (p U rho);
+    }
+}
+
+// ************************************************************************* //
