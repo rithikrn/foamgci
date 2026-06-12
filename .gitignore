@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+examples/**/*_grid/
+examples/**/processor*/
+examples/**/postProcessing/
+examples/**/*.foam
+examples/**/log.*
+# commit the small fieldMinMax inputs for reproducibility:
+*.dat
+!examples/**/fieldMinMax.dat
