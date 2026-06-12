@@ -3,6 +3,21 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] — 2026-06-12
+
+**Stabilisation patch — packaging and documentation only; no library changes.**
+
+### Fixed
+- The `v3.1.0` git tag pointed at a commit that predated the 3.1.0
+  version bump, so checking out that tag delivered code reporting
+  `__version__ = "0.3.1"`. The tag has been removed; `v3.1.1` is the
+  first tag of the 3.x line guaranteed to match the code it points to.
+  Pin `v3.1.1` (not `v3.1.0`) in any citation.
+- READMEs now invoke the example driver as `bash run_all.sh` instead of
+  `./run_all.sh`: the executable bit is not stored in the repository,
+  so the documented command failed with "Permission denied" on a fresh
+  clone. (`submit.sh` is unaffected — it is launched via `sbatch`.)
+
 ## [3.1.0] — 2026-06-12
 
 **Correctness of the asymptotic diagnostic + honest reporting.**
