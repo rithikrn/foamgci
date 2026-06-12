@@ -9,6 +9,8 @@ examples/**/processor*/
 examples/**/postProcessing/
 examples/**/*.foam
 examples/**/log.*
-# commit the small fieldMinMax inputs for reproducibility:
+# Commit the small (KB) fieldMinMax inputs for reproducibility.
+# Full run outputs (postProcessing/, processor*/) stay ignored above;
+# only the curated copies under each example's gci/data/ are tracked.
 *.dat
-!examples/**/fieldMinMax.dat
+!examples/**/gci/data/*.dat
