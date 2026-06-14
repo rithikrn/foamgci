@@ -23,29 +23,16 @@ All notable changes to **foamgci** are documented here. Versions follow
   * `rho_kpss_stat`;
   * `rho_kpss_p`;
   * `rho_kpss_stationary`.
-* Added `included_qois` and `excluded_qois` metadata to the JSON summary
-  so the report documents which scalar fields are included in the formal
-  GCI table and which are excluded.
 
 ### Changed
 
 * Updated the forward-step statistical window to `t in [6, 10]`.
+* Updated `analyze.py` and `make_figures.py` 
 * Reframed the example from a pressure-only GCI study to a
   pressure-density multi-QoI verification demonstration.
-* Kept `p_max` as the primary QoI because:
-
-  * it is stationary on all four grids over `t in [6, 10]`;
-  * it has a valid deepest GCI triplet;
-  * the extra-fine value agrees with the Rayleigh--Pitot analytical
-    reference to within approximately `0.03%`.
-* Reclassified `rho_max` as a secondary diagnostic QoI:
-
-  * it has clean monotonic spatial convergence on both triplets;
-  * the deepest triplet gives `p_obs = 2.528`, `GCI = 0.0186%`, and
-    `R_asym = 1.000`;
-  * KPSS rejects stationarity on the medium, fine, and extra-fine density
-    histories, so it is not promoted as a final stationary uncertainty
-    claim.
+* Kept `p_max` as the primary QoI 
+* Reclassified `rho_max` as a secondary diagnostic QoI
+  
 
 ## [3.1.1] — 2026-06-12
 
