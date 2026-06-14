@@ -270,3 +270,37 @@ def read_fieldminmax(
         loc_max=np.array(lmaxs) if have_locations else None,
         source=path,
     )
+def read_timeseries(
+    path,
+    *,
+    field,
+    time_col=0,
+    value_col=1,
+    loc_cols=None,        # e.g. (2, 3, 4) for x, y, z; or None
+    delimiter=None,       # None => any whitespace
+    comments="#",
+):
+    
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"No such file: {path}")
+    t, v, loc = [], [], []
+    with path.open() as fh:
+        for raw in fh:
+            line = raw.strip()
+            if not line or line.startswith(comments):
+                continue
+            r = line.split(delimiter)
+            t.append(float(r[time_col]))
+            v.append(float(r[value_col]))
+            if loc_cols is not None:
+                loc.append([float(r[c]) for c in loc_cols])
+    if not t:
+        raise ValueError(f"No data rows in {path}")
+    t = np.asarray(t, float)
+    v = np.asarray(v, float)
+    locs = np.asarray(loc, float) if loc_cols is not None else None
+    return FieldMinMaxData(
+        field=field, time=t, min=v, max=v,
+        loc_min=locs, loc_max=locs, source=path,
+    )
