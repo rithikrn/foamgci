@@ -59,15 +59,7 @@ The library stays untouched.
   machinery.
 - **LaTeX `tabular` output**, drop-in for a paper Table 1.
 
-The motivating finding: the naive σ/√N standard error understates
-temporal sampling uncertainty for shock-dominated unsteady flows,
-because the samples are serially correlated. For noisy or non-stationary
-QoIs this matters — the autocorrelation-corrected SEM, the KPSS test,
-and the localization check together decide whether a quantity is a valid
-converged scalar at all, rather than reporting a GCI for it
-unconditionally. (In the forward-step example the pressure QoI is clean,
-its grid increments dwarfing the SEM, while the density extremum is the
-case where the gates bite.)
+The motivating finding: unsteady shock-dominated CFD needs more than a single GCI number. The naive $\sigma/\sqrt N$ standard error can understate temporal sampling uncertainty when samples are serially correlated, and different extrema can behave differently under refinement. In the forward-step example, maximum pressure is the primary reference-anchored QoI, while maximum density is retained as a diagnostic QoI because its stationarity and localization behavior reveal additional shock/contact-line dynamics.
 
 Two caveats apply when interpreting GCI on unsteady, CFL-limited runs,
 spelled out in `LIMITATIONS.md`: (1) refining the mesh also refines the
