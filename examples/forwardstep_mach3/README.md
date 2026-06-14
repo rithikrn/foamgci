@@ -131,3 +131,11 @@ diagnostic QoI:
 Copy this whole directory, swap `system/blockMeshDict` + `0/`, set the
 grid metadata and reference in `gci/data.py`, populate `gci/data/`, and
 write the new case's README. The library is never edited.
+
+## References
+
+- Woodward, P., Colella, P. (1984), *J. Comput. Phys.* **54**(1), 115–173 — the forward-step benchmark.
+- Greenshields, C.J. et al. (2010), *Int. J. Numer. Meth. Fluids* **63**(1), 1–21 — the rhoCentralFoam central-upwind solver.
+- Kurganov, A., Noelle, S., Petrova, G. (2001), *SIAM J. Sci. Comput.* **23**(3), 707–740 — the KNP flux scheme.
+- You, R.G.Y., New, T.H., Chan, W.L. (2024), *Computation* **12**(6), 124 — modern rhoCentralFoam LES + GCI.
+- Gilmanov, A., Gokulakrishnan, P., Klassen, M.S. (2024), *Dynamics* **4**(1), 135–156 — rhoCentralFoam-derived solver, supersonic combustion, with GCI.
