@@ -10,7 +10,7 @@ DATA_DIR = GCI_DIR / "data"
 # Stationary-regime time window used everywhere for time averaging.
 # If KPSS rejects stationarity on this window for any grid, narrow it
 # here and re-run analyze.py.
-T_STAT = (3.0, 10.0)
+T_STAT = (6.0, 10.0)
 
 # Benchmark comparison time (Greenshields 2010 Fig. 6, WC84 Fig. 4(d)).
 T_BENCHMARK = 4.0
