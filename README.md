@@ -193,11 +193,7 @@ foamgci/
 `examples/forwardstep_mach3/` is the Mach-3 Woodward-Colella
 forward-facing step, used as the template for every future case. It
 ships the full OpenFOAM case (the fine grid) and the analysis driver.
-The four `fieldMinMax.dat` inputs under `gci/data/` are **not committed
-yet** — the simulation campaign is being rerun with the final tool
-workflow, and the regenerated files will be committed then. Until that
-lands, reproducing the figures requires running the four OpenFOAM cases
-first (see `gci/data/README.md`, one `cp` per grid).
+The four `fieldMinMax.dat` inputs under `gci/data/` are committed, so the analysis can be reproduced from a fresh clone without rerunning OpenFOAM. Running the OpenFOAM cases is only needed if you want to regenerate the input data.
 
 See **`examples/forwardstep_mach3/README.md`** for step-by-step run
 instructions. The short version:
