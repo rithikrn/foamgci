@@ -86,9 +86,12 @@ row for that grid.
   well below the raw count).
 - `triplet_A_CMF` may be **divergent** (R > 1, pre-asymptotic);
   `triplet_B_MFXF` is the deeper triplet used for `phi_star`.
-- `phi_star` is the converged value; `rayleigh_pitot_p02` (12.061) is the
-  lower-bound check.
-- If KPSS rejects stationarity on `[3, 10]` for any grid, narrow the
+- `rayleigh_pitot_p02` (12.061) is the physical ceiling and the
+  verification anchor; the finest-grid `p_max_mean` should approach it
+  from below. `phi_star` is the Richardson extrapolate, reported as a
+  diagnostic — it overshoots the ceiling here, so it is *not* taken as
+  the converged value.
+- If KPSS rejects stationarity on `[6, 10]` for any grid, narrow the
   window in `gci/data.py` (`T_STAT`) and re-run `analyze.py`.
 
 ### Multi-QoI forward-step diagnostics (latest)
