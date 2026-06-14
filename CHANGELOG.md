@@ -3,6 +3,20 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1] — 2026-06-14
+
+**Solver-agnostic reader foundation and reproducible example inputs.**
+
+### Added
+- Added `read_timeseries()` for generic scalar QoI histories from CSV or whitespace-delimited files.
+- Exported `read_timeseries` through the public package API.
+- Added reader test coverage for generic `(time, value[, x, y, z])` inputs.
+- Committed the four forward-step `fieldMinMax.dat` inputs required by the worked example.
+
+### Changed
+- The reader layer now supports both OpenFOAM `fieldMinMax.dat` and solver-independent scalar time histories.
+- Updated the forward-step example data status from “rerun required” to reproducible-from-clone.
+
 ## [3.2.0] — 2026-06-14
 
 **Pressure-density multi-QoI diagnostics.**
