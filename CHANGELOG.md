@@ -3,7 +3,9 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v3.2.0 - Pressure-density multi-QoI diagnostics
+## [3.2.0] — 2026-06-14
+
+** - Pressure-density multi-QoI diagnostics.**
 
 ### Added
 
