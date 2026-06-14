@@ -5,7 +5,7 @@ All notable changes to **foamgci** are documented here. Versions follow
 
 ## [3.2.0] — 2026-06-14
 
-** - Pressure-density multi-QoI diagnostics.**
+**Pressure-density multi-QoI diagnostics.**
 
 ### Added
 
