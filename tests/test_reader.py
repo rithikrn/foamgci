@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from foamgci.reader import read_fieldminmax
+from foamgci.reader import read_fieldminmax, read_timeseries
 
 
 COMBINED_HEADER = (
