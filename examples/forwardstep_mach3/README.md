@@ -14,7 +14,9 @@ is the **template** for adding further cases.
   (the library) and applies it here. You edit `gci/data.py`; you do not
   touch the library.
 - `gci/data/` — the four small `fieldMinMax.dat` inputs the analysis
-  reads. Committed so the figures reproduce without rerunning OpenFOAM.
+  reads. Regenerated from the final workflow and committed with the campaign
+  rerun; until then, produce them by running the four cases (see
+  `gci/data/README.md`).
 
 ## Physics
 
