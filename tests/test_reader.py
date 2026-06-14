@@ -121,3 +121,11 @@ def test_restrict(tmp_path: Path) -> None:
     assert d2.time.min() >= 0.3
     assert d2.time.max() <= 0.7
     assert len(d2) == 5
+    
+def test_read_timeseries_roundtrip(tmp_path):
+    p = tmp_path / "series.csv"
+    p.write_text("# t value x y z\n0.0 1.0 0.5 0.1 0\n0.1 2.0 0.5 0.1 0\n")
+    d = read_timeseries(p, field="cd", time_col=0, value_col=1, loc_cols=(2, 3, 4))
+    assert len(d) == 2
+    assert d.max[1] == 2.0 and d.min[1] == 2.0
+    assert d.loc_max.shape == (2, 3)
