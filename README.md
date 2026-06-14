@@ -158,7 +158,7 @@ foamgci/
 │   ├── _version.py                #   single source of the version string
 │   ├── __init__.py                #   public API
 │   ├── __main__.py                #   CLI: foamgci report ...
-│   ├── reader.py                  #   fieldMinMax.dat parser (both dialects)
+│   ├── reader.py                  #   OpenFOAM fieldMinMax + generic scalar time-series readers
 │   ├── stats.py                   #   Geyer tau_int, KPSS, window stats
 │   ├── gci.py                     #   Roache GCI on triplets
 │   ├── report.py                  #   end-to-end driver + Rayleigh-Pitot
