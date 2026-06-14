@@ -32,5 +32,6 @@ __all__ = [
     "rayleigh_pitot",
     "ReportTable",
     "GridCase",
+    "read_timeseries",
     "__version__",
 ]
