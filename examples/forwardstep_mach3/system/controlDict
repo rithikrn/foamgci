@@ -87,7 +87,7 @@ functions
         writeControl    timeStep;
         writeInterval   100;
         log             true;
-        fields          (p U rho);
+        fields          (p rho);
     }
 }
 
