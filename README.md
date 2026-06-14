@@ -59,12 +59,15 @@ The library stays untouched.
   machinery.
 - **LaTeX `tabular` output**, drop-in for a paper Table 1.
 
-The motivating finding: the naive $\sigma/\sqrt N$ standard error
-understates temporal sampling uncertainty for shock-dominated unsteady
-flows, because the samples are serially correlated. Once
-$\tau_{\mathrm{int}}$ is accounted for, the apparent grid-refinement
-increment between the two finest grids is often smaller than the
-sampling noise — i.e. the remaining difference is temporal, not spatial.
+The motivating finding: the naive σ/√N standard error understates
+temporal sampling uncertainty for shock-dominated unsteady flows,
+because the samples are serially correlated. For noisy or non-stationary
+QoIs this matters — the autocorrelation-corrected SEM, the KPSS test,
+and the localization check together decide whether a quantity is a valid
+converged scalar at all, rather than reporting a GCI for it
+unconditionally. (In the forward-step example the pressure QoI is clean,
+its grid increments dwarfing the SEM, while the density extremum is the
+case where the gates bite.)
 
 Two caveats apply when interpreting GCI on unsteady, CFL-limited runs,
 spelled out in `LIMITATIONS.md`: (1) refining the mesh also refines the
@@ -266,13 +269,27 @@ Pin the version (release tag or commit hash) you actually used.
 
 ## References
 
-- Roache, P.J. (1994), *J. Fluids Eng.*, **116**, 405-413.
-- Celik, I.B. et al. (2008), *J. Fluids Eng.*, **130**, 078001.
-- Geyer, C.J. (1992), *Statistical Science*, **7**, 473-483.
-- Kwiatkowski, D. et al. (1992), *J. Econometrics*, **54**, 159-178.
-- Woodward, P., Colella, P. (1984), *J. Comput. Phys.*, **54**, 115-173.
-- Greenshields, C.J. et al. (2010), *Int. J. Numer. Meth. Fluids*,
-  **63**, 1-21.
+**Verification & uncertainty methodology**
+- Roache, P.J. (1994), *J. Fluids Eng.* **116**(3), 405–413.
+- Celik, I.B. et al. (2008), *J. Fluids Eng.* **130**(7), 078001.
+- Eça, L., Hoekstra, M. (2014), *J. Comput. Phys.* **262**, 104–130.
+- Oberkampf, W.L., Roy, C.J. (2010), *Verification and Validation in
+  Scientific Computing*, Cambridge Univ. Press.
+
+**Autocorrelation-corrected sampling statistics**
+- Geyer, C.J. (1992), *Statistical Science* **7**(4), 473–483.
+- Flyvbjerg, H., Petersen, H.G. (1989), *J. Chem. Phys.* **91**(1), 461–466.
+- Kwiatkowski, D. et al. (1992), *J. Econometrics* **54**(1–3), 159–178.
+
+**Time-averaging uncertainty in CFD (recent context)**
+- Rezaeiravesh, S., Vinuesa, R., Schlatter, P. (2022), *J. Comput. Sci.* **62**, 101688.
+- Xavier, D., Rezaeiravesh, S., Schlatter, P. (2024), *Phys. Fluids* **36**(10), 105122.
+- Related software: Rezaeiravesh, S. et al. (2021), *UQit*, JOSS **6**(60), 2871.
+
+**Solver & benchmark**
+- Woodward, P., Colella, P. (1984), *J. Comput. Phys.* **54**(1), 115–173.
+- Kurganov, A., Noelle, S., Petrova, G. (2001), *SIAM J. Sci. Comput.* **23**(3), 707–740.
+- Greenshields, C.J. et al. (2010), *Int. J. Numer. Meth. Fluids* **63**(1), 1–21.
 
 ## License
 
