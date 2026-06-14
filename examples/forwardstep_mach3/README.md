@@ -94,27 +94,21 @@ row for that grid.
 - If KPSS rejects stationarity on `[6, 10]` for any grid, narrow the
   window in `gci/data.py` (`T_STAT`) and re-run `analyze.py`.
 
-### Multi-QoI forward-step diagnostics (latest)
+The Mach-3 forward-step example carries one formal QoI and one
+diagnostic QoI:
 
-`foamgci` is not restricted to pressure. The current OpenFOAM
-`fieldMinMax.dat` reader can extract any scalar field written by the
-function object, including `p`, `rho`, and velocity magnitude when
-available. The Mach-3 forward-step example currently promotes two formal
-QoIs:
-
-| QoI       | Role                     | Interpretation                                                                                                                          |
-| --------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `p_max`   | Primary verified QoI     | Stationary on all four grids, valid deepest GCI triplet, and extra-fine value agrees with Rayleigh--Pitot within approximately `0.03%`. |
-| `rho_max` | Secondary diagnostic QoI | Very clean spatial convergence, but refined-grid density histories fail KPSS stationarity in the current window.                        |
-
-The intended workflow is diagnostic:
+| QoI       | Role                       | Interpretation                                                                                                                                                                                                                                 |
+| --------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `p_max`   | Primary verified QoI       | Stationary on all four grids, localized at the stagnation foot, valid deepest GCI triplet; extra-fine value within ~0.03% of Rayleigh–Pitot.                                                                                                     |
+| `rho_max` | Diagnostic QoI (not formal) | Its GCI *looks* excellent (p_obs ≈ 2.5, GCI ≈ 0.02%), but two gates reject it: KPSS fails on the three finer grids, and the maximum is **not localized** — it migrates from the triple-point region to the stagnation foot, wandering tens-to-hundreds of cells within the window, so the GCI compares different physical maxima across grids. |
 
 1. Parse multiple scalar QoIs from the same OpenFOAM output.
 2. Check stationarity using KPSS.
-3. Estimate autocorrelation-corrected SEM and effective sample size.
-4. Compute GCI on every consecutive triplet.
-5. Promote only the QoIs that are stationary, physically meaningful, and
-   asymptotically reliable.
+3. Check extremum localization (in-window location wander).
+4. Estimate autocorrelation-corrected SEM and effective sample size.
+5. Compute GCI on every consecutive triplet.
+6. Promote only QoIs that are stationary, pointwise-localized,
+   physically meaningful, and asymptotically reliable.
 
 ### JSON summary structure
 
