@@ -49,6 +49,11 @@ The library stays untouched.
 - **KPSS test** for stationarity of the time-averaging window (level and
   trend variants), implemented from first principles — no `statsmodels`
   dependency.
+- **Extremum-localization check** for pointwise QoIs: the in-window
+  spread of the extremum *location* (5th–95th percentile, in cell
+  widths). A localized QoI stays within a few cells; a maximum that
+  migrates between flow features is flagged as not pointwise-localized
+  and demoted to a diagnostic — independent of the KPSS value check.
 - **Analytical Rayleigh-Pitot reference** for cross-checking the
   Richardson-extrapolated maximum pressure independently of the GCI
   machinery.
