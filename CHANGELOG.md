@@ -3,14 +3,12 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## CHANGELOG.md
-
 ## v3.2.0 - Pressure-density multi-QoI diagnostics
 
 ### Added
 
 * Added formal multi-QoI diagnostics to the Mach-3 forward-step example.
-* `gci_summary.json` now contains a `qoi_results` block for:
+* The generated `gci_summary.json` will now contain a `qoi_results` block for:
 
   * `p_max` — primary maximum-pressure QoI;
   * `rho_max` — secondary maximum-density diagnostic QoI.
