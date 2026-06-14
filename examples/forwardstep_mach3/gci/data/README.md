@@ -13,14 +13,11 @@ Each file is the OpenFOAM `fieldMinMax` function-object output from one grid-ref
 
 ## Current status
 
-The `.dat` files are intentionally not committed yet because the simulation campaign will be rerun. To reproduce the workflow now, run the OpenFOAM cases first and copy the generated files into this folder.
+The four `.dat` files are committed, so the forward-step GCI workflow can be reproduced from a fresh clone without rerunning OpenFOAM.
 
-## How to populate this folder
-
-After each grid finishes, copy:
+From the repository root:
 
 ```bash
-cp <coarse_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat     coarse.dat
-cp <medium_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat     medium.dat
-cp <fine_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat       fine.dat
-cp <extrafine_case>/postProcessing/fieldMinMax/0/fieldMinMax.dat  extrafine.dat
+pip install -e ".[dev]"
+cd examples/forwardstep_mach3/gci
+bash run_all.sh
