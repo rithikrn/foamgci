@@ -1,4 +1,4 @@
-from .reader import read_fieldminmax, FieldMinMaxData
+from .reader import read_fieldminmax, read_timeseries, FieldMinMaxData
 from .stats import (
     window_stats,
     tau_int_geyer,
