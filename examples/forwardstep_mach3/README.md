@@ -87,6 +87,103 @@ row for that grid.
 - If KPSS rejects stationarity on `[3, 10]` for any grid, narrow the
   window in `gci/data.py` (`T_STAT`) and re-run `analyze.py`.
 
+## CHANGELOG.md
+
+## v3.2.0 - Pressure-density multi-QoI diagnostics
+
+### Added
+
+* Added formal multi-QoI diagnostics to the Mach-3 forward-step example.
+* `gci_summary.json` now contains a `qoi_results` block for:
+
+  * `p_max` — primary maximum-pressure QoI;
+  * `rho_max` — secondary maximum-density diagnostic QoI.
+* Added separate Rayleigh--Pitot reference-error reporting for the
+  primary pressure QoI through `error_table_vs_rayleigh_pitot`.
+* Added density-specific statistics to the legacy top-level `cases`
+  block:
+
+  * `rho_max_sem`;
+  * `rho_max_tau_int`;
+  * `rho_max_n_eff`;
+  * `rho_kpss_stat`;
+  * `rho_kpss_p`;
+  * `rho_kpss_stationary`.
+* Added `included_qois` and `excluded_qois` metadata to the JSON summary
+  so the report documents which scalar fields are included in the formal
+  GCI table and which are excluded.
+
+### Changed
+
+* Updated the forward-step statistical window to `t in [6, 10]`.
+* Reframed the example from a pressure-only GCI study to a
+  pressure-density multi-QoI verification demonstration.
+* Kept `p_max` as the primary QoI because:
+
+  * it is stationary on all four grids over `t in [6, 10]`;
+  * it has a valid deepest GCI triplet;
+  * the extra-fine value agrees with the Rayleigh--Pitot analytical
+    reference to within approximately `0.03%`.
+* Reclassified `rho_max` as a secondary diagnostic QoI:
+
+  * it has clean monotonic spatial convergence on both triplets;
+  * the deepest triplet gives `p_obs = 2.528`, `GCI = 0.0186%`, and
+    `R_asym = 1.000`;
+  * KPSS rejects stationarity on the medium, fine, and extra-fine density
+    histories, so it is not promoted as a final stationary uncertainty
+    claim.
+* Excluded `U_mag_max` from the formal forward-step GCI table because the
+  pointwise velocity maximum changed location across grids and did not
+  produce a physically useful extrapolation.
+
+### Notes
+
+* This release does not change the core GCI/statistics API.
+* The update is implemented in the case-specific forward-step analysis
+  workflow.
+* The result demonstrates the intended purpose of `foamgci`: scalar QoIs
+  are compared using stationarity, autocorrelation-corrected SEM,
+  triplet regime, GCI, and asymptotic-range diagnostics instead of being
+  accepted blindly.
+
+
+
+### Multi-QoI forward-step diagnostics (latest)
+
+`foamgci` is not restricted to pressure. The current OpenFOAM
+`fieldMinMax.dat` reader can extract any scalar field written by the
+function object, including `p`, `rho`, and velocity magnitude when
+available. The Mach-3 forward-step example currently promotes two formal
+QoIs:
+
+| QoI       | Role                     | Interpretation                                                                                                                          |
+| --------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `p_max`   | Primary verified QoI     | Stationary on all four grids, valid deepest GCI triplet, and extra-fine value agrees with Rayleigh--Pitot within approximately `0.03%`. |
+| `rho_max` | Secondary diagnostic QoI | Very clean spatial convergence, but refined-grid density histories fail KPSS stationarity in the current window.                        |
+
+The intended workflow is diagnostic:
+
+1. Parse multiple scalar QoIs from the same OpenFOAM output.
+2. Check stationarity using KPSS.
+3. Estimate autocorrelation-corrected SEM and effective sample size.
+4. Compute GCI on every consecutive triplet.
+5. Promote only the QoIs that are stationary, physically meaningful, and
+   asymptotically reliable.
+
+### JSON summary structure
+
+`gci_summary.json` contains:
+
+* `stationary_window` — the averaging window used for all QoIs;
+* `cases` — backward-compatible top-level pressure-centered output, now
+  also carrying density statistics;
+* `qoi_results` — full per-QoI statistics and triplet GCI diagnostics;
+* `included_qois` — QoIs promoted to the formal table;
+* `excluded_qois` — parsed or considered QoIs excluded from formal GCI
+  interpretation, with a reason;
+* `error_table_vs_rayleigh_pitot` — pressure-only analytical reference
+  comparison.
+
 ## Adding a new case
 
 Copy this whole directory, swap `system/blockMeshDict` + `0/`, set the
