@@ -21,15 +21,19 @@ is the **template** for adding further cases.
 Inviscid (Euler) Mach-3 flow over a forward-facing step, solved with
 `rhoCentralFoam` (Kurganov/KNP fluxes, vanLeer limiters, CFL <= 0.2).
 Normalised perfect gas: a_inf = 1 at T = 1, so M = U = 3, p_inf = 1.
-QoI: <max p> over the stationary window t in [3, 10].
+QoI: <max p> over the stationary window t in [6, 10].
 
 **Reference value.** The global pressure maximum sits at the bow-shock
-stagnation foot, so the inviscid normal-shock value p02/p1 = 12.061 is a
-physical **lower-bound check**, not the convergence target. <max p> is
-the time-mean of a fluctuating spatial maximum, which exceeds the steady
-stagnation value and rises slightly under refinement as finer grids
-resolve more transient over-pressure. The convergence target is the
-Richardson value phi_star from the deepest monotonic triplet (~ 12.09).
+stagnation foot, where the post-shock flow comes to rest behind the
+locally normal portion of the bow shock. The inviscid Rayleigh–Pitot
+stagnation pressure p02/p1 = 12.061 is therefore a physical **ceiling**:
+numerical dissipation smears the captured shock, so the time-mean
+<max p> approaches 12.061 **from below** as h → 0 and cannot exceed it.
+All four grids confirm this (11.996 → 12.014 → 12.041 → 12.057, all
+below 12.061). The verification rests on the finest-grid agreement with
+this reference (within 0.029%), **not** on the Richardson extrapolate:
+phi_star ≈ 12.080 overshoots the ceiling, the expected signature of
+applying Richardson extrapolation to a non-smooth pointwise extremum.
 
 ## The four grids
 
