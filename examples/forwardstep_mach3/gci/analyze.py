@@ -24,6 +24,13 @@ from foamgci.report import rayleigh_pitot  # noqa: E402
 # its extremum location changes substantially across grids and the GCI
 # extrapolation is not physically useful. Velocity can still be added later
 # as a diagnostic-only QoI if needed.
+# Maximum in-window extremum wander (in cell widths) tolerated before a QoI
+# is flagged as not pointwise-localized. A stagnation-point pressure peak
+# stays put (~O(1) cell); a density max that trades between the triple point
+# and the stagnation foot wanders over tens-to-hundreds of cells.
+LOC_WANDER_CELLS_MAX = 5.0
+
+
 QOIS = [
     {
         "key": "p_max",
@@ -117,9 +124,26 @@ def _qoi_case_stats(grid, qoi: dict, window) -> dict:
     # Median is used because pointwise extrema can hop by one or two cells.
     m = (data.time >= window[0]) & (data.time <= window[1])
     if loc is not None and m.any():
-        lx, ly = (float(v) for v in np.median(loc[m], axis=0)[:2])
+        locw = loc[m]
+        lx, ly = (float(v) for v in np.median(locw, axis=0)[:2])
+        # Within-window extremum wander: the robust (5th-95th percentile)
+        # spread of the extremum LOCATION inside the averaging window,
+        # expressed in cell widths. A localized pointwise QoI (e.g. a
+        # stagnation-point pressure peak) keeps its extremum within ~1 cell
+        # over the whole window, so loc_wander_cells ~ O(1). A QoI whose
+        # extremum migrates between competing flow features (e.g. a density
+        # maximum that trades between the triple-point region and the
+        # stagnation foot) wanders over tens-to-hundreds of cells, which
+        # means its windowed time-average is not a single-feature scalar and
+        # the GCI on it is comparing different physical quantities across
+        # grids. This is independent of, and complementary to, the KPSS
+        # stationarity test on the VALUE series.
+        span_x = float(np.percentile(locw[:, 0], 95) - np.percentile(locw[:, 0], 5))
+        span_y = float(np.percentile(locw[:, 1], 95) - np.percentile(locw[:, 1], 5))
+        loc_wander_cells = float(np.hypot(span_x, span_y) / grid.dx)
     else:
         lx = ly = float("nan")
+        loc_wander_cells = float("nan")
 
     return {
         "label": grid.label,
@@ -139,6 +163,7 @@ def _qoi_case_stats(grid, qoi: dict, window) -> dict:
         "kpss_stationary": bool(ws.kpss_stationary_5pct),
         "loc_x": lx,
         "loc_y": ly,
+        "loc_wander_cells": loc_wander_cells,
     }
 
 
@@ -182,6 +207,28 @@ def _qoi_quality_flags(report: dict) -> list[str]:
     if not all(c["kpss_stationary"] for c in cases):
         failed = [c["label"] for c in cases if not c["kpss_stationary"]]
         flags.append("KPSS stationarity rejected on: " + ", ".join(failed))
+
+    # Extremum-location localization. If the extremum wanders over many
+    # cells within the averaging window, the windowed mean is not a single
+    # physical feature and triplet-wise GCI on it compares different maxima
+    # across grids. Threshold is deliberately generous: a localized pointwise
+    # QoI stays within a handful of cells.
+    wanders = [
+        c["loc_wander_cells"]
+        for c in cases
+        if isinstance(c["loc_wander_cells"], float)
+        and not math.isnan(c["loc_wander_cells"])
+    ]
+    if wanders:
+        med_wander = float(np.median(wanders))
+        report["loc_wander_cells_median"] = med_wander
+        if med_wander > LOC_WANDER_CELLS_MAX:
+            flags.append(
+                f"extremum is not localized: median in-window wander "
+                f"{med_wander:.0f} cells (> {LOC_WANDER_CELLS_MAX:.0f}); the "
+                f"max relocates between distinct flow features, so its "
+                f"time-average is not a single-feature scalar"
+            )
 
     tB = report["triplet_B_MFXF"]
     gci = tB.get("gci_fine_pct")
@@ -313,6 +360,8 @@ def _legacy_cases(qoi_results: dict[str, dict]) -> list[dict]:
                 "rho_kpss_stationary": crho["kpss_stationary"],
                 "peak_loc_x": cp["loc_x"],
                 "peak_loc_y": cp["loc_y"],
+                "p_max_loc_wander_cells": cp["loc_wander_cells"],
+                "rho_max_loc_wander_cells": crho["loc_wander_cells"],
             }
         )
 
