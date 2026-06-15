@@ -17,7 +17,7 @@ most of the confusion:
 
 | | what it is | analogy |
 |---|---|---|
-| **`foamgci/`** (repo root) | The **library**. Generic, case-agnostic, pip-installable. All the reusable math lives here: read a scalar QoI time series, compute tau_int / SEM / KPSS, run Roache GCI, classify convergence, and render text & LaTeX reports. The current built-in OpenFOAM reader supports `fieldMinMax.dat`, but the report layer is designed to accept other QoI sources later. | this is `numpy` |
+| **`foamgci/`** (repo root) | The **library**. Generic, case-agnostic, pip-installable. All the reusable math lives here: read a scalar QoI time series, compute tau_int / SEM / KPSS, run Roache GCI, classify convergence, and render text & LaTeX reports. The built-in readers support OpenFOAM `fieldMinMax.dat` and generic scalar time-series files, so the same verification core can be used with solver-independent QoI histories. | this is `numpy` |
 | **`examples/<case>/gci/`** | A **per-case driver** that *imports* the library and applies it to one case. Holds that case's grid metadata, the analysis script, and the figure scripts. | this is your `analysis.py` that does `import foamgci` |
 
 Rule of thumb: anything reusable across cases belongs in `foamgci/`;
@@ -141,7 +141,7 @@ functions
         location        true;        // record (x y z) of each extremum
         writeControl    timeStep;
         writeInterval   100;
-        fields          (p U rho);
+        fields          (p rho);
     }
 }
 ```
