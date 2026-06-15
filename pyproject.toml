@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "foamgci"
 dynamic = ["version"]
-description = "Verification utilities for unsteady OpenFOAM CFD: Roache GCI, autocorrelation-corrected SEM, KPSS stationarity, fieldMinMax parsing."
+description = "Verification utilities for unsteady CFD: Roache GCI, autocorrelation-corrected SEM, KPSS stationarity, OpenFOAM fieldMinMax parsing, and generic scalar time-series input."
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Rithik R Nambiar" }]
