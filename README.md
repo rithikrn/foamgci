@@ -1,4 +1,5 @@
 # foamgci
+![foamgci_logo](media/images/foamgci_logo.png)
 
 **Autocorrelation-aware grid-convergence verification for unsteady OpenFOAM CFD.**
 
