@@ -1,7 +1,7 @@
-# foamgci
+
 ![foamgci_logo](media/images/foamgci_logo.png)
 
-**Autocorrelation-aware grid-convergence verification for unsteady OpenFOAM CFD.**
+# foamgci - Autocorrelation-aware grid-convergence verification for OpenFOAM CFD studies.
 
 `foamgci` reads OpenFOAM output and produces a complete
 grid-convergence-index (GCI) report: Roache GCI on every refinement
