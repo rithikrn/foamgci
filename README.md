@@ -245,12 +245,15 @@ acknowledgement:
 Or as BibTeX:
 
 ```bibtex
-@software{nambiar_foamgci,
-  author  = {Nambiar, Rithik R.},
-  title   = {{foamgci}: Verification utilities for unsteady OpenFOAM CFD
-             (Roache GCI, autocorrelation-corrected SEM, KPSS stationarity)},
-  year    = {2026},
-  url     = {https://github.com/rithikrn/foamgci}
+@software{rithik_r_nambiar_2026_20778318,
+  author       = {Rithik R Nambiar},
+  title        = {rithikrn/foamgci: Zenodo release version},
+  month        = jun,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v3.2.2},
+  doi          = {10.5281/zenodo.20778318},
+  url          = {https://doi.org/10.5281/zenodo.20778318},
 }
 ```
 
