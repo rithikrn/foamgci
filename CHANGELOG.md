@@ -3,6 +3,14 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.2] — 2026-06-20
+
+**Zenodo release**
+
+### Added
+- The `v3.2.2` is just for zenodo release
+- Added a citation file
+
 ## [3.2.1] — 2026-06-14
 
 **Solver-agnostic reader foundation and reproducible example inputs.**
