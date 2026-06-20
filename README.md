@@ -245,15 +245,13 @@ acknowledgement:
 Or as BibTeX:
 
 ```bibtex
-@software{rithik_r_nambiar_2026_20778318,
-  author       = {Rithik R Nambiar},
-  title        = {rithikrn/foamgci: Zenodo release version},
-  month        = jun,
-  year         = 2026,
-  publisher    = {Zenodo},
-  version      = {v3.2.2},
-  doi          = {10.5281/zenodo.20778318},
-  url          = {https://doi.org/10.5281/zenodo.20778318},
+@software{Nambiar_foamgci_2026,
+author = {Nambiar, Rithik},
+doi = {10.5281/zenodo.20778318},
+month = jun,
+title = {{foamgci}},
+version = {v3.2.2},
+year = {2026}
 }
 ```
 
