@@ -1,9 +1,9 @@
 cff-version: 1.1.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: "Nambiar"
-  given-names: "Rithik"
-  orcid: "https://orcid.org/0009-0002-9722-5136"
+ - family-names: "Nambiar"
+   given-names: "Rithik"
+   orcid: "https://orcid.org/0009-0002-9722-5136"
 title: "foamgci:OpenFOAM verification toolkit for grid convergence, GCI, and autocorrelation-aware uncertainty reporting in CFD studies."
 version: v3.2.2
 date-released: 2026-06-20
