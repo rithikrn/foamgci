@@ -4,7 +4,7 @@ authors:
  - family-names: "Nambiar"
    given-names: "Rithik"
    orcid: "https://orcid.org/0009-0002-9722-5136"
-title: "foamgci:OpenFOAM verification toolkit for grid convergence, GCI, and autocorrelation-aware uncertainty reporting in CFD studies."
+title: "foamgci"
 version: v3.2.2
 date-released: 2026-06-20
 doi: 10.5281/zenodo.20778318
