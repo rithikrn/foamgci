@@ -3,6 +3,14 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-06-21
+
+**Added new validation case - Wedge15Ma5**
+
+### Added
+- New validation example: `wedge15Ma5` (Mach 5, 15-degree wedge oblique shock).
+- Demonstration of integrated/smoother Quantities of Interest (e.g., surface forces or averaged pressures) to provide a formally cleaner target for GCI than pointwise extrema.
+
 ## [3.2.2] — 2026-06-20
 
 **Zenodo release**
