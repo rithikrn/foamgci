@@ -1,0 +1,91 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     rhoCentralFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         0.2;
+
+deltaT          0.0001;
+
+writeControl    runTime;
+
+writeInterval   0.02;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep  no;
+
+maxCo           1;
+
+maxDeltaT       1e-06;
+
+
+// ----------------------------------------------------------------------- //
+// foamgci QoI source.
+//
+// This case deliberately uses a DIFFERENT output from the forward-step
+// example (which used `fieldMinMax`).  Here the QoI is an INTEGRATED
+// surface quantity: the area-averaged static pressure on the ramp surface
+// (`obstacle`).  For inviscid flow the ramp-surface pressure equals the
+// analytical post-shock pressure p2, so this single scalar is directly
+// comparable to oblique-shock theory (gci/oblique_shock.py).
+//
+// `surfaceFieldValue` writes:
+//   postProcessing/wallPressure/0/surfaceFieldValue.dat
+// with a self-describing header line `# Time   areaAverage(p)` that
+// foamgci.reader.read_surface_field_value parses automatically.
+//
+// deltaT = 1e-4, writeInterval 20 => one sample per 2e-3 s => ~100 samples
+// over [0, 0.2]; the steady window [0.15, 0.20] holds ~25 (>= KPSS minimum).
+// ----------------------------------------------------------------------- //
+functions
+{
+    wallPressure
+    {
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        regionType      patch;
+        name            obstacle;
+        operation       areaAverage;
+        fields          (p);
+        writeControl    timeStep;
+        writeInterval   20;
+        writeFields     false;
+        log             false;
+    }
+}
+
+
+// ************************************************************************* //
