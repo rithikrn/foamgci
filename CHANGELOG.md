@@ -5,12 +5,12 @@ All notable changes to **foamgci** are documented here. Versions follow
 
 ## [3.3.0] - 2026-06-21
 
-**Added new validation case - Wedge15Ma5**
+**Added new validation case - Wedge15Ma5 (IMPORTANT- WILL DO COMPLETE SMOKE TEST BEFORE THE TAG RELEASE)**
 
 ### Added
 - New validation example: `wedge15Ma5` (Mach 5, 15-degree wedge oblique shock).
 - Demonstration of integrated/smoother Quantities of Interest (e.g., surface forces or averaged pressures) to provide a formally cleaner target for GCI than pointwise extrema.
-- IMPORTANT- WILL DO COMPLETE SMOKE TEST BEFORE THE TAG RELEASE
+
 
 ## [3.2.2] — 2026-06-20
 
