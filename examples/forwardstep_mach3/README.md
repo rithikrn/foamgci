@@ -20,6 +20,7 @@ is the **template** for adding further cases.
 
 ## Case directory
 
+```
 forwardstep_mach3/
 ├── 0/                          # initial + boundary conditions (this copy = fine grid)
 │   ├── T
@@ -55,6 +56,7 @@ forwardstep_mach3/
 │       └── snap_extrafine_t4.000.npz
 ├── README.md
 └── submit.sh                   # SLURM runner: mesh, decompose, run, reconstruct
+```
 
 ## Physics
 
