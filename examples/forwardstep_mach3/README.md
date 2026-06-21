@@ -18,6 +18,44 @@ is the **template** for adding further cases.
   rerun; until then, produce them by running the four cases (see
   `gci/data/README.md`).
 
+## Case directory
+
+forwardstep_mach3/
+├── 0/                          # initial + boundary conditions (this copy = fine grid)
+│   ├── T
+│   ├── U
+│   └── p
+├── constant/
+│   ├── thermophysicalProperties
+│   └── turbulenceProperties
+├── system/
+│   ├── blockMeshDict           # edit the three block counts per grid (see table)
+│   ├── controlDict             # fieldMinMax function object (QoI source)
+│   ├── decomposeParDict
+│   ├── fvSchemes
+│   └── fvSolution
+├── gci/                        # per-case driver; imports foamgci, never edits it
+│   ├── analyze.py              # parses fieldMinMax -> stats -> GCI -> JSON
+│   ├── data.py                 # grid metadata, window, reference config
+│   ├── extract_snapshot.py     # field -> t=4 snapshot .npz (for contours)
+│   ├── make_figures.py         # grid-convergence figure
+│   ├── make_aux_figures.py     # domain + peak-location figures
+│   ├── make_contour_figure.py  # density contours vs Greenshields/Woodward-Colella
+│   ├── run_all.sh
+│   ├── data/                   # four committed fieldMinMax.dat inputs
+│   │   ├── README.md
+│   │   ├── coarse.dat
+│   │   ├── medium.dat
+│   │   ├── fine.dat
+│   │   └── extrafine.dat
+│   └── snapshots/              # committed t=4 field snapshots for contour figure
+│       ├── snap_coarse_t4.000.npz
+│       ├── snap_medium_t4.000.npz
+│       ├── snap_fine_t4.000.npz
+│       └── snap_extrafine_t4.000.npz
+├── README.md
+└── submit.sh                   # SLURM runner: mesh, decompose, run, reconstruct
+
 ## Physics
 
 Inviscid (Euler) Mach-3 flow over a forward-facing step, solved with
