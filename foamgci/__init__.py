@@ -1,4 +1,10 @@
-from .reader import read_fieldminmax, read_timeseries, FieldMinMaxData
+from .reader import (
+    read_fieldminmax,
+    read_surface_field_value,
+    read_timeseries,
+    FieldMinMaxData,
+    SurfaceFieldValueData,
+)
 from .stats import (
     window_stats,
     tau_int_geyer,
@@ -18,7 +24,9 @@ from ._version import __version__
 
 __all__ = [
     "read_fieldminmax",
+    "read_surface_field_value",
     "FieldMinMaxData",
+    "SurfaceFieldValueData",
     "window_stats",
     "tau_int_geyer",
     "sem_autocorr_corrected",
