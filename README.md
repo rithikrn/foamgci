@@ -196,20 +196,7 @@ ships the full OpenFOAM case (the fine grid) and the analysis driver.
 The four `fieldMinMax.dat` inputs under `gci/data/` are committed, so the analysis can be reproduced from a fresh clone without rerunning OpenFOAM. Running the OpenFOAM cases is only needed if you want to regenerate the input data.
 
 See **`examples/forwardstep_mach3/README.md`** for step-by-step run
-instructions. The short version:
-
-```bash
-pip install -e .                       # install the library
-cd examples/forwardstep_mach3/gci
-bash run_all.sh                           # -> gci_summary.json + figures/
-```
-
-| label       | cells   | $h$       | $r$ |
-| ----------- | ------: | --------- | --- |
-| coarse      |   4,032 | 0.025     | --  |
-| medium      |  16,128 | 0.0125    | 2   |
-| fine        |  64,512 | 0.00625   | 2   |
-| extra-fine  | 258,048 | 0.003125  | 2   |
+instructions. 
 
 ### Second example: `wedge15Ma5`
 
