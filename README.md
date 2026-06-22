@@ -190,6 +190,8 @@ foamgci/
 
 ## Worked example
 
+### First example: `forwardstep_mach3`
+
 `examples/forwardstep_mach3/` is the Mach-3 Woodward-Colella
 forward-facing step, used as the template for every future case. It
 ships the full OpenFOAM case (the fine grid) and the analysis driver.
