@@ -18,7 +18,7 @@ most of the confusion:
 
 | | what it is | analogy |
 |---|---|---|
-| **`foamgci/`** (repo root) | The **library**. Generic, case-agnostic, pip-installable. All the reusable math lives here: read a scalar QoI time series, compute tau_int / SEM / KPSS, run Roache GCI, classify convergence, and render text & LaTeX reports. The built-in readers support OpenFOAM `fieldMinMax.dat` and generic scalar time-series files, so the same verification core can be used with solver-independent QoI histories. | this is `numpy` |
+| **`foamgci/`** (repo root) | The **library**. Generic, case-agnostic, pip-installable. All the reusable math lives here: read a scalar QoI time series, compute tau_int / SEM / KPSS, run Roache GCI, classify convergence, and render text & LaTeX reports. The built-in readers support OpenFOAM `fieldMinMax.dat` (pointwise extrema), `surfaceFieldValue.dat` (integrated surface functionals such as `areaAverage(p)`), and generic scalar time-series files, so the same verification core can be used with solver-independent QoI histories. | this is `numpy` |
 | **`examples/<case>/gci/`** | A **per-case driver** that *imports* the library and applies it to one case. Holds that case's grid metadata, the analysis script, and the figure scripts. | this is your `analysis.py` that does `import foamgci` |
 
 Rule of thumb: anything reusable across cases belongs in `foamgci/`;
@@ -68,7 +68,8 @@ time step, so the apparent order mixes spatial and temporal error
 unless a fixed-Δt control run is performed; (2) a spatial extremum is a
 non-smooth functional, so the Richardson expansion is heuristic for
 `fieldMinMax` QoIs — integrated QoIs (forces, surface averages) are the
-formally cleaner target and are on the roadmap.
+formally cleaner target, demonstrated by the `wedge15Ma5` example, whose
+primary QoI is an area-averaged surface pressure from `surfaceFieldValue`.
 
 ## Installation
 
@@ -159,23 +160,29 @@ foamgci/
 │   ├── _version.py                #   single source of the version string
 │   ├── __init__.py                #   public API
 │   ├── __main__.py                #   CLI: foamgci report ...
-│   ├── reader.py                  #   OpenFOAM fieldMinMax + generic scalar time-series readers
+│   ├── reader.py                  #   OpenFOAM fieldMinMax + surfaceFieldValue + generic readers
 │   ├── stats.py                   #   Geyer tau_int, KPSS, window stats
 │   ├── gci.py                     #   Roache GCI on triplets
 │   ├── report.py                  #   end-to-end driver + Rayleigh-Pitot
 │   └── plot.py                    #   optional matplotlib figure
 ├── tests/                         # pytest suite, anchored to Celik (2008)
 ├── examples/
-│   └── forwardstep_mach3/         # ONE worked case (the template)
-│       ├── 0/ constant/ system/   #   the committed OpenFOAM case (fine grid)
-│       ├── submit.sh              #   SLURM runner
-│       ├── README.md              #   how to run THIS case end-to-end
-│       └── gci/                   #   THIS case's analysis driver
-│           ├── data.py            #     grid metadata (edit this per case)
-│           ├── analyze.py         #     reads gci/data/*.dat -> gci_summary.json
-│           ├── make_*.py          #     paper figures
-│           ├── run_all.sh         #     analyze + figures
-│           └── data/              #     expected coarse/medium/fine/extrafine QoI inputs
+│   ├── forwardstep_mach3/         # ONE worked case (the template)
+│   │   ├── 0/ constant/ system/   #   the committed OpenFOAM case (fine grid)
+│   │   ├── submit.sh              #   SLURM runner
+│   │   ├── README.md              #   how to run THIS case end-to-end
+│   │   └── gci/                   #   THIS case's analysis driver
+│   │       ├── data.py            #     grid metadata (edit this per case)
+│   │       ├── analyze.py         #     reads gci/data/*.dat -> gci_summary.json
+│   │       ├── make_*.py          #     paper figures
+│   │       ├── run_all.sh         #     analyze + figures
+│   │       └── data/              #     expected coarse/medium/fine/extrafine QoI inputs
+│   └── wedge15Ma5/                # SECOND case: Mach-5 15-deg wedge oblique shock
+│       ├── 0/ constant/ system/   #   committed case (fine grid); controlDict writes
+│       │                          #   surfaceFieldValue AND fieldMinMax
+│       ├── README.md              #   dual-output (two QoI) walkthrough
+│       └── gci/                   #   driver + gci/oblique_shock.py analytical reference
+│           └── data/              #     eight inputs (surfaceFieldValue + fieldMinMax / grid)
 ├── README.md  LIMITATIONS.md  CONTRIBUTING.md  CHANGELOG.md  LICENSE
 ├── pyproject.toml
 └── .github/workflows/tests.yml    # CI: Linux + macOS, Py 3.10-3.12
@@ -203,6 +210,18 @@ bash run_all.sh                           # -> gci_summary.json + figures/
 | medium      |  16,128 | 0.0125    | 2   |
 | fine        |  64,512 | 0.00625   | 2   |
 | extra-fine  | 258,048 | 0.003125  | 2   |
+
+### Second example: `wedge15Ma5`
+
+`examples/wedge15Ma5/` is a Mach-5, 15-degree wedge oblique shock. It exists to
+show the workflow transferring to a different OpenFOAM output and to more than
+one output at once. Its `controlDict` writes both a `surfaceFieldValue`
+(area-averaged wall pressure — the primary, reference-anchored QoI, compared to
+the exact oblique-shock `p2/p1`) and a `fieldMinMax` (`max(p)` — the secondary
+diagnostic, the same output the forward step used). The analysis reads both per
+grid and reports the contrast: the surface integral is a well-posed GCI target,
+while the pointwise extremum sits on the post-shock plateau and is flagged
+non-localized. See **`examples/wedge15Ma5/README.md`**.
 
 ## Output format
 
