@@ -1,20 +1,34 @@
-# Grid-convergence inputs (`surfaceFieldValue.dat`)
+# Grid-convergence inputs (two OpenFOAM outputs per grid)
 
-`analyze.py` expects four files in this folder, one per grid:
+`analyze.py` reads **two files per grid** — one from each function object in
+`system/controlDict`. Eight files total, one pair per grid:
 
-| file | grid | block1 / block2 cells | total | h = 0.1524/Ny |
-|---|---|---|---|---|
-| `coarse.dat`    | Coarse     | (20 20 1) / (40 20 1)   | 1 200  | 0.0076200 |
-| `medium.dat`    | Medium     | (40 40 1) / (80 40 1)   | 4 800  | 0.0038100 |
-| `fine.dat`      | Fine       | (80 80 1) / (160 80 1)  | 19 200 | 0.0019050 |
-| `extrafine.dat` | Extra-fine | (160 160 1) / (320 160 1) | 76 800 | 0.0009525 |
+| grid       | block1 / block2 cells     | total  | h = 0.1524/Ny | surfaceFieldValue (primary)      | fieldMinMax (secondary)      |
+|------------|---------------------------|-------:|---------------|----------------------------------|------------------------------|
+| Coarse     | (20 20 1) / (40 20 1)     |  1 200 | 0.0076200     | `coarse_surfaceFieldValue.dat`   | `coarse_fieldMinMax.dat`     |
+| Medium     | (40 40 1) / (80 40 1)     |  4 800 | 0.0038100     | `medium_surfaceFieldValue.dat`   | `medium_fieldMinMax.dat`     |
+| Fine       | (80 80 1) / (160 80 1)    | 19 200 | 0.0019050     | `fine_surfaceFieldValue.dat`     | `fine_fieldMinMax.dat`       |
+| Extra-fine | (160 160 1) / (320 160 1) | 76 800 | 0.0009525     | `extrafine_surfaceFieldValue.dat`| `extrafine_fieldMinMax.dat`  |
 
-Each file is the OpenFOAM `surfaceFieldValue` function-object output
-(`areaAverage(p)` on patch `obstacle`) from one grid-refinement run — a
-**different** output type from the forward-step example, which used
-`fieldMinMax`. The same foamgci GCI/statistics engine consumes both.
+**Why two outputs.** This case deliberately writes both, to (1) stay
+consistent with the forward-step example, which used `fieldMinMax`, and (2)
+show that the *same* foamgci engine ingests a new output type and multiple
+files in one analysis:
 
-## How to produce each file (the only thing you change between runs)
+- `surfaceFieldValue.dat` — **primary**, reference-anchored QoI: the
+  area-averaged ramp-surface pressure (`areaAverage(p)` on patch `obstacle`),
+  an integrated functional for which Richardson/GCI is well founded. It is
+  compared to the exact oblique-shock `p2/p1`.
+- `fieldMinMax.dat` — **secondary**, diagnostic QoI: the global `max(p)`. Its
+  value also approaches `p2`, but the post-shock field is a near-uniform
+  plateau, so the extremum's *location* is degenerate and foamgci's
+  localization check flags it. That contrast — a well-posed surface integral
+  vs a degenerate pointwise extremum targeting the *same* pressure — is the
+  point. Filenames must contain a field column (`p`) the reader can select.
+
+The same foamgci GCI/statistics engine consumes both.
+
+## How to produce the files (the only thing you change between runs)
 
 From a copy of this case directory, for each grid:
 
@@ -26,24 +40,32 @@ From a copy of this case directory, for each grid:
    blockMesh
    rhoCentralFoam            # or: decomposePar && mpirun -np 16 rhoCentralFoam -parallel && reconstructPar
    ```
-3. Copy the result here, renamed for the grid:
+3. Copy BOTH outputs here, renamed for the grid (example for the coarse run):
    ```bash
-   cp postProcessing/wallPressure/0/surfaceFieldValue.dat  <grid>.dat
+   cp postProcessing/wallPressure/0/surfaceFieldValue.dat  coarse_surfaceFieldValue.dat
+   cp postProcessing/fieldMinMax/0/fieldMinMax.dat         coarse_fieldMinMax.dat
    ```
+   (OpenFOAM names each function object's output folder after the object:
+   `wallPressure/` for the `surfaceFieldValue`, `fieldMinMax/` for the
+   `fieldMinMax`. The file *inside* keeps its type name.)
 
 ## Current status
 
-These `.dat` files are **not** committed: this case ships ready-to-run but
-without precomputed CFD output. Populate `data/` from your own four runs,
-then:
+These `.dat` files are **not** committed: the case ships ready-to-run but
+without precomputed CFD output. Populate `data/` from your own four runs
+(eight files), then:
 
 ```bash
 pip install -e ".[dev]"          # from the repository root
 cd examples/wedge15Ma5/gci
-bash run_all.sh                  # analyze.py -> gci_summary.json
+bash run_all.sh                  # analyze.py -> gci_summary.json + figures/
 ```
 
-`analyze.py` will report, per grid, the time-averaged wall pressure, the
-Roache GCI on each refinement triplet, the Richardson-extrapolated
-`p_wall/p_inf`, and its error against the exact analytical post-shock
-pressure `p2/p1` from `oblique_shock.py`.
+`analyze.py` will report, per grid and per QoI, the time-averaged value, the
+autocorrelation-corrected SEM, the Roache GCI on each refinement triplet, the
+Richardson extrapolate, and its error against the exact analytical post-shock
+pressure `p2/p1` from `oblique_shock.py`. The secondary QoI additionally
+reports the in-window extremum wander (cells) and the localization verdict.
+
+If `analyze.py` exits with `ERROR: missing input file(s)` it lists exactly
+which of the eight files is absent; it never runs on a partial input set.
