@@ -129,3 +129,96 @@ def test_read_timeseries_roundtrip(tmp_path):
     assert len(d) == 2
     assert d.max[1] == 2.0 and d.min[1] == 2.0
     assert d.loc_max.shape == (2, 3)
+
+
+# ---- surfaceFieldValue reader ----------------------------------------------
+
+from foamgci.reader import read_surface_field_value  # noqa: E402
+
+
+SFV_SINGLE = (
+    "# Region type : patch obstacle\n"
+    "# Faces  : 160\n"
+    "# Area   : 7.890000e-02\n"
+    "# Time             areaAverage(p)\n"
+    "0.002              4.77910\n"
+    "0.004              4.78050\n"
+    "0.006              4.78081\n"
+    "0.008              4.78083\n"
+)
+
+SFV_MULTI_DISTINCT = (
+    "# Time          areaAverage(p)   areaAverage(rho)\n"
+    "0.002           4.77910          2.75300\n"
+    "0.004           4.78050          2.75340\n"
+)
+
+SFV_MULTI_SAME_FIELD = (
+    "# Time          areaAverage(p)   areaIntegrate(p)\n"
+    "0.002           4.77910          0.37700\n"
+    "0.004           4.78050          0.37711\n"
+)
+
+
+def test_sfv_single_column_auto(tmp_path: Path) -> None:
+    f = _write(tmp_path / "surfaceFieldValue.dat", SFV_SINGLE)
+    d = read_surface_field_value(f)
+    assert d.column == "areaAverage(p)"
+    assert d.field == "p"
+    assert len(d) == 4
+    assert d.value[-1] == pytest.approx(4.78083)
+    assert d.time[0] == pytest.approx(0.002)
+
+
+def test_sfv_token_select(tmp_path: Path) -> None:
+    f = _write(tmp_path / "surfaceFieldValue.dat", SFV_MULTI_DISTINCT)
+    assert read_surface_field_value(f, column="p").column == "areaAverage(p)"
+    rho = read_surface_field_value(f, column="rho")
+    assert rho.field == "rho"
+    assert rho.value[1] == pytest.approx(2.75340)
+
+
+def test_sfv_token_ambiguous_raises(tmp_path: Path) -> None:
+    f = _write(tmp_path / "surfaceFieldValue.dat", SFV_MULTI_SAME_FIELD)
+    with pytest.raises(ValueError, match="[Aa]mbiguous"):
+        read_surface_field_value(f, column="p")
+
+
+def test_sfv_full_label_and_index_select(tmp_path: Path) -> None:
+    f = _write(tmp_path / "surfaceFieldValue.dat", SFV_MULTI_SAME_FIELD)
+    assert read_surface_field_value(f, column="areaIntegrate(p)").column == "areaIntegrate(p)"
+    assert read_surface_field_value(f, column=0).column == "areaAverage(p)"
+    assert read_surface_field_value(f, column=1).column == "areaIntegrate(p)"
+
+
+def test_sfv_multi_column_without_selector_raises(tmp_path: Path) -> None:
+    f = _write(tmp_path / "surfaceFieldValue.dat", SFV_MULTI_DISTINCT)
+    with pytest.raises(ValueError, match="value columns"):
+        read_surface_field_value(f)
+
+
+def test_sfv_missing_file(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        read_surface_field_value(tmp_path / "nope.dat")
+
+
+def test_sfv_index_out_of_range_raises(tmp_path: Path) -> None:
+    f = _write(tmp_path / "surfaceFieldValue.dat", SFV_SINGLE)
+    with pytest.raises(ValueError, match="out of range"):
+        read_surface_field_value(f, column=5)
+
+
+def test_sfv_no_header_single_column(tmp_path: Path) -> None:
+    # Header missing entirely: a lone value column must still parse.
+    body = "0.002  4.77910\n0.004  4.78050\n"
+    f = _write(tmp_path / "surfaceFieldValue.dat", body)
+    d = read_surface_field_value(f)
+    assert len(d) == 2
+    assert d.value[0] == pytest.approx(4.77910)
+
+
+def test_sfv_restrict(tmp_path: Path) -> None:
+    f = _write(tmp_path / "surfaceFieldValue.dat", SFV_SINGLE)
+    d = read_surface_field_value(f).restrict(0.004, 0.008)
+    assert len(d) == 3
+    assert d.time.min() >= 0.004
