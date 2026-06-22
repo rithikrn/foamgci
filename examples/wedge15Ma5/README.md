@@ -1,18 +1,30 @@
 # Example: Mach-5 oblique shock over a 15-degree wedge
 
-Grid-convergence verification of the area-averaged ramp-surface pressure on a
-four-grid hierarchy, checked against exact oblique-shock theory and analysed
-with the `foamgci` library. This is the second example. It reuses the library
-unchanged and reads a different OpenFOAM output from the forward step, so it
-doubles as the portability demonstration: same GCI engine, new data source.
+Grid-convergence verification on a four-grid hierarchy, checked against exact
+oblique-shock theory and analysed with the `foamgci` library. This is the
+second example. It reuses the library unchanged and reads **two** OpenFOAM
+outputs per grid, so it doubles as the portability demonstration: the same GCI
+engine handles a new data source (`surfaceFieldValue`) *and* the one the
+forward step already used (`fieldMinMax`), in a single analysis.
+
+- **Primary QoI** (`surfaceFieldValue`): the area-averaged ramp-surface
+  pressure — an integrated functional, reference-anchored against the exact
+  post-shock `p2/p1`. This is a *new* output type vs the forward step and
+  carries the verification verdict.
+- **Secondary QoI** (`fieldMinMax`): the global `max(p)` — the *same* output
+  type the forward step used, kept here for cross-case consistency. Its value
+  also tends to `p2`, but the post-shock plateau makes the extremum location
+  degenerate, so foamgci's localization check flags it. The contrast between a
+  well-posed surface integral and a degenerate pointwise extremum that target
+  the same physical pressure is the methodological point.
 
 ## What lives where
 
 - `0/`, `constant/`, `system/`: the committed OpenFOAM case (this copy is the
   **fine** grid). These are the OpenFOAM-4.x `wedge15Ma5` tutorial files,
-  unchanged except for two case-specific additions in `system/` (a
-  `surfaceFieldValue` function object in `controlDict` and a
-  `decomposeParDict`).
+  unchanged except for two case-specific additions in `system/`: two function
+  objects in `controlDict` (a `surfaceFieldValue` named `wallPressure` and a
+  `fieldMinMax`) and a `decomposeParDict`.
 - `submit.sh`: SLURM runner, identical to the forward-step example. Mesh,
   decompose, run, reconstruct.
 - `gci/`: the analysis driver for THIS case. It `import`s `foamgci` (the
@@ -20,9 +32,9 @@ doubles as the portability demonstration: same GCI engine, new data source.
   library.
 - `gci/oblique_shock.py`: the analytical reference. An exact theta-beta-M solve
   for the post-shock state, NumPy only.
-- `gci/data/`: the four `surfaceFieldValue.dat` inputs the analysis reads, one
-  per grid. They ship empty; produce them by running the four cases (see
-  `gci/data/README.md`).
+- `gci/data/`: the **eight** inputs the analysis reads — a
+  `surfaceFieldValue.dat` and a `fieldMinMax.dat` per grid. They ship empty;
+  produce them by running the four cases (see `gci/data/README.md`).
 
 ## Physics
 
@@ -79,9 +91,13 @@ that grid.
      ( cd $d && sbatch submit.sh ); done
    ```
    (If you run interactively instead of via SLURM, copy the files by hand.)
-3. Copy each run's `postProcessing/wallPressure/0/surfaceFieldValue.dat` into
-   `gci/data/`, renamed `coarse.dat`, `medium.dat`, `fine.dat`,
-   `extrafine.dat`.
+3. Copy each run's two function-object outputs into `gci/data/`, renamed for
+   the grid (example for the coarse run):
+   ```bash
+   cp postProcessing/wallPressure/0/surfaceFieldValue.dat  coarse_surfaceFieldValue.dat
+   cp postProcessing/fieldMinMax/0/fieldMinMax.dat         coarse_fieldMinMax.dat
+   ```
+   Do the same for `medium_`, `fine_`, `extrafine_` (eight files total).
 4. Analyse:
    ```bash
    pip install -e ../..            # install the foamgci library (once)
@@ -90,7 +106,7 @@ that grid.
    Writes `gci/gci_summary.json`: per-grid mean, sigma, tau_int, SEM, N_eff,
    KPSS; regime-aware GCI on both triplets; and the error against the
    analytical reference.
-5. Commit the four small `gci/data/*.dat` files. That is what makes the study
+5. Commit the eight small `gci/data/*.dat` files. That is what makes the study
    reproducible for the next reader, who then runs step 4 alone.
 
 ## Reading the output
@@ -114,37 +130,55 @@ that grid.
   extrapolate is meaningful rather than a diagnostic.
 - If KPSS rejects stationarity on [0.15, 0.20] for any grid, widen the run or
   narrow the window in `gci/data.py` (`T_STAT`) and re-run `analyze.py`.
+- The **secondary** `max(p)` block lives under `secondary_qoi_fieldminmax`.
+  Read it as a diagnostic, not a verdict: its `localization.localized` is
+  expected to be `false` (the plateau makes the extremum location wander past
+  the threshold). That `false` is the *intended* result here — it shows the
+  toolkit distinguishing a degenerate pointwise extremum from the well-posed
+  surface integral, both of which numerically approach the same `p2`.
 
-This case carries one formal QoI:
+This case carries two QoIs from two different OpenFOAM outputs:
 
-| QoI            | Role                 | Interpretation                                                                                                                                                                                                 |
-| -------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `p_wall_ratio` | Primary verified QoI | Area-averaged ramp-surface pressure, an integrated functional. Steady and stationary on the window, converges monotonically to the analytical p2/p1. Richardson extrapolation is well founded for a surface integral, unlike for a pointwise extremum. |
+| QoI            | Source             | Role                 | Interpretation                                                                                                                                                                                                 |
+| -------------- | ------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `p_wall_ratio` | `surfaceFieldValue`| Primary verified QoI | Area-averaged ramp-surface pressure, an integrated functional. Steady and stationary on the window, converges monotonically to the analytical p2/p1. Richardson extrapolation is well founded for a surface integral, unlike for a pointwise extremum. |
+| `p_max`        | `fieldMinMax`      | Secondary diagnostic | Global `max(p)`. Value tends to p2 as well, but the post-shock plateau makes the extremum location degenerate, so the localization (wander) check flags it. Reported as a diagnostic, and as the cross-case-consistent `fieldMinMax` output. |
 
 The analysis driver:
 
-1. Parse the `surfaceFieldValue` output, a different OpenFOAM source from the
-   forward step's `fieldMinMax`.
-2. Check stationarity using KPSS.
+1. Parse `surfaceFieldValue` (primary) **and** `fieldMinMax` (secondary) — two
+   OpenFOAM sources, both ingested by the same foamgci readers.
+2. Check stationarity using KPSS on each QoI's window.
 3. Estimate autocorrelation-corrected SEM and effective sample size.
-4. Compute GCI on every consecutive triplet.
-5. Extrapolate to h -> 0 and compare against exact oblique-shock theory.
+4. Compute GCI on every consecutive triplet, for each QoI.
+5. Extrapolate to h -> 0 and compare against exact oblique-shock theory; for
+   the secondary QoI, also report the in-window extremum wander and the
+   localization verdict.
 
 ### JSON summary structure
 
 `gci_summary.json` contains:
 
-* `qoi`: name, description, and the OpenFOAM source of the quantity;
+* `qoi`: name, description, and the OpenFOAM source of the **primary** quantity;
 * `stationary_window`: the averaging window used for the QoI;
 * `reference`: the analytical oblique-shock state (beta, p2/p1, rho2/rho1,
   T2/T1, M2);
-* `cases`: per-grid mean, sigma, tau_int, SEM, N_eff, KPSS;
+* `cases`: per-grid mean, sigma, tau_int, SEM, N_eff, KPSS (primary QoI);
 * `triplet_A_CMF`, `triplet_B_MFXF`: regime-aware GCI on both triplets;
 * `phi_star`, `phi_star_source`, `phi_star_rel_err_pct`: the extrapolate and
   its error against the reference;
 * `reference_covered_by_gci`: whether the reference falls inside the
   fine-grid GCI band;
-* `error_table_vs_reference`: per-grid error against p2/p1.
+* `error_table_vs_reference`: per-grid error against p2/p1;
+* `secondary_qoi_fieldminmax`: the full GCI block for the `fieldMinMax`
+  `max(p)` QoI (its own `cases`, triplets, `phi_star`, error table) plus a
+  `localization` sub-object (`median_wander_cells`, `wander_threshold_cells`,
+  `localized`, `note`);
+* `inputs_per_grid`: a record of the two input files consumed per grid.
+
+The top-level keys describe the primary QoI and are kept stable so the figure
+scripts read them directly; the secondary QoI lives entirely under
+`secondary_qoi_fieldminmax`.
 
 ## Case directory tree
 
@@ -159,16 +193,16 @@ wedge15Ma5/
 │   └── turbulenceProperties
 ├── system/
 │   ├── blockMeshDict           # edit the two block counts per grid (see table)
-│   ├── controlDict             # + surfaceFieldValue function object (QoI source)
+│   ├── controlDict             # + surfaceFieldValue AND fieldMinMax (two QoI sources)
 │   ├── decomposeParDict
 │   ├── fvSchemes
 │   └── fvSolution
 ├── gci/                        # per-case driver; imports foamgci, never edits it
-│   ├── analyze.py              # reads surfaceFieldValue -> GCI -> vs analytical
-│   ├── data.py                 # grid metadata, window, free-stream conditions
+│   ├── analyze.py              # reads BOTH outputs -> GCI(both QoIs) -> vs analytical
+│   ├── data.py                 # grid metadata (two files/grid), window, free-stream
 │   ├── oblique_shock.py        # exact theta-beta-M reference (NumPy only)
 │   ├── run_all.sh
-│   └── data/                   # four surfaceFieldValue.dat inputs (ship empty)
+│   └── data/                   # eight inputs (surfaceFieldValue + fieldMinMax per grid; ship empty)
 │       └── README.md
 ├── README.md
 └── submit.sh                   # identical to the forward-step runner
