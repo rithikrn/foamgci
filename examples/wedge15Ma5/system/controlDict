@@ -85,6 +85,18 @@ functions
         writeFields     false;
         log             false;
     }
+
+    fieldMinMax
+    {
+        type            fieldMinMax;
+        libs            ("libfieldFunctionObjects.so");
+        mode            magnitude;
+        location        true;       // (x y z) of each extremum; do not disable
+        writeControl    timeStep;
+        writeInterval   20;
+        log             false;
+        fields          (p rho);
+    }
 }
 
 
