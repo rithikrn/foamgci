@@ -53,15 +53,21 @@ def in_wedge_body(X, Y):
 @dataclass(frozen=True)
 class GridSpec:
     label: str          # human-readable, used in tables/figures
-    dat: str            # filename in gci/data/
+    sfv_dat: str        # surfaceFieldValue.dat filename in gci/data/ (primary QoI)
+    fmm_dat: str        # fieldMinMax.dat filename in gci/data/ (secondary QoI)
     case_dirname: str   # run directory (sibling of gci/) for snapshot extraction
     n_cells: int        # total cells (block1 + block2)
     dx: float           # uniform square-cell spacing h = 0.1524 / Ny
 
     @property
     def sfv_path(self) -> Path:
-        """surfaceFieldValue.dat input read by analyze.py."""
-        return DATA_DIR / self.dat
+        """surfaceFieldValue.dat input (area-averaged wall pressure: primary QoI)."""
+        return DATA_DIR / self.sfv_dat
+
+    @property
+    def fmm_path(self) -> Path:
+        """fieldMinMax.dat input (global max p/rho: secondary diagnostic QoI)."""
+        return DATA_DIR / self.fmm_dat
 
     @property
     def foam_path(self) -> Path:
@@ -72,12 +78,21 @@ class GridSpec:
 
 # ----------------------------------------------------------------------
 # Four grids.  Refinement ratio r = 2 between successive levels
-# (cells x4 in 2D).  Medium == the upstream OpenFOAM-4.x tutorial mesh.
-# h = domain_height / Ny = 0.1524 / Ny; cells are square (dx = dy).
+# (cells x4 in 2D).  h = domain_height / Ny = 0.1524 / Ny; cells are square.
+# Each grid contributes TWO inputs: the surfaceFieldValue.dat (primary,
+# reference-anchored) and the fieldMinMax.dat (secondary, diagnostic).
 # ----------------------------------------------------------------------
-COARSE     = GridSpec("Coarse",     "coarse.dat",     "coarse_grid",     1_200, 0.0076200)
-MEDIUM     = GridSpec("Medium",     "medium.dat",     "medium_grid",     4_800, 0.0038100)
-FINE       = GridSpec("Fine",       "fine.dat",       "fine_grid",      19_200, 0.0019050)
-EXTRA_FINE = GridSpec("Extra-fine", "extrafine.dat",  "extrafine_grid", 76_800, 0.0009525)
+COARSE = GridSpec(
+    "Coarse", "coarse_surfaceFieldValue.dat", "coarse_fieldMinMax.dat",
+    "coarse_grid", 1_200, 0.0076200)
+MEDIUM = GridSpec(
+    "Medium", "medium_surfaceFieldValue.dat", "medium_fieldMinMax.dat",
+    "medium_grid", 4_800, 0.0038100)
+FINE = GridSpec(
+    "Fine", "fine_surfaceFieldValue.dat", "fine_fieldMinMax.dat",
+    "fine_grid", 19_200, 0.0019050)
+EXTRA_FINE = GridSpec(
+    "Extra-fine", "extrafine_surfaceFieldValue.dat", "extrafine_fieldMinMax.dat",
+    "extrafine_grid", 76_800, 0.0009525)
 
 GRIDS = [COARSE, MEDIUM, FINE, EXTRA_FINE]
