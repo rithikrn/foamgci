@@ -3,9 +3,49 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.3.0] - 2026-06-21
+## [3.4.0] - 2026-06-21
 
-**Added new validation case - Wedge15Ma5 (IMPORTANT- WILL DO COMPLETE SMOKE TEST BEFORE THE TAG RELEASE)**
+**Wedge15Ma5 case completed and smoke-tested; first-class `surfaceFieldValue` reader.**
+
+This release makes the `wedge15Ma5` example actually run. The 3.3.0 commit
+shipped a wedge `analyze.py` that imported `read_surface_field_value` from
+`foamgci.reader`, but that function did not exist — the case failed at import.
+3.4.0 implements the reader, adds the `fieldMinMax` output alongside the
+`surfaceFieldValue` output, and verifies the whole pipeline end to end.
+
+### Added
+- `foamgci.reader.read_surface_field_value()` — a first-class reader for
+  OpenFOAM `surfaceFieldValue.dat` (integrated surface functionals such as
+  `areaAverage(p)`). Auto-detects the value column from the self-describing
+  `# Time ...` header; selects by field token, full label, or integer index;
+  raises clearly on ambiguity, missing columns, or missing files. Exported,
+  with a `SurfaceFieldValueData` container, through the public API.
+- Reader test coverage for `surfaceFieldValue` (header auto-detect, multi-column
+  selection, ambiguity and range guards, headerless single column, restrict).
+- The `wedge15Ma5` example now reads **two** OpenFOAM outputs per grid and
+  reports two QoIs: a primary, reference-anchored `surfaceFieldValue` wall
+  pressure (compared to exact oblique-shock `p2/p1`) and a secondary
+  `fieldMinMax` `max(p)` carried for cross-case consistency. The secondary QoI
+  reports the in-window extremum wander and a localization verdict, surfacing
+  the contrast between a well-posed surface integral and a degenerate pointwise
+  extremum that target the same physical pressure.
+
+### Changed
+- `wedge15Ma5/system/controlDict` writes both a `surfaceFieldValue`
+  (`wallPressure`) and a `fieldMinMax` function object, at a matched sampling
+  cadence (`writeInterval 20`).
+- `wedge15Ma5/gci/data.py` now carries two input filenames per grid; the
+  analysis guards on all eight files and exits with a clear message (and a
+  non-zero status, so `run_all.sh` aborts) if any is missing.
+- The `wedge15Ma5` README and `gci/data/README.md` document the dual-output
+  design and the eight-file input set.
+
+## [3.3.0] - 2026-06-21 — superseded by 3.4.0 (do not use)
+
+**Added the wedge15Ma5 case as a work-in-progress.** This commit was never
+release-validated: the wedge `analyze.py` referenced a `read_surface_field_value`
+reader that had not been committed, so the example raised `ImportError` on run.
+Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 
 ### Added
 - New validation example: `wedge15Ma5` (Mach 5, 15-degree wedge oblique shock).
