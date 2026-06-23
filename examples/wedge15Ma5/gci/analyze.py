@@ -94,8 +94,8 @@ def _case_stats_wall(grid) -> dict:
         "column": data.column,
         "n_samples_stat": ws.n,
         "mean": ws.mean / P_INF,
-        "std": ws.std,
-        "sem": ws.sem,
+        "std": ws.std / P_INF,
+        "sem": ws.sem / P_INF,
         "tau_int": ws.tau_int,
         "n_eff": ws.n_eff,
         "kpss_stat": ws.kpss_stat,
@@ -270,7 +270,7 @@ def main() -> int:
 
     by_pmax = {c["label"]: c for c in pmax_cases}
     pA, pB, pgcis = _gci_blocks(pmax_cases)
-    pphi_star, psrc, pgci_band = _pick_phi_star(pgcis, by_pmax, pA, pB)
+    pphi_star, psrc, pgci_band, pphi_fine_sel = _pick_phi_star(pgcis, by_pmax, pA, pB)
     pmax_err = _error_table(pmax_cases, ref.p2_p1)
 
     wanders = [c["loc_wander_cells"] for c in pmax_cases
