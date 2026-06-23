@@ -5,33 +5,34 @@ All notable changes to **foamgci** are documented here. Versions follow
 
 ## [3.4.0] - 2026-06-21
 
-**Wedge15Ma5 case completed and smoke-tested; first-class `surfaceFieldValue` reader.**
+**Wedge15Ma5 case completed and smoke-tested; first-class surface-region area-average reader.**
 
 This release makes the `wedge15Ma5` example actually run. The 3.3.0 commit
 shipped a wedge `analyze.py` that imported `read_surface_field_value` from
-`foamgci.reader`, but that function did not exist — the case failed at import.
+`foamgci.reader`, but that function did not exist, the case failed at import.
 3.4.0 implements the reader, adds the `fieldMinMax` output alongside the
-`surfaceFieldValue` output, and verifies the whole pipeline end to end.
+the area-average output, and verifies the whole pipeline end to end.
 
 ### Added
-- `foamgci.reader.read_surface_field_value()` — a first-class reader for
-  OpenFOAM `surfaceFieldValue.dat` (integrated surface functionals such as
-  `areaAverage(p)`). Auto-detects the value column from the self-describing
+- `foamgci.reader.read_surface_field_value()`, a first-class reader for
+  the OpenFOAM surface-region area-average output (`surfaceRegion.dat` in
+  OpenFOAM-4.x, `surfaceFieldValue.dat` in v5.0+; integrated surface
+  functionals such as `areaAverage(p)`). Auto-detects the value column from the self-describing
   `# Time ...` header; selects by field token, full label, or integer index;
   raises clearly on ambiguity, missing columns, or missing files. Exported,
   with a `SurfaceFieldValueData` container, through the public API.
-- Reader test coverage for `surfaceFieldValue` (header auto-detect, multi-column
+- Reader test coverage for the area-average reader (header auto-detect, multi-column
   selection, ambiguity and range guards, headerless single column, restrict).
 - The `wedge15Ma5` example now reads **two** OpenFOAM outputs per grid and
-  reports two QoIs: a primary, reference-anchored `surfaceFieldValue` wall
-  pressure (compared to exact oblique-shock `p2/p1`) and a secondary
+  reports two QoIs: a primary, reference-anchored ramp wall pressure from
+  the `surfaceRegion` area-average (compared to exact oblique-shock `p2/p1`) and a secondary
   `fieldMinMax` `max(p)` carried for cross-case consistency. The secondary QoI
   reports the in-window extremum wander and a localization verdict, surfacing
   the contrast between a well-posed surface integral and a degenerate pointwise
   extremum that target the same physical pressure.
 
 ### Changed
-- `wedge15Ma5/system/controlDict` writes both a `surfaceFieldValue`
+- `wedge15Ma5/system/controlDict` writes both a `surfaceRegion`
   (`wallPressure`) and a `fieldMinMax` function object, at a matched sampling
   cadence (`writeInterval 20`).
 - `wedge15Ma5/gci/data.py` now carries two input filenames per grid; the
@@ -40,7 +41,7 @@ shipped a wedge `analyze.py` that imported `read_surface_field_value` from
 - The `wedge15Ma5` README and `gci/data/README.md` document the dual-output
   design and the eight-file input set.
 
-## [3.3.0] - 2026-06-21 — superseded by 3.4.0 (do not use)
+## [3.3.0] - 2026-06-21: superseded by 3.4.0 (do not use)
 
 **Added the wedge15Ma5 case as a work-in-progress.** This commit was never
 release-validated: the wedge `analyze.py` referenced a `read_surface_field_value`
@@ -52,7 +53,7 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 - Demonstration of integrated/smoother Quantities of Interest (e.g., surface forces or averaged pressures) to provide a formally cleaner target for GCI than pointwise extrema.
 
 
-## [3.2.2] — 2026-06-20
+## [3.2.2]: 2026-06-20
 
 **Zenodo release**
 
@@ -60,7 +61,7 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 - The `v3.2.2` is just for zenodo release
 - Added a citation file
 
-## [3.2.1] — 2026-06-14
+## [3.2.1]: 2026-06-14
 
 **Solver-agnostic reader foundation and reproducible example inputs.**
 
@@ -74,7 +75,7 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 - The reader layer now supports both OpenFOAM `fieldMinMax.dat` and solver-independent scalar time histories.
 - Updated the forward-step example data status from “rerun required” to reproducible-from-clone.
 
-## [3.2.0] — 2026-06-14
+## [3.2.0]: 2026-06-14
 
 **Pressure-density multi-QoI diagnostics.**
 
@@ -83,8 +84,8 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 * Added formal multi-QoI diagnostics to the Mach-3 forward-step example.
 * The generated `gci_summary.json` will now contain a `qoi_results` block for:
 
-  * `p_max` — primary maximum-pressure QoI;
-  * `rho_max` — secondary maximum-density diagnostic QoI.
+  * `p_max`, primary maximum-pressure QoI;
+  * `rho_max`, secondary maximum-density diagnostic QoI.
 * Added separate Rayleigh--Pitot reference-error reporting for the
   primary pressure QoI through `error_table_vs_rayleigh_pitot`.
 * Added density-specific statistics to the legacy top-level `cases`
@@ -107,9 +108,9 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 * Reclassified `rho_max` as a secondary diagnostic QoI
   
 
-## [3.1.1] — 2026-06-12
+## [3.1.1]: 2026-06-12
 
-**Stabilisation patch — packaging and documentation only; no library changes.**
+**Stabilisation patch, packaging and documentation only; no library changes.**
 
 ### Fixed
 - The `v3.1.0` git tag pointed at a commit that predated the 3.1.0
@@ -120,9 +121,9 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 - READMEs now invoke the example driver as `bash run_all.sh` instead of
   `./run_all.sh`: the executable bit is not stored in the repository,
   so the documented command failed with "Permission denied" on a fresh
-  clone. (`submit.sh` is unaffected — it is launched via `sbatch`.)
+  clone. (`submit.sh` is unaffected, it is launched via `sbatch`.)
 
-## [3.1.0] — 2026-06-12
+## [3.1.0]: 2026-06-12
 
 **Correctness of the asymptotic diagnostic + honest reporting.**
 
@@ -161,7 +162,7 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
 - CI: ruff lint step; statsmodels installed on one matrix leg so the
   cross-validation actually runs.
 
-## [3.0.0] — 2026-06-12
+## [3.0.0]: 2026-06-12
 
 **Correctness + single-source-of-truth release.**
 
@@ -205,25 +206,25 @@ Superseded by 3.4.0, which implements the reader and smoke-tests the case.
   `examples/.../data/` folder are gone.
 - `gci_over_hierarchy` is now part of the public API.
 
-## [2.0.0] — 2026-05-19
+## [2.0.0]: 2026-05-19
 
 **Reproducibility release.** Reorients the package toward an
 end-to-end V&V workflow that ingests the user's actual OpenFOAM
 output and emits a paper-ready Table 1 directly.
 
 ### Added
-- `foamgci.report.full_report` — single-call orchestrator that
+- `foamgci.report.full_report`, single-call orchestrator that
   reads N `fieldMinMax.dat` files, computes window statistics on
   a stationary window, applies Roache GCI on every consecutive
   triplet, and returns a `ReportTable` with both plain-text and
   LaTeX renderings.
-- `foamgci.report.rayleigh_pitot` — analytical Mach-3 normal-shock
+- `foamgci.report.rayleigh_pitot`, analytical Mach-3 normal-shock
   stagnation pressure ratio for cross-checking Richardson
   extrapolation independently of the GCI machinery.
-- `foamgci.stats.kpss_test` — implemented from first principles
+- `foamgci.stats.kpss_test`, implemented from first principles
   (Bartlett-kernel long-run variance, Kwiatkowski et al. 1992
   critical values). No `statsmodels` dependency.
-- `foamgci.plot.plot_convergence` — optional two-panel
+- `foamgci.plot.plot_convergence`, optional two-panel
   convergence figure. Pulls matplotlib only when invoked.
 
 ### Changed
@@ -248,7 +249,7 @@ output and emits a paper-ready Table 1 directly.
 - KPSS rejects a random walk and accepts iid Gaussian noise; the
   trend variant accepts a deterministic linear trend + noise.
 
-## [1.0.0] — 2026-05-19
+## [1.0.0]: 2026-05-19
 
 Initial release. Package skeleton, `reader.py`, `gci.py`, `stats.py`,
 `report.py`, CLI, tests, CI, MIT license, and a worked-synthetic
