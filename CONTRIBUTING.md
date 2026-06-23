@@ -1,6 +1,6 @@
 # Contributing
 
-Bug reports and PRs welcome. The project is deliberately small —
+Bug reports and PRs welcome. The project is deliberately small, so
 new functionality should be argued from a concrete CFD V&V use
 case, not from generality.
 
