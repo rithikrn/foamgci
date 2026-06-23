@@ -1,6 +1,6 @@
 # Grid-convergence inputs (two OpenFOAM outputs per grid)
 
-`analyze.py` reads **two files per grid** — one from each function object in
+`analyze.py` reads **two files per grid**, one from each function object in
 `system/controlDict`. Eight files total, one pair per grid:
 
 | grid       | block1 / block2 cells     | total  | h = 0.1524/Ny | surfaceFieldValue (primary)      | fieldMinMax (secondary)      |
@@ -15,15 +15,15 @@ consistent with the forward-step example, which used `fieldMinMax`, and (2)
 show that the *same* foamgci engine ingests a new output type and multiple
 files in one analysis:
 
-- `surfaceFieldValue.dat` — **primary**, reference-anchored QoI: the
+- `surfaceFieldValue.dat`, **primary**, reference-anchored QoI: the
   area-averaged ramp-surface pressure (`areaAverage(p)` on patch `obstacle`),
   an integrated functional for which Richardson/GCI is well founded. It is
   compared to the exact oblique-shock `p2/p1`.
-- `fieldMinMax.dat` — **secondary**, diagnostic QoI: the global `max(p)`. Its
+- `fieldMinMax.dat`, **secondary**, diagnostic QoI: the global `max(p)`. Its
   value also approaches `p2`, but the post-shock field is a near-uniform
   plateau, so the extremum's *location* is degenerate and foamgci's
-  localization check flags it. That contrast — a well-posed surface integral
-  vs a degenerate pointwise extremum targeting the *same* pressure — is the
+  localization check flags it. That contrast, a well-posed surface integral
+  vs a degenerate pointwise extremum targeting the *same* pressure, is the
   point. Filenames must contain a field column (`p`) the reader can select.
 
 The same foamgci GCI/statistics engine consumes both.
@@ -33,7 +33,7 @@ The same foamgci GCI/statistics engine consumes both.
 From a copy of this case directory, for each grid:
 
 1. Edit the two `(nx ny 1)` tuples in `system/blockMeshDict` per the table
-   above. Change nothing else — same `0/`, `constant/`, `system/fvSchemes`,
+   above. Change nothing else, same `0/`, `constant/`, `system/fvSchemes`,
    `system/fvSolution`, `system/controlDict`.
 2. Run the case (locally or via `submit.sh`):
    ```bash
@@ -42,12 +42,16 @@ From a copy of this case directory, for each grid:
    ```
 3. Copy BOTH outputs here, renamed for the grid (example for the coarse run):
    ```bash
-   cp postProcessing/wallPressure/0/surfaceFieldValue.dat  coarse_surfaceFieldValue.dat
-   cp postProcessing/fieldMinMax/0/fieldMinMax.dat         coarse_fieldMinMax.dat
+   cp postProcessing/wallPressure/0/surfaceRegion.dat  coarse_surfaceFieldValue.dat
+   cp postProcessing/fieldMinMax/0/fieldMinMax.dat     coarse_fieldMinMax.dat
    ```
-   (OpenFOAM names each function object's output folder after the object:
-   `wallPressure/` for the `surfaceFieldValue`, `fieldMinMax/` for the
-   `fieldMinMax`. The file *inside* keeps its type name.)
+   OpenFOAM names each function object's output folder after the object name
+   (`wallPressure/`, `fieldMinMax/`). The file inside is named after the object
+   *type*: in OpenFOAM-4.x the area-average file is `surfaceRegion.dat`; in
+   OpenFOAM v5.0+ it is `surfaceFieldValue.dat` (and you would set
+   `type surfaceFieldValue` in controlDict). The local name on the right
+   (`coarse_surfaceFieldValue.dat`) is just our label for the analysis; the
+   reader picks the column from the file header, not the filename.
 
 ## Current status
 
