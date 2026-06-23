@@ -13,12 +13,13 @@ quickly whether it fits their workflow.
   `U`). For coupled QoIs across fields, invoke the report API
   multiple times and combine results yourself.
 
-- **No surface- or volume-integrated quantities.** `fieldMinMax`
-  records pointwise extrema, not surface integrals. Drag,
-  lift, mass-flow, and other integrated QoIs require separate
-  OpenFOAM function objects (`forces`, `volFieldValue`,
-  `surfaceFieldValue`) and a separate parser. A follow-up release
-  will add `volFieldValue` ingest if there is interest.
+- **Surface area-averages, but not yet volume integrals or forces.**
+  `read_surface_field_value` ingests the `surfaceRegion` /
+  `surfaceFieldValue` area-average output (used by the wedge example), so
+  integrated surface functionals like `areaAverage(p)` are supported.
+  Volume integrals (`volFieldValue`) and force coefficients (`forces`) still
+  need their own parsers; a follow-up release will add `volFieldValue` ingest
+  if there is interest.
 
 - **No spatial discretisation diagnostics.** The package assumes the
   user has already produced converged time-histories on each mesh
@@ -84,12 +85,17 @@ quickly whether it fits their workflow.
   expansion `phi(h) = phi_exact + C h^p + ...` assumed by GCI has no
   formal basis for the max/min of a shock-captured field, whose
   location can jump between cells under refinement. Treat
-  `fieldMinMax`-based GCI as a heuristic indicator; prefer integrated
-  QoIs (forces, surface/volume averages) for formally defensible
-  convergence claims. For inviscid shock/shear-layer benchmarks
+  `fieldMinMax`-based GCI as a heuristic indicator. An integrated QoI
+  (a force, a surface or volume average) is better posed: it has a
+  definite continuum value and is insensitive to per-cell grid noise, so the
+  Richardson expansion at least applies to a well-defined limit. But its
+  *order* of convergence is still capped by the shock-capturing scheme
+  (first order at captured discontinuities), so do not expect the formal
+  second order even for a smooth functional, measure the apparent order,
+  do not assume it. For inviscid shock/shear-layer benchmarks
   (e.g. the forward-facing step), statistics may not converge under
   refinement at all, because resolved Kelvin-Helmholtz structure on
-  slip lines grows without a viscous cutoff — a divergent or
+  slip lines grows without a viscous cutoff, a divergent or
   oscillatory regime flag on the coarsest triplet can be physics, not
   a bug.
 
