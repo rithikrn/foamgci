@@ -129,8 +129,8 @@ def _case_stats_pmax(grid) -> dict:
         "field": data.field,
         "n_samples_stat": ws.n,
         "mean": ws.mean / P_INF,
-        "std": ws.std,
-        "sem": ws.sem,
+        "std": ws.std / P_INF,
+        "sem": ws.sem / P_INF,
         "tau_int": ws.tau_int,
         "n_eff": ws.n_eff,
         "kpss_stat": ws.kpss_stat,
@@ -173,10 +173,11 @@ def _gci_blocks(cases: list[dict]) -> tuple[dict, dict, list]:
 def _pick_phi_star(gcis, by, tA, tB):
     """Richardson phi_star from the deepest monotonic triplet."""
     if gcis[1].regime == "monotonic":
-        return gcis[1].phi_exact, tB["label"], tB["gci_fine_pct"]
+        return gcis[1].phi_exact, tB["label"], tB["gci_fine_pct"], gcis[1].phi_fine
     if gcis[0].regime == "monotonic":
-        return gcis[0].phi_exact, tA["label"], tA["gci_fine_pct"]
-    return by["Extra-fine"]["mean"], "Extra-fine (no monotonic triplet)", float("nan")
+        return gcis[0].phi_exact, tA["label"], tA["gci_fine_pct"], gcis[0].phi_fine
+    xf = by["Extra-fine"]["mean"]
+    return xf, "Extra-fine (no monotonic triplet)", float("nan"), xf
 
 
 def _error_table(cases, ref_value):
@@ -236,18 +237,23 @@ def main() -> int:
         )
         print(f"    {t['note']}")
 
-    phi_star, src, gci_band = _pick_phi_star(gcis, by_wall, tA, tB)
+    phi_star, src, gci_band, phi_fine_sel = _pick_phi_star(gcis, by_wall, tA, tB)
     err_vs_ref = _error_table(wall_cases, ref.p2_p1)
     ext_err_pct = 100.0 * abs(phi_star - ref.p2_p1) / ref.p2_p1
-    covered = (not math.isnan(gci_band)) and (ext_err_pct <= gci_band)
+    # GCI_fine is the Roache band around the selected triplet's FINE-GRID
+    # solution, so the coverage test compares the fine-grid value (not the
+    # extrapolate) against the reference, normalised the same way as the band.
+    fine_err_pct = 100.0 * abs(phi_fine_sel - ref.p2_p1) / abs(phi_fine_sel)
+    covered = (not math.isnan(gci_band)) and (fine_err_pct <= gci_band)
 
     print(f"\n  Richardson phi_star  = {phi_star:.5f} ({src})")
     print(f"  Analytical p2/p1     = {ref.p2_p1:.5f}")
-    print(f"  |phi_star - ref|     = {ext_err_pct:.4f} %   vs  GCI_fine = "
+    print(f"  |phi_extrap - ref|   = {ext_err_pct:.4f} %  (extrapolate accuracy)")
+    print(f"  |phi_fine - ref|     = {fine_err_pct:.4f} %   vs  GCI_fine = "
           f"{_fmt(gci_band)} %  ->  reference "
-          f"{'COVERED' if covered else 'NOT covered'} by GCI band")
+          f"{'COVERED' if covered else 'NOT covered'} by fine-grid GCI band")
     print(f"  finest-grid error    = {err_vs_ref[-1]['rel_pct']:.4f} %")
-
+    
     # ============= SECONDARY QoI: pointwise max(p) (fieldMinMax) =============
     print("\n[SECONDARY] fieldMinMax: global max(p) (diagnostic; same output "
           "type as the forward step)")
@@ -309,6 +315,7 @@ def main() -> int:
         "phi_star": phi_star,
         "phi_star_source": src,
         "phi_star_rel_err_pct": ext_err_pct,
+        "fine_grid_rel_err_pct": fine_err_pct,
         "reference_covered_by_gci": bool(covered),
         "error_table_vs_reference": err_vs_ref,
         # --- secondary QoI: pointwise max(p) from fieldMinMax (diagnostic) ---
