@@ -5,14 +5,19 @@ treats as first-class QoI sources, plus a generic fallback:
 
 * :func:`read_fieldminmax` — ``fieldMinMax.dat`` (pointwise field extrema and
   their locations); used by the forward-step example.
-* :func:`read_surface_field_value` — ``surfaceFieldValue.dat`` (integrated
-  surface functionals such as ``areaAverage(p)``); used by the wedge example.
+* :func:`read_surface_field_value` — the integrated surface-functional output
+  (``areaAverage(p)`` etc.). The function object is ``surfaceRegion`` in
+  OpenFOAM-4.x (file ``surfaceRegion.dat``) and ``surfaceFieldValue`` in
+  v5.0+ (file ``surfaceFieldValue.dat``); both share the same
+  ``# Time<TAB>areaAverage(p)`` header, so one reader handles either. Used by
+  the wedge example.
 * :func:`read_timeseries` — a generic ``(time, value[, x, y, z])`` reader for
   solver-independent scalar histories.
 
 A single OpenFOAM case can write several of these at once, and one analysis
 driver may read more than one per grid (the wedge example reads both a
-``surfaceFieldValue.dat`` and a ``fieldMinMax.dat`` from every run).
+``surfaceRegion.dat`` / ``surfaceFieldValue.dat`` area-average and a
+``fieldMinMax.dat`` from every run).
 
 The ``fieldMinMax`` function object in OpenFOAM writes one row per write
 timestep. The format has evolved across versions; this parser handles both
@@ -290,10 +295,10 @@ def read_fieldminmax(
 
 @dataclass
 class SurfaceFieldValueData:
-    """Parsed contents of a single column of a ``surfaceFieldValue.dat`` file.
+    """Parsed contents of a single column of a surface-region area-average file.
 
-    The ``surfaceFieldValue`` (a.k.a. ``fieldValues``/``surfaceRegion``)
-    function object writes one row per write timestep and one column per
+    This is the ``surfaceRegion`` (OpenFOAM-4.x) / ``surfaceFieldValue``
+    (v5.0+) function-object output. The object writes one row per write timestep and one column per
     requested ``operation(field)`` (e.g. ``areaAverage(p)``,
     ``areaIntegrate(p)``). This dataclass holds the time axis and a single
     selected value column.
@@ -354,10 +359,12 @@ def read_surface_field_value(
     path: Union[str, Path],
     column: Optional[Union[str, int]] = None,
 ) -> SurfaceFieldValueData:
-    """Read an OpenFOAM ``surfaceFieldValue.dat`` file.
+    """Read an OpenFOAM surface-region area-average file.
 
-    The file is self-describing: a header comment line beginning ``# Time``
-    lists the column labels, e.g.::
+    This is the output of the ``surfaceRegion`` function object in
+    OpenFOAM-4.x (``surfaceRegion.dat``) and the ``surfaceFieldValue`` object
+    in v5.0+ (``surfaceFieldValue.dat``). Both share the same self-describing
+    header: a comment line beginning ``# Time`` lists the column labels, e.g.::
 
         # Region type : patch obstacle
         # Faces  : 160
@@ -370,7 +377,8 @@ def read_surface_field_value(
     Parameters
     ----------
     path : str | Path
-        Path to the ``surfaceFieldValue.dat`` file.
+        Path to the ``.dat`` file (``surfaceRegion.dat`` or
+        ``surfaceFieldValue.dat``).
     column : str | int, optional
         Which value column to return.
 
