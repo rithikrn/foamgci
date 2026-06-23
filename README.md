@@ -11,6 +11,38 @@ table.
 
 ---
 
+## Where to start
+
+If you just want to see it work, you do not need OpenFOAM. The worked
+examples ship with their input data committed, so you can reproduce a full
+report from a clone in under a minute.
+
+1. Install the library: `pip install -e .` from the repo root (see
+   [Installation](#installation)).
+2. Reproduce the forward-step study: `cd examples/forwardstep_mach3/gci`
+   then `bash run_all.sh`. This reads the committed `.dat` files, writes
+   `gci_summary.json`, and renders the figures. Open the summary to see the
+   numbers and read `examples/forwardstep_mach3/README.md` for what they mean.
+3. Read the second example, `examples/wedge15Ma5/`, to see the same engine
+   applied to a different OpenFOAM output and checked against exact
+   oblique-shock theory.
+
+When you want to run it on your own case, the path is:
+
+1. Add the right function object to your `system/controlDict` (a `fieldMinMax`
+   for a pointwise extremum, or a surface area-average for an integrated
+   quantity). The two examples show both.
+2. Run your mesh-refinement hierarchy (three or four grids) and collect one
+   output file per grid.
+3. Copy the per-case driver from an example's `gci/` folder, edit `data.py` to
+   point at your files and grids, and run `analyze.py`.
+
+The library code in `foamgci/` never changes between cases. You only edit the
+small `data.py` in your case's `gci/` folder. The next section explains that
+split.
+
+---
+
 ## How this repository is organised (read this first)
 
 There are two things in this repo, and keeping them straight removes
@@ -18,13 +50,13 @@ most of the confusion:
 
 | | what it is | analogy |
 |---|---|---|
-| **`foamgci/`** (repo root) | The **library**. Generic, case-agnostic, pip-installable. All the reusable math lives here: read a scalar QoI time series, compute tau_int / SEM / KPSS, run Roache GCI, classify convergence, and render text & LaTeX reports. The built-in readers support OpenFOAM `fieldMinMax.dat` (pointwise extrema), `surfaceFieldValue.dat` (integrated surface functionals such as `areaAverage(p)`), and generic scalar time-series files, so the same verification core can be used with solver-independent QoI histories. | this is `numpy` |
+| **`foamgci/`** (repo root) | The **library**. Generic, case-agnostic, pip-installable. All the reusable math lives here: read a scalar QoI time series, compute tau_int / SEM / KPSS, run Roache GCI, classify convergence, and render text & LaTeX reports. The built-in readers support OpenFOAM `fieldMinMax.dat` (pointwise extrema), the surface-region area-average (`surfaceRegion.dat` in OpenFOAM-4.x, `surfaceFieldValue.dat` in v5.0+), and generic scalar time-series files, so the same verification core can be used with solver-independent QoI histories. | this is `numpy` |
 | **`examples/<case>/gci/`** | A **per-case driver** that *imports* the library and applies it to one case. Holds that case's grid metadata, the analysis script, and the figure scripts. | this is your `analysis.py` that does `import foamgci` |
 
 Rule of thumb: anything reusable across cases belongs in `foamgci/`;
 anything specific to one case (paths, mesh spacing, reference value,
 figure styling) belongs in that example's `gci/` folder. The package
-directory shares the repo name on purpose — `foamgci/` is exactly what
+directory shares the repo name on purpose, `foamgci/` is exactly what
 you `import foamgci`, which is the standard Python convention.
 
 To add your own case later, copy `examples/forwardstep_mach3/`, swap the
@@ -48,13 +80,13 @@ The library stays untouched.
   using the convention $\tau_{\mathrm{int}} = 1 + 2\sum_{k\ge1}\rho_k$
   (so iid data give $\tau_{\mathrm{int}}=1$ and recover $\sigma/\sqrt N$).
 - **KPSS test** for stationarity of the time-averaging window (level and
-  trend variants), implemented from first principles — no `statsmodels`
+  trend variants), implemented from first principles, no `statsmodels`
   dependency.
 - **Extremum-localization check** for pointwise QoIs: the in-window
   spread of the extremum *location* (5th–95th percentile, in cell
   widths). A localized QoI stays within a few cells; a maximum that
   migrates between flow features is flagged as not pointwise-localized
-  and demoted to a diagnostic — independent of the KPSS value check.
+  and demoted to a diagnostic, independent of the KPSS value check.
 - **Analytical Rayleigh-Pitot reference** for cross-checking the
   Richardson-extrapolated maximum pressure independently of the GCI
   machinery.
@@ -67,9 +99,11 @@ spelled out in `LIMITATIONS.md`: (1) refining the mesh also refines the
 time step, so the apparent order mixes spatial and temporal error
 unless a fixed-Δt control run is performed; (2) a spatial extremum is a
 non-smooth functional, so the Richardson expansion is heuristic for
-`fieldMinMax` QoIs — integrated QoIs (forces, surface averages) are the
-formally cleaner target, demonstrated by the `wedge15Ma5` example, whose
-primary QoI is an area-averaged surface pressure from `surfaceFieldValue`.
+`fieldMinMax` QoIs. An integrated QoI (a force or a surface average) is
+better posed, it has a definite continuum value and is insensitive to per-cell
+grid noise, but its order of convergence is still set by the shock-capturing
+scheme, so it must be measured, not assumed. The `wedge15Ma5` example uses one:
+an area-averaged ramp-surface pressure from the `surfaceRegion` area-average.
 
 ## Installation
 
@@ -104,7 +138,7 @@ foamgci report \
 Each `--case` is `label:path:h[:n_cells]`. List cases coarse-to-fine
 (`h` strictly decreasing). `--text` / `--latex` are optional; without
 them the report just prints to the terminal. (The CLI does not draw
-figures — use the Python API or an example's figure scripts for that.)
+figures, use the Python API or an example's figure scripts for that.)
 
 ## Quick start (Python API)
 
@@ -160,7 +194,7 @@ foamgci/
 │   ├── _version.py                #   single source of the version string
 │   ├── __init__.py                #   public API
 │   ├── __main__.py                #   CLI: foamgci report ...
-│   ├── reader.py                  #   OpenFOAM fieldMinMax + surfaceFieldValue + generic readers
+│   ├── reader.py                  #   OpenFOAM fieldMinMax + surfaceRegion area-average + generic readers
 │   ├── stats.py                   #   Geyer tau_int, KPSS, window stats
 │   ├── gci.py                     #   Roache GCI on triplets
 │   ├── report.py                  #   end-to-end driver + Rayleigh-Pitot
@@ -204,11 +238,12 @@ instructions.
 
 `examples/wedge15Ma5/` is a Mach-5, 15-degree wedge oblique shock. It exists to
 show the workflow transferring to a different OpenFOAM output and to more than
-one output at once. Its `controlDict` writes both a `surfaceFieldValue`
-(area-averaged wall pressure — the primary, reference-anchored QoI, compared to
-the exact oblique-shock `p2/p1`) and a `fieldMinMax` (`max(p)` — the secondary
+one output at once. Its `controlDict` writes both a surface-region area-average
+(`surfaceRegion` in OpenFOAM-4.x; `surfaceFieldValue` in v5.0+) of the ramp
+wall pressure, the primary, reference-anchored QoI, compared to the exact
+oblique-shock `p2/p1`, and a `fieldMinMax` (`max(p)`, the secondary
 diagnostic, the same output the forward step used). The analysis reads both per
-grid and reports the contrast: the surface integral is a well-posed GCI target,
+grid and reports the contrast: the surface integral is a better-posed GCI target,
 while the pointwise extremum sits on the post-shock plateau and is flagged
 non-localized. See **`examples/wedge15Ma5/README.md`**.
 
@@ -293,4 +328,4 @@ Pin the version (release tag or commit hash) you actually used.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT, see `LICENSE`.
