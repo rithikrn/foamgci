@@ -161,7 +161,7 @@ def fig_convergence(summary: dict) -> None:
         h_obs = np.array([h[1], h[-1] * 0.9])
         a_err = err[1] if err[1] > 0 else positive.min()
         ax.plot(h_obs, a_err * (h_obs / h[1]) ** p_obs, color="C3", lw=0.9,
-                label=fr"observed $p={p_obs:.2f}$")
+                label=fr"$p_{{\mathrm{{obs}}}}={p_obs:.2f}$")
     for i in range(len(cases)):
         if err[i] <= 0:
             continue
