@@ -6,8 +6,7 @@
 `foamgci` reads OpenFOAM output and produces a complete
 grid-convergence-index (GCI) report: Roache GCI on every refinement
 triplet, an autocorrelation-corrected standard error of the mean, a KPSS
-stationarity check, an analytical cross-check, and a paper-ready LaTeX
-table.
+stationarity check, an analytical cross-check, and a LaTeX table.
 
 ---
 
@@ -90,7 +89,7 @@ The library stays untouched.
 - **Analytical Rayleigh-Pitot reference** for cross-checking the
   Richardson-extrapolated maximum pressure independently of the GCI
   machinery.
-- **LaTeX `tabular` output**, drop-in for a paper Table 1.
+- **LaTeX `tabular` output**
 
 The motivating finding: unsteady shock-dominated CFD needs more than a single GCI number. The naive $\sigma/\sqrt N$ standard error can understate temporal sampling uncertainty when samples are serially correlated, and different extrema can behave differently under refinement. In the forward-step example, maximum pressure is the primary reference-anchored QoI, while maximum density is retained as a diagnostic QoI because its stationarity and localization behavior reveal additional shock/contact-line dynamics.
 
@@ -208,7 +207,7 @@ foamgci/
 │   │   └── gci/                   #   THIS case's analysis driver
 │   │       ├── data.py            #     grid metadata (edit this per case)
 │   │       ├── analyze.py         #     reads gci/data/*.dat -> gci_summary.json
-│   │       ├── make_*.py          #     paper figures
+│   │       ├── make_*.py          #     make figures
 │   │       ├── run_all.sh         #     analyze + figures
 │   │       └── data/              #     expected coarse/medium/fine/extrafine QoI inputs
 │   └── wedge15Ma5/                # SECOND case: Mach-5 15-deg wedge oblique shock
