@@ -26,11 +26,15 @@ from foamgci.gci import gci_over_hierarchy  # noqa: E402
 # This case reads TWO OpenFOAM outputs per grid and reports both QoIs:
 #
 #   PRIMARY  (p_wall_ratio): area-averaged ramp-surface static pressure from
-#            `surfaceFieldValue` (a NEW output type vs the forward step). An
-#            integrated functional, smooth in space, for which Richardson/GCI
-#            is formally well founded. Reference-anchored against the exact
-#            oblique-shock p2/p1. This QoI carries the verification verdict and
-#            owns the top-level summary keys consumed by the figure scripts.
+#            the surface-region area-average (`surfaceRegion` in OpenFOAM-4.x,
+#            `surfaceFieldValue` in v5.0+) -- a different output type than the
+#            forward step. It is an integrated functional with a definite
+#            continuum value and is robust to per-cell grid noise, so it is a
+#            better-posed Richardson/GCI target than a pointwise extremum. Its
+#            observed order is still set by the shock-capturing scheme (vanLeer
+#            + Euler), so analyze.py measures p_obs rather than assuming it.
+#            Reference-anchored against the exact oblique-shock p2/p1. This QoI
+#            carries the verdict and owns the summary keys the figures consume.
 #
 #   SECONDARY (p_max): global max(p) from `fieldMinMax` (the SAME output type
 #            the forward step used; here for cross-case consistency and as a
@@ -329,7 +333,8 @@ def main() -> int:
             },
         },
         "inputs_per_grid": {
-            "primary": "surfaceFieldValue.dat (area-averaged wall pressure)",
+            "primary": "surfaceRegion.dat (area-averaged wall pressure; "
+                       "surfaceFieldValue.dat on OpenFOAM v5.0+)",
             "secondary": "fieldMinMax.dat (global max p/rho)",
         },
     }
