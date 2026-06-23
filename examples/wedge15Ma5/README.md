@@ -4,14 +4,14 @@ Grid-convergence verification on a four-grid hierarchy, checked against exact
 oblique-shock theory and analysed with the `foamgci` library. This is the
 second example. It reuses the library unchanged and reads **two** OpenFOAM
 outputs per grid, so it doubles as the portability demonstration: the same GCI
-engine handles a new data source (`surfaceFieldValue`) *and* the one the
+engine handles a new data source (the `surfaceRegion` area-average) *and* the one the
 forward step already used (`fieldMinMax`), in a single analysis.
 
-- **Primary QoI** (`surfaceFieldValue`): the area-averaged ramp-surface
-  pressure — an integrated functional, reference-anchored against the exact
+- **Primary QoI** (`surfaceRegion` area-average): the area-averaged ramp-surface
+  pressure, an integrated functional, reference-anchored against the exact
   post-shock `p2/p1`. This is a *new* output type vs the forward step and
   carries the verification verdict.
-- **Secondary QoI** (`fieldMinMax`): the global `max(p)` — the *same* output
+- **Secondary QoI** (`fieldMinMax`): the global `max(p)`, the *same* output
   type the forward step used, kept here for cross-case consistency. Its value
   also tends to `p2`, but the post-shock plateau makes the extremum location
   degenerate, so foamgci's localization check flags it. The contrast between a
@@ -23,8 +23,9 @@ forward step already used (`fieldMinMax`), in a single analysis.
 - `0/`, `constant/`, `system/`: the committed OpenFOAM case (this copy is the
   **fine** grid). These are the OpenFOAM-4.x `wedge15Ma5` tutorial files,
   unchanged except for two case-specific additions in `system/`: two function
-  objects in `controlDict` (a `surfaceFieldValue` named `wallPressure` and a
-  `fieldMinMax`) and a `decomposeParDict`.
+  objects in `controlDict` (an area-average on the ramp surface, `surfaceRegion`
+  in OpenFOAM-4.x, named `wallPressure`, and a `fieldMinMax`) and a
+  `decomposeParDict`.
 - `submit.sh`: SLURM runner, identical to the forward-step example. Mesh,
   decompose, run, reconstruct.
 - `gci/`: the analysis driver for THIS case. It `import`s `foamgci` (the
@@ -32,14 +33,17 @@ forward step already used (`fieldMinMax`), in a single analysis.
   library.
 - `gci/oblique_shock.py`: the analytical reference. An exact theta-beta-M solve
   for the post-shock state, NumPy only.
-- `gci/data/`: the **eight** inputs the analysis reads — a
-  `surfaceFieldValue.dat` and a `fieldMinMax.dat` per grid. They ship empty;
-  produce them by running the four cases (see `gci/data/README.md`).
+- `gci/data/`: the **eight** inputs the analysis reads, a
+  `surfaceRegion.dat` (the area-average) and a `fieldMinMax.dat` per grid. They
+  ship empty; produce them by running the four cases (see `gci/data/README.md`).
 
 ## Physics
 
 Inviscid (Euler) Mach-5 flow over a 15-degree compression ramp, solved with
-`rhoCentralFoam` (Kurganov fluxes, vanLeer limiters, fixed time step).
+`rhoCentralFoam` (Kurganov fluxes, vanLeer limiters, fixed time step). Target
+solver version: OpenFOAM-4.x, which is where these tutorial files come from. The
+only version-sensitive piece is the ramp-pressure function object, `surfaceRegion`
+in 4.x, `surfaceFieldValue` in v5.0+; the controlDict comment notes the swap.
 Normalised perfect gas: a_inf = 1 at T = 1, so M = U = 5, p_inf = 1. The
 `obstacle` patch is the ramp surface; its slope, atan(0.08167/0.3048), is 15
 degrees exactly, so an attached oblique shock forms at the ramp foot. QoI:
@@ -94,7 +98,7 @@ that grid.
 3. Copy each run's two function-object outputs into `gci/data/`, renamed for
    the grid (example for the coarse run):
    ```bash
-   cp postProcessing/wallPressure/0/surfaceFieldValue.dat  coarse_surfaceFieldValue.dat
+   cp postProcessing/wallPressure/0/surfaceRegion.dat  coarse_surfaceFieldValue.dat
    cp postProcessing/fieldMinMax/0/fieldMinMax.dat         coarse_fieldMinMax.dat
    ```
    Do the same for `medium_`, `fine_`, `extrafine_` (eight files total).
@@ -129,24 +133,37 @@ that grid.
   pointwise pressure maximum, this integrated QoI is smooth, so the Richardson
   extrapolate is meaningful rather than a diagnostic.
 - If KPSS rejects stationarity on [0.15, 0.20] for any grid, widen the run or
-  narrow the window in `gci/data.py` (`T_STAT`) and re-run `analyze.py`.
+  narrow the window in `gci/data.py` (`T_STAT`) and re-run `analyze.py`. Note
+  that `endTime = 0.2` is about 2.2 domain flow-through times (the window starts
+  near 1.6), which is on the short side for a startup transient to fully wash
+  out. The KPSS check is what tells you whether it has; if it has not, the
+  simplest fix is to raise `endTime` and rerun.
 - The **secondary** `max(p)` block lives under `secondary_qoi_fieldminmax`.
   Read it as a diagnostic, not a verdict: its `localization.localized` is
   expected to be `false` (the plateau makes the extremum location wander past
-  the threshold). That `false` is the *intended* result here — it shows the
+  the threshold). That `false` is the *intended* result here, it shows the
   toolkit distinguishing a degenerate pointwise extremum from the well-posed
   surface integral, both of which numerically approach the same `p2`.
 
 This case carries two QoIs from two different OpenFOAM outputs:
 
-| QoI            | Source             | Role                 | Interpretation                                                                                                                                                                                                 |
-| -------------- | ------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `p_wall_ratio` | `surfaceFieldValue`| Primary verified QoI | Area-averaged ramp-surface pressure, an integrated functional. Steady and stationary on the window, converges monotonically to the analytical p2/p1. Richardson extrapolation is well founded for a surface integral, unlike for a pointwise extremum. |
-| `p_max`        | `fieldMinMax`      | Secondary diagnostic | Global `max(p)`. Value tends to p2 as well, but the post-shock plateau makes the extremum location degenerate, so the localization (wander) check flags it. Reported as a diagnostic, and as the cross-case-consistent `fieldMinMax` output. |
+| QoI            | Source         | Role                 | Interpretation                                                                                                                                                                                                 |
+| -------------- | -------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `p_wall_ratio` | `surfaceRegion`| Primary verified QoI | Area-averaged ramp-surface pressure: an integrated functional with a definite continuum value, insensitive to per-cell grid noise. That makes it a better-posed Richardson/GCI target than a pointwise extremum. Its observed order is still set by the shock-capturing scheme (see "Expected order" below), so it is measured, not assumed. |
+| `p_max`        | `fieldMinMax`  | Secondary diagnostic | Global `max(p)`. The value tends to p2 as well, but the post-shock plateau makes the extremum location degenerate, so the localization (wander) check flags it. Reported as a diagnostic, and as the `fieldMinMax` output shared with the forward-step example. |
+
+Expected order. `rhoCentralFoam` here uses Kurganov fluxes with vanLeer
+reconstruction (second order in smooth regions, first order at the shock) and
+Euler time stepping (first order). For a shock-set quantity like the post-shock
+pressure, the observed order `p_obs` will realistically sit between 1 and ~1.5,
+not 2. The GCI-with-measured-order approach is the right tool precisely because
+the order cannot be assumed; the analysis reports the `p_obs` it finds and
+classifies the convergence regime.
 
 The analysis driver:
 
-1. Parse `surfaceFieldValue` (primary) **and** `fieldMinMax` (secondary) — two
+1. Parse the `surfaceRegion` area-average (primary) **and** `fieldMinMax`
+   (secondary), two
    OpenFOAM sources, both ingested by the same foamgci readers.
 2. Check stationarity using KPSS on each QoI's window.
 3. Estimate autocorrelation-corrected SEM and effective sample size.
@@ -193,7 +210,7 @@ wedge15Ma5/
 │   └── turbulenceProperties
 ├── system/
 │   ├── blockMeshDict           # edit the two block counts per grid (see table)
-│   ├── controlDict             # + surfaceFieldValue AND fieldMinMax (two QoI sources)
+│   ├── controlDict             # + surfaceRegion AND fieldMinMax (two QoI sources)
 │   ├── decomposeParDict
 │   ├── fvSchemes
 │   └── fvSolution
@@ -202,7 +219,7 @@ wedge15Ma5/
 │   ├── data.py                 # grid metadata (two files/grid), window, free-stream
 │   ├── oblique_shock.py        # exact theta-beta-M reference (NumPy only)
 │   ├── run_all.sh
-│   └── data/                   # eight inputs (surfaceFieldValue + fieldMinMax per grid; ship empty)
+│   └── data/                   # eight inputs (surfaceRegion + fieldMinMax per grid; ship empty)
 │       └── README.md
 ├── README.md
 └── submit.sh                   # identical to the forward-step runner
