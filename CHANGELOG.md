@@ -3,6 +3,43 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-06-23
+
+Two new honesty checks, a couple of plots.
+The big one: the wedge ran on all four grids, the numbers showed our old
+`max(p)` story was wrong, so we taught the tooling to catch it on its own.
+
+### Added
+- `order_consistency()` (+ `OrderConsistency`) — checks whether the apparent
+  order `p̂` actually holds steady across overlapping triplets. That's the
+  asymptotic-range signal the single-triplet ratio never gave us, reported
+  as necessary-not-sufficient.
+- `extremum_location_drift()` (+ `LocationDrift`) — asks whether an extremum's
+  *location* settles onto a fixed point or just marches with the mesh. The
+  wedge `max(p)` sits a constant ~13 cells from the ramp tip, so it's flagged
+  `mesh_locked` even though each grid alone looks "localized."
+- A `fig_diagnostics` plot in both examples: convergence, error-vs-`h`, and a
+  location-drift panel that makes the mesh-locking obvious at a glance.
+- Ten unit tests across the two new diagnostics, including the real wedge
+  numbers as a fixture.
+
+### Changed
+- `R_asym` is now `R_fit` everywhere a human reads it, labelled "not an
+  asymptotic-range test." It's ≈1 by construction, so we stopped implying
+  otherwise (the API field name is unchanged).
+- The wedge secondary QoI is relabelled honestly: `max(p)` tracks a near-tip
+  mesh feature ~42 % above the analytical `p2`, not a plateau pressure. The
+  old "approaches p2 / location degenerate" wording didn't survive the run.
+- Both examples now print and store the new verdicts (`order_consistency`,
+  `across_grid_drift`, `well_posed_location`) for every QoI. On the forward
+  step this also flags `rho_max` as order-drifting (p̂ 1.49 → 2.53).
+- `analyze.py` in both examples is swap-and-run on a 3.4.x install: it falls
+  back to inline diagnostics when the library predates them.
+
+### Fixed
+- README and `LIMITATIONS.md` brought in line with the code: `R_fit`, the two
+  new checks, and the corrected wedge `max(p)` story.
+
 ## [3.4.0] - 2026-06-21
 
 **Wedge15Ma5 case completed and smoke-tested; first-class surface-region area-average reader.**
