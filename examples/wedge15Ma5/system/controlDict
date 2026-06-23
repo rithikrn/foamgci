@@ -51,25 +51,6 @@ maxCo           1;
 
 maxDeltaT       1e-06;
 
-
-// ----------------------------------------------------------------------- //
-// foamgci QoI source.
-//
-// This case deliberately uses a DIFFERENT output from the forward-step
-// example (which used `fieldMinMax`).  Here the QoI is an INTEGRATED
-// surface quantity: the area-averaged static pressure on the ramp surface
-// (`obstacle`).  For inviscid flow the ramp-surface pressure equals the
-// analytical post-shock pressure p2, so this single scalar is directly
-// comparable to oblique-shock theory (gci/oblique_shock.py).
-//
-// `surfaceFieldValue` writes:
-//   postProcessing/wallPressure/0/surfaceFieldValue.dat
-// with a self-describing header line `# Time   areaAverage(p)` that
-// foamgci.reader.read_surface_field_value parses automatically.
-//
-// deltaT = 1e-4, writeInterval 20 => one sample per 2e-3 s => ~100 samples
-// over [0, 0.2]; the steady window [0.15, 0.20] holds ~25 (>= KPSS minimum).
-// ----------------------------------------------------------------------- //
 functions
 {
     wallPressure
@@ -100,4 +81,3 @@ functions
 }
 
 
-// ************************************************************************* //
