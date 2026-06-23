@@ -6,14 +6,14 @@ is the **template** for adding further cases.
 
 ## What lives where
 
-- `0/`, `constant/`, `system/` — the committed OpenFOAM case (this copy
+- `0/`, `constant/`, `system/`: the committed OpenFOAM case (this copy
   is the **fine** grid).
-- `submit.sh` — SLURM runner: mesh, decompose, run, reconstruct, and
+- `submit.sh`: SLURM runner. Mesh, decompose, run, reconstruct, and
   copy the result into `gci/data/`.
-- `gci/` — the analysis driver for THIS case. It `import`s `foamgci`
+- `gci/`: the analysis driver for THIS case. It `import`s `foamgci`
   (the library) and applies it here. You edit `gci/data.py`; you do not
   touch the library.
-- `gci/data/` — the four small `fieldMinMax.dat` inputs the analysis
+- `gci/data/`: the four small `fieldMinMax.dat` inputs the analysis
   reads. Regenerated from the final workflow and committed with the campaign
   rerun; until then, produce them by running the four cases (see
   `gci/data/README.md`).
@@ -109,8 +109,7 @@ row for that grid.
    for d in coarse_grid medium_grid fine_grid extrafine_grid; do
      ( cd $d && sbatch submit.sh ); done
    ```
-   (If you run interactively instead of via SLURM, copy the files by hand —
-   see `gci/data/README.md`.)
+   (If you run interactively instead of via SLURM, copy the files by hand; see `gci/data/README.md`.)
 3. Analyse + plot:
    ```bash
    pip install -e ../..            # install the foamgci library (once)
@@ -119,19 +118,19 @@ row for that grid.
    Writes `gci/gci_summary.json` (per-grid mean, sigma, tau_int, SEM,
    N_eff, KPSS; regime-aware GCI on both triplets) and the figures.
 4. Commit the four KB-sized `gci/data/*.dat` files. That is what makes the
-   study reproducible for the next reader — they just run step 3.
+   study reproducible for the next reader, they just run step 3.
 
 ## Reading the output
 
 - Per grid: `p_max_mean`, the autocorrelation-corrected `p_max_sem`, and
-  `p_max_n_eff` (effective sample count after the tau_int correction —
+  `p_max_n_eff` (effective sample count after the tau_int correction,
   well below the raw count).
 - `triplet_A_CMF` may be **divergent** (R > 1, pre-asymptotic);
   `triplet_B_MFXF` is the deeper triplet used for `phi_star`.
 - `rayleigh_pitot_p02` (12.061) is the physical ceiling and the
   verification anchor; the finest-grid `p_max_mean` should approach it
   from below. `phi_star` is the Richardson extrapolate, reported as a
-  diagnostic — it overshoots the ceiling here, so it is *not* taken as
+  diagnostic, it overshoots the ceiling here, so it is *not* taken as
   the converged value.
 - If KPSS rejects stationarity on `[6, 10]` for any grid, narrow the
   window in `gci/data.py` (`T_STAT`) and re-run `analyze.py`.
@@ -142,7 +141,7 @@ diagnostic QoI:
 | QoI       | Role                       | Interpretation                                                                                                                                                                                                                                 |
 | --------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `p_max`   | Primary verified QoI       | Stationary on all four grids, localized at the stagnation foot, valid deepest GCI triplet; extra-fine value within ~0.03% of Rayleigh–Pitot.                                                                                                     |
-| `rho_max` | Diagnostic QoI (not formal) | Its GCI *looks* excellent (p_obs ≈ 2.5, GCI ≈ 0.02%), but two gates reject it: KPSS fails on the three finer grids, and the maximum is **not localized** — it migrates from the triple-point region to the stagnation foot, wandering tens-to-hundreds of cells within the window, so the GCI compares different physical maxima across grids. |
+| `rho_max` | Diagnostic QoI (not formal) | Its GCI *looks* excellent (p_obs ≈ 2.5, GCI ≈ 0.02%), but two gates reject it: KPSS fails on the three finer grids, and the maximum is **not localized**, it migrates from the triple-point region to the stagnation foot, wandering tens-to-hundreds of cells within the window, so the GCI compares different physical maxima across grids. |
 
 1. Parse multiple scalar QoIs from the same OpenFOAM output.
 2. Check stationarity using KPSS.
@@ -156,14 +155,14 @@ diagnostic QoI:
 
 `gci_summary.json` contains:
 
-* `stationary_window` — the averaging window used for all QoIs;
-* `cases` — backward-compatible top-level pressure-centered output, now
+* `stationary_window`: the averaging window used for all QoIs;
+* `cases`: backward-compatible top-level pressure-centered output, now
   also carrying density statistics;
-* `qoi_results` — full per-QoI statistics and triplet GCI diagnostics;
-* `included_qois` — QoIs promoted to the formal table;
-* `excluded_qois` — parsed or considered QoIs excluded from formal GCI
+* `qoi_results`: full per-QoI statistics and triplet GCI diagnostics;
+* `included_qois`: QoIs promoted to the formal table;
+* `excluded_qois`: parsed or considered QoIs excluded from formal GCI
   interpretation, with a reason;
-* `error_table_vs_rayleigh_pitot` — pressure-only analytical reference
+* `error_table_vs_rayleigh_pitot`: pressure-only analytical reference
   comparison.
 
 ## Adding a new case
@@ -174,8 +173,8 @@ write the new case's README. The library is never edited.
 
 ## References
 
-- Woodward, P., Colella, P. (1984), *J. Comput. Phys.* **54**(1), 115–173 — the forward-step benchmark.
-- Greenshields, C.J. et al. (2010), *Int. J. Numer. Meth. Fluids* **63**(1), 1–21 — the rhoCentralFoam central-upwind solver.
-- Kurganov, A., Noelle, S., Petrova, G. (2001), *SIAM J. Sci. Comput.* **23**(3), 707–740 — the KNP flux scheme.
-- You, R.G.Y., New, T.H., Chan, W.L. (2024), *Computation* **12**(6), 124 — modern rhoCentralFoam LES + GCI.
-- Gilmanov, A., Gokulakrishnan, P., Klassen, M.S. (2024), *Dynamics* **4**(1), 135–156 — rhoCentralFoam-derived solver, supersonic combustion, with GCI.
+- Woodward, P., Colella, P. (1984), *J. Comput. Phys.* **54**(1), 115–173, the forward-step benchmark.
+- Greenshields, C.J. et al. (2010), *Int. J. Numer. Meth. Fluids* **63**(1), 1–21, the rhoCentralFoam central-upwind solver.
+- Kurganov, A., Noelle, S., Petrova, G. (2001), *SIAM J. Sci. Comput.* **23**(3), 707–740, the KNP flux scheme.
+- You, R.G.Y., New, T.H., Chan, W.L. (2024), *Computation* **12**(6), 124, modern rhoCentralFoam LES + GCI.
+- Gilmanov, A., Gokulakrishnan, P., Klassen, M.S. (2024), *Dynamics* **4**(1), 135–156, rhoCentralFoam-derived solver, supersonic combustion, with GCI.
