@@ -61,10 +61,9 @@ quickly whether it fits their workflow.
   the time-statistics block but no GCI. Hierarchies with more than
   four grids work but only consecutive triplets are reported.
 
-- **Asymptotic-range diagnostic, not enforcement.** The asymptotic
-  ratio `R_asym` is reported; the package does **not** refuse to
-  emit a GCI when `R_asym` strays from unity. Interpretation is
-  the user's responsibility.
+- **Asymptotic-range diagnostic, not enforcement.** The fit ratio `R_fit`
+  is reported (≈1 by construction, not an asymptotic-range test); the package
+  does **not** refuse to emit a GCI when it strays. Interpretation is yours.
 
 ## Space-time error confounding (important)
 
