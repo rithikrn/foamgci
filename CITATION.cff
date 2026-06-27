@@ -1,12 +1,12 @@
 authors:
 - family-names: Rithik R Nambiar
 cff-version: 1.2.0
-date-released: '2026-06-23'
+date-released: '2026-06-20'
 doi: 10.5281/zenodo.20778444
 license:
 - mit
 message: If you use this software, please cite it using the metadata from this file.
-repository-code: https://github.com/rithikrn/foamgci/tree/v3.5.0
+repository-code: https://github.com/rithikrn/foamgci/tree/v3.2.2
 title: rithikrn/foamgci
 type: software
-version: v3.5.0
+version: v3.2.2
