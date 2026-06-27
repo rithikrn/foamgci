@@ -24,7 +24,7 @@ endTime         10;                // 10 flow-through times (FT = L/U = 3/3 = 1)
                                    // First ~2 FT is transient, kept for safety;
                                    // last 8 FT is the snapshot window.
 
-deltaT          1e-4;              // Conservative; adjustTimeStep will tighten it.
+deltaT          5e-5;              // Conservative; adjustTimeStep will tighten it.
 
 writeControl    adjustableRunTime;
 writeInterval   0.02;              // ~500 snapshots over 10 FT; ~400 usable
@@ -46,11 +46,11 @@ timePrecision   8;
 
 runTimeModifiable true;
 
-adjustTimeStep  yes;
+adjustTimeStep  no;
 maxCo           0.2;               // Tutorial default; do not raise — central
                                    // schemes go unstable above ~0.5 on strong
                                    // shocks.
-maxDeltaT       1;
+maxDeltaT       5e-5;
 
 // ------------------------- function objects -------------------------------
 functions
