@@ -89,7 +89,7 @@ class GCIResult:
     u_oscillatory_pct: float = float("nan")  # Celik (2008) oscillatory-convergence
                                 # uncertainty 0.5*(phi_max - phi_min)/|phi_fine|, in %
 
-    def __repr__(self) -> str:  # pragma: no cover — printout
+    def __repr__(self) -> str: 
         return (
             f"GCIResult(triplet={self.label_coarse}/"
             f"{self.label_medium}/{self.label_fine}, "
