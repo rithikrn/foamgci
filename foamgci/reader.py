@@ -1,46 +1,4 @@
 """foamgci.reader — parse OpenFOAM function-object output.
-
-This module reads the two OpenFOAM function-object outputs that ``foamgci``
-treats as first-class QoI sources, plus a generic fallback:
-
-* :func:`read_fieldminmax` — ``fieldMinMax.dat`` (pointwise field extrema and
-  their locations); used by the forward-step example.
-* :func:`read_surface_field_value` — the integrated surface-functional output
-  (``areaAverage(p)`` etc.). The function object is ``surfaceRegion`` in
-  OpenFOAM-4.x (file ``surfaceRegion.dat``) and ``surfaceFieldValue`` in
-  v5.0+ (file ``surfaceFieldValue.dat``); both share the same
-  ``# Time<TAB>areaAverage(p)`` header, so one reader handles either. Used by
-  the wedge example.
-* :func:`read_timeseries` — a generic ``(time, value[, x, y, z])`` reader for
-  solver-independent scalar histories.
-
-A single OpenFOAM case can write several of these at once, and one analysis
-driver may read more than one per grid (the wedge example reads both a
-``surfaceRegion.dat`` / ``surfaceFieldValue.dat`` area-average and a
-``fieldMinMax.dat`` from every run).
-
-The ``fieldMinMax`` function object in OpenFOAM writes one row per write
-timestep. The format has evolved across versions; this parser handles both
-of the two common dialects:
-
-  1. **Combined dialect** (one file holds all requested fields, OpenFOAM ≥ v5)::
-
-         # Time         field   min   location(min)         processor   max   location(max)         processor
-         0.0001         p       0.99  (0.012 0.5 0)         0           1.01  (0.123 0.6 0)         0
-         0.0001         U       0.0   (0.0 0.5 0)           0           3.0   (1.5  0.5 0)          0
-         ...
-
-  2. **Per-field dialect** (one file per field, older versions)::
-
-         # Time         min   location(min)            processor   max   location(max)            processor
-         0.0001         0.99  (0.012 0.5 0)            0           1.01  (0.123 0.6 0)            0
-
-The parser returns a :class:`FieldMinMaxData` instance: column-wise NumPy
-arrays for *time*, *min*, *max*, and (when available) the locations of the
-extrema. Comment lines beginning with ``#`` are skipped.
-
-When the file does not declare which field a row belongs to, the user must
-supply the field name explicitly (``field=``).
 """
 from __future__ import annotations
 
@@ -53,26 +11,6 @@ import numpy as np
 
 @dataclass
 class FieldMinMaxData:
-    """Parsed contents of a single field's ``fieldMinMax.dat`` time-series.
-
-    Attributes
-    ----------
-    field : str
-        Field name (e.g., ``'p'``, ``'U'``, ``'mag(U)'``, ``'rho'``).
-    time : np.ndarray, shape (N,)
-        Time values at which the extrema were recorded.
-    min : np.ndarray, shape (N,)
-        Field minimum at each time.
-    max : np.ndarray, shape (N,)
-        Field maximum at each time.
-    loc_min : np.ndarray | None, shape (N, 3)
-        Spatial location of the minimum, if present in the file.
-    loc_max : np.ndarray | None, shape (N, 3)
-        Spatial location of the maximum, if present in the file.
-    source : Path
-        Source file path (for traceability in reports).
-    """
-
     field: str
     time: np.ndarray
     min: np.ndarray
@@ -149,30 +87,6 @@ def read_fieldminmax(
     path: Union[str, Path],
     field: Optional[str] = None,
 ) -> FieldMinMaxData:
-    """Read an OpenFOAM ``fieldMinMax.dat`` file.
-
-    Parameters
-    ----------
-    path : str | Path
-        Path to the ``fieldMinMax.dat`` file (any OpenFOAM dialect).
-    field : str, optional
-        Required for the *combined dialect* with multiple fields per file:
-        select which field's rows to extract. For the per-field dialect, the
-        caller must pass the field name explicitly (the file itself does not
-        record it).
-
-    Returns
-    -------
-    FieldMinMaxData
-
-    Raises
-    ------
-    FileNotFoundError
-        If ``path`` does not exist.
-    ValueError
-        If the file is empty, has an unrecognised header, or ``field`` is
-        ambiguous / missing.
-    """
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"No such file: {path}")
@@ -295,30 +209,6 @@ def read_fieldminmax(
 
 @dataclass
 class SurfaceFieldValueData:
-    """Parsed contents of a single column of a surface-region area-average file.
-
-    This is the ``surfaceRegion`` (OpenFOAM-4.x) / ``surfaceFieldValue``
-    (v5.0+) function-object output. The object writes one row per write timestep and one column per
-    requested ``operation(field)`` (e.g. ``areaAverage(p)``,
-    ``areaIntegrate(p)``). This dataclass holds the time axis and a single
-    selected value column.
-
-    Attributes
-    ----------
-    column : str
-        Full column label as it appears in the file header
-        (e.g. ``'areaAverage(p)'``).
-    field : str
-        The field token inside the operation parentheses (e.g. ``'p'``), or
-        the raw column label when no parentheses are present.
-    time : np.ndarray, shape (N,)
-        Sample times.
-    value : np.ndarray, shape (N,)
-        The selected functional value at each time.
-    source : Path | None
-        Source file path, for traceability in reports.
-    """
-
     column: str
     field: str
     time: np.ndarray
@@ -341,11 +231,6 @@ class SurfaceFieldValueData:
 
 
 def _field_token(label: str) -> str:
-    """Extract the field name from an operation label.
-
-    ``'areaAverage(p)' -> 'p'``; ``'areaIntegrate(mag(U))' -> 'mag(U)'``;
-    a label with no parentheses is returned unchanged.
-    """
     i = label.find("(")
     if i == -1:
         return label
@@ -359,50 +244,6 @@ def read_surface_field_value(
     path: Union[str, Path],
     column: Optional[Union[str, int]] = None,
 ) -> SurfaceFieldValueData:
-    """Read an OpenFOAM surface-region area-average file.
-
-    This is the output of the ``surfaceRegion`` function object in
-    OpenFOAM-4.x (``surfaceRegion.dat``) and the ``surfaceFieldValue`` object
-    in v5.0+ (``surfaceFieldValue.dat``). Both share the same self-describing
-    header: a comment line beginning ``# Time`` lists the column labels, e.g.::
-
-        # Region type : patch obstacle
-        # Faces  : 160
-        # Area   : 0.0789...
-        # Time             areaAverage(p)
-        0.002              4.7791
-        0.004              4.7805
-        ...
-
-    Parameters
-    ----------
-    path : str | Path
-        Path to the ``.dat`` file (``surfaceRegion.dat`` or
-        ``surfaceFieldValue.dat``).
-    column : str | int, optional
-        Which value column to return.
-
-        * ``None`` (default): require exactly one non-time column and return
-          it; raise if the file has several columns.
-        * ``str``: match by field token — ``column='p'`` selects the column
-          whose label is ``...(p)`` (e.g. ``areaAverage(p)``). Falls back to a
-          case-sensitive substring match on the full label, so passing the
-          full label (``'areaAverage(p)'``) also works.
-        * ``int``: a 0-based index into the **value** columns (column 0 is the
-          first quantity after ``Time``).
-
-    Returns
-    -------
-    SurfaceFieldValueData
-
-    Raises
-    ------
-    FileNotFoundError
-        If ``path`` does not exist.
-    ValueError
-        If the file is empty, has no parseable ``# Time`` header, or
-        ``column`` is ambiguous / not found.
-    """
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"No such file: {path}")
