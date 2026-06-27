@@ -1,0 +1,670 @@
+{
+  "stationary_window": [
+    6.0,
+    10.0
+  ],
+  "cases": [
+    {
+      "label": "Coarse",
+      "n_cells": 4032,
+      "dx": 0.025,
+      "n_samples_stat": 201,
+      "p_max_mean": 11.996469657999999,
+      "p_max_std": 0.000582860704344276,
+      "p_max_sem": 0.0001160837863303822,
+      "p_max_tau_int": 7.972777315279179,
+      "p_max_n_eff": 25.210788167229985,
+      "kpss_stat": 0.0576733918266332,
+      "kpss_p": 0.1,
+      "kpss_stationary": true,
+      "rho_max_mean": 6.12892555995,
+      "rho_max_std": 0.13807436022149516,
+      "rho_max_sem": 0.06230483611828948,
+      "rho_max_tau_int": 40.9273376421696,
+      "rho_max_n_eff": 4.9111428101518895,
+      "rho_kpss_stat": 0.99901833349793,
+      "rho_kpss_p": 0.01,
+      "rho_kpss_stationary": false,
+      "peak_loc_x": 0.5875,
+      "peak_loc_y": 0.0125,
+      "p_max_loc_wander_cells": 0.0,
+      "rho_max_loc_wander_cells": 29.01723625709382
+    },
+    {
+      "label": "Medium",
+      "n_cells": 16128,
+      "dx": 0.0125,
+      "n_samples_stat": 201,
+      "p_max_mean": 12.013741819749999,
+      "p_max_std": 0.0021584738032491132,
+      "p_max_sem": 0.00024094998219358703,
+      "p_max_tau_int": 2.5047033132380827,
+      "p_max_n_eff": 80.24902547844958,
+      "kpss_stat": 0.049408462531144545,
+      "kpss_p": 0.1,
+      "kpss_stationary": true,
+      "rho_max_mean": 6.066751997349999,
+      "rho_max_std": 0.10071163594003701,
+      "rho_max_sem": 0.04535020823442237,
+      "rho_max_tau_int": 40.75635414238495,
+      "rho_max_n_eff": 4.931746330836992,
+      "rho_kpss_stat": 0.9806068560504988,
+      "rho_kpss_p": 0.01,
+      "rho_kpss_stationary": false,
+      "peak_loc_x": 0.59375,
+      "peak_loc_y": 0.00625,
+      "p_max_loc_wander_cells": 0.0,
+      "rho_max_loc_wander_cells": 54.451813560247935
+    },
+    {
+      "label": "Fine",
+      "n_cells": 64512,
+      "dx": 0.00625,
+      "n_samples_stat": 201,
+      "p_max_mean": 12.040607724249998,
+      "p_max_std": 0.005353911173618978,
+      "p_max_sem": 0.00037763577740085086,
+      "p_max_tau_int": 1.0,
+      "p_max_n_eff": 201.0,
+      "kpss_stat": 0.03535821920337399,
+      "kpss_p": 0.1,
+      "kpss_stationary": true,
+      "rho_max_mean": 6.0416112682000005,
+      "rho_max_std": 0.06445501387173563,
+      "rho_max_sem": 0.02482918393994877,
+      "rho_max_tau_int": 29.8268600652879,
+      "rho_max_n_eff": 6.7388923795542635,
+      "rho_kpss_stat": 0.9420362893214502,
+      "rho_kpss_p": 0.01,
+      "rho_kpss_stationary": false,
+      "peak_loc_x": 0.596875,
+      "peak_loc_y": 0.003125,
+      "p_max_loc_wander_cells": 0.0,
+      "rho_max_loc_wander_cells": 104.08650248711405
+    },
+    {
+      "label": "Extra-fine",
+      "n_cells": 258048,
+      "dx": 0.003125,
+      "n_samples_stat": 201,
+      "p_max_mean": 12.050752036999999,
+      "p_max_std": 0.004460370541948259,
+      "p_max_sem": 0.00045522464667552964,
+      "p_max_tau_int": 2.093657873177148,
+      "p_max_n_eff": 96.00422426945067,
+      "kpss_stat": 0.13139610551922604,
+      "kpss_p": 0.1,
+      "kpss_stationary": true,
+      "rho_max_mean": 6.0358689344,
+      "rho_max_std": 0.04273820577992277,
+      "rho_max_sem": 0.013645042754241193,
+      "rho_max_tau_int": 20.488647346338258,
+      "rho_max_n_eff": 9.810310881060815,
+      "rho_kpss_stat": 0.7963803559407001,
+      "rho_kpss_p": 0.01,
+      "rho_kpss_stationary": false,
+      "peak_loc_x": 0.5984375,
+      "peak_loc_y": 0.0015625,
+      "p_max_loc_wander_cells": 3.999999999999986,
+      "rho_max_loc_wander_cells": 203.69094236121543
+    }
+  ],
+  "triplet_A_CMF": {
+    "label": "A : C-M-F",
+    "phi1": 12.040607724249998,
+    "phi2": 12.013741819749999,
+    "phi3": 11.996469657999999,
+    "h1": 0.00625,
+    "h2": 0.0125,
+    "h3": 0.025,
+    "r": 2.0,
+    "eps21": 0.02686590449999926,
+    "eps32": 0.017272161750000237,
+    "R": 1.5554453975628668,
+    "regime": "divergent",
+    "p_obs": null,
+    "phi_ext": null,
+    "gci_fine_pct": null,
+    "gci_med_pct": null,
+    "asymptotic_ratio": null,
+    "note": "R=1.555 > 1: residual grows under refinement (pre-asymptotic)"
+  },
+  "triplet_B_MFXF": {
+    "label": "B : M-F-XF",
+    "phi1": 12.050752036999999,
+    "phi2": 12.040607724249998,
+    "phi3": 12.013741819749999,
+    "h1": 0.003125,
+    "h2": 0.00625,
+    "h3": 0.0125,
+    "r": 2.0,
+    "eps21": 0.010144312750000495,
+    "eps32": 0.02686590449999926,
+    "R": 0.3775905907058061,
+    "regime": "monotonic",
+    "p_obs": 1.4051052806939823,
+    "phi_ext": 12.056906180858332,
+    "gci_fine_pct": 0.06383568261381731,
+    "gci_med_pct": 0.1692030105705241,
+    "asymptotic_ratio": 1.0,
+    "note": "monotonic convergence; GCI valid"
+  },
+  "phi_star": 12.056906180858332,
+  "phi_star_source": "B : M-F-XF",
+  "rayleigh_pitot_p02": 12.060964701266622,
+  "error_table": [
+    {
+      "label": "Coarse",
+      "dx": 0.025,
+      "mean": 11.996469657999999,
+      "err": 0.060436522858333674,
+      "rel_pct": 0.5012606215206628
+    },
+    {
+      "label": "Medium",
+      "dx": 0.0125,
+      "mean": 12.013741819749999,
+      "err": 0.04316436110833344,
+      "rel_pct": 0.3580052831203217
+    },
+    {
+      "label": "Fine",
+      "dx": 0.00625,
+      "mean": 12.040607724249998,
+      "err": 0.016298456608334178,
+      "rel_pct": 0.13517942632920021
+    },
+    {
+      "label": "Extra-fine",
+      "dx": 0.003125,
+      "mean": 12.050752036999999,
+      "err": 0.006154143858333683,
+      "rel_pct": 0.05104247943891331
+    }
+  ],
+  "error_table_vs_rayleigh_pitot": [
+    {
+      "label": "Coarse",
+      "dx": 0.025,
+      "mean": 11.996469657999999,
+      "err": 0.06449504326662314,
+      "rel_pct": 0.534741995056581
+    },
+    {
+      "label": "Medium",
+      "dx": 0.0125,
+      "mean": 12.013741819749999,
+      "err": 0.047222881516622905,
+      "rel_pct": 0.39153486214633926
+    },
+    {
+      "label": "Fine",
+      "dx": 0.00625,
+      "mean": 12.040607724249998,
+      "err": 0.020356977016623645,
+      "rel_pct": 0.1687839863629299
+    },
+    {
+      "label": "Extra-fine",
+      "dx": 0.003125,
+      "mean": 12.050752036999999,
+      "err": 0.01021266426662315,
+      "rel_pct": 0.08467535159563674
+    }
+  ],
+  "qoi_results": {
+    "p_max": {
+      "key": "p_max",
+      "description": "maximum pressure",
+      "field_used": "p",
+      "quantity": "max",
+      "primary": true,
+      "cases": [
+        {
+          "label": "Coarse",
+          "n_cells": 4032,
+          "dx": 0.025,
+          "field": "p",
+          "quantity": "max",
+          "description": "maximum pressure",
+          "n_samples_stat": 201,
+          "mean": 11.996469657999999,
+          "std": 0.000582860704344276,
+          "sem": 0.0001160837863303822,
+          "tau_int": 7.972777315279179,
+          "n_eff": 25.210788167229985,
+          "kpss_stat": 0.0576733918266332,
+          "kpss_p": 0.1,
+          "kpss_stationary": true,
+          "loc_x": 0.5875,
+          "loc_y": 0.0125,
+          "loc_wander_cells": 0.0
+        },
+        {
+          "label": "Medium",
+          "n_cells": 16128,
+          "dx": 0.0125,
+          "field": "p",
+          "quantity": "max",
+          "description": "maximum pressure",
+          "n_samples_stat": 201,
+          "mean": 12.013741819749999,
+          "std": 0.0021584738032491132,
+          "sem": 0.00024094998219358703,
+          "tau_int": 2.5047033132380827,
+          "n_eff": 80.24902547844958,
+          "kpss_stat": 0.049408462531144545,
+          "kpss_p": 0.1,
+          "kpss_stationary": true,
+          "loc_x": 0.59375,
+          "loc_y": 0.00625,
+          "loc_wander_cells": 0.0
+        },
+        {
+          "label": "Fine",
+          "n_cells": 64512,
+          "dx": 0.00625,
+          "field": "p",
+          "quantity": "max",
+          "description": "maximum pressure",
+          "n_samples_stat": 201,
+          "mean": 12.040607724249998,
+          "std": 0.005353911173618978,
+          "sem": 0.00037763577740085086,
+          "tau_int": 1.0,
+          "n_eff": 201.0,
+          "kpss_stat": 0.03535821920337399,
+          "kpss_p": 0.1,
+          "kpss_stationary": true,
+          "loc_x": 0.596875,
+          "loc_y": 0.003125,
+          "loc_wander_cells": 0.0
+        },
+        {
+          "label": "Extra-fine",
+          "n_cells": 258048,
+          "dx": 0.003125,
+          "field": "p",
+          "quantity": "max",
+          "description": "maximum pressure",
+          "n_samples_stat": 201,
+          "mean": 12.050752036999999,
+          "std": 0.004460370541948259,
+          "sem": 0.00045522464667552964,
+          "tau_int": 2.093657873177148,
+          "n_eff": 96.00422426945067,
+          "kpss_stat": 0.13139610551922604,
+          "kpss_p": 0.1,
+          "kpss_stationary": true,
+          "loc_x": 0.5984375,
+          "loc_y": 0.0015625,
+          "loc_wander_cells": 3.999999999999986
+        }
+      ],
+      "triplet_A_CMF": {
+        "label": "A : C-M-F",
+        "phi1": 12.040607724249998,
+        "phi2": 12.013741819749999,
+        "phi3": 11.996469657999999,
+        "h1": 0.00625,
+        "h2": 0.0125,
+        "h3": 0.025,
+        "r": 2.0,
+        "eps21": 0.02686590449999926,
+        "eps32": 0.017272161750000237,
+        "R": 1.5554453975628668,
+        "regime": "divergent",
+        "p_obs": null,
+        "phi_ext": null,
+        "gci_fine_pct": null,
+        "gci_med_pct": null,
+        "asymptotic_ratio": null,
+        "note": "R=1.555 > 1: residual grows under refinement (pre-asymptotic)"
+      },
+      "triplet_B_MFXF": {
+        "label": "B : M-F-XF",
+        "phi1": 12.050752036999999,
+        "phi2": 12.040607724249998,
+        "phi3": 12.013741819749999,
+        "h1": 0.003125,
+        "h2": 0.00625,
+        "h3": 0.0125,
+        "r": 2.0,
+        "eps21": 0.010144312750000495,
+        "eps32": 0.02686590449999926,
+        "R": 0.3775905907058061,
+        "regime": "monotonic",
+        "p_obs": 1.4051052806939823,
+        "phi_ext": 12.056906180858332,
+        "gci_fine_pct": 0.06383568261381731,
+        "gci_med_pct": 0.1692030105705241,
+        "asymptotic_ratio": 1.0,
+        "note": "monotonic convergence; GCI valid"
+      },
+      "order_consistency": {
+        "orders": [
+          1.4051052806939823
+        ],
+        "triplet_labels": [
+          "Medium-Fine-Extra-fine"
+        ],
+        "n_monotonic": 1,
+        "p_spread": null,
+        "p_rel_spread": null,
+        "rel_tol": 0.15,
+        "any_order_clipped": false,
+        "consistent": null,
+        "verdict": "indeterminate",
+        "note": "need >=2 monotonic triplets; orders=[1.405]"
+      },
+      "across_grid_location_drift": {
+        "verdict": "converging",
+        "mesh_locked": false,
+        "finest_cell_disp": 0.7071067811865275,
+        "cell_displacements": [
+          0.7071067811865462,
+          0.7071067811865526,
+          0.7071067811865275
+        ],
+        "pair_labels": [
+          "Coarse->Medium",
+          "Medium->Fine",
+          "Fine->Extra-fine"
+        ],
+        "tol_cells": 2.0,
+        "shrinking": true,
+        "note": "converging: two finest grids agree to 0.7 cells (<= 2); per-pair [0.7, 0.7, 0.7]"
+      },
+      "phi_star": 12.056906180858332,
+      "phi_star_source": "B : M-F-XF",
+      "error_table_vs_phi_star": [
+        {
+          "label": "Coarse",
+          "dx": 0.025,
+          "mean": 11.996469657999999,
+          "err": 0.060436522858333674,
+          "rel_pct": 0.5012606215206628
+        },
+        {
+          "label": "Medium",
+          "dx": 0.0125,
+          "mean": 12.013741819749999,
+          "err": 0.04316436110833344,
+          "rel_pct": 0.3580052831203217
+        },
+        {
+          "label": "Fine",
+          "dx": 0.00625,
+          "mean": 12.040607724249998,
+          "err": 0.016298456608334178,
+          "rel_pct": 0.13517942632920021
+        },
+        {
+          "label": "Extra-fine",
+          "dx": 0.003125,
+          "mean": 12.050752036999999,
+          "err": 0.006154143858333683,
+          "rel_pct": 0.05104247943891331
+        }
+      ],
+      "reference_label": "Rayleigh-Pitot p02",
+      "reference_value": 12.060964701266622,
+      "error_table_vs_reference": [
+        {
+          "label": "Coarse",
+          "dx": 0.025,
+          "mean": 11.996469657999999,
+          "err": 0.06449504326662314,
+          "rel_pct": 0.534741995056581
+        },
+        {
+          "label": "Medium",
+          "dx": 0.0125,
+          "mean": 12.013741819749999,
+          "err": 0.047222881516622905,
+          "rel_pct": 0.39153486214633926
+        },
+        {
+          "label": "Fine",
+          "dx": 0.00625,
+          "mean": 12.040607724249998,
+          "err": 0.020356977016623645,
+          "rel_pct": 0.1687839863629299
+        },
+        {
+          "label": "Extra-fine",
+          "dx": 0.003125,
+          "mean": 12.050752036999999,
+          "err": 0.01021266426662315,
+          "rel_pct": 0.08467535159563674
+        }
+      ],
+      "loc_wander_cells_median": 0.0,
+      "quality_flags": [],
+      "diagnostic_only": false
+    },
+    "rho_max": {
+      "key": "rho_max",
+      "description": "maximum density",
+      "field_used": "rho",
+      "quantity": "max",
+      "primary": false,
+      "cases": [
+        {
+          "label": "Coarse",
+          "n_cells": 4032,
+          "dx": 0.025,
+          "field": "rho",
+          "quantity": "max",
+          "description": "maximum density",
+          "n_samples_stat": 201,
+          "mean": 6.12892555995,
+          "std": 0.13807436022149516,
+          "sem": 0.06230483611828948,
+          "tau_int": 40.9273376421696,
+          "n_eff": 4.9111428101518895,
+          "kpss_stat": 0.99901833349793,
+          "kpss_p": 0.01,
+          "kpss_stationary": false,
+          "loc_x": 0.5875,
+          "loc_y": 0.6875,
+          "loc_wander_cells": 29.01723625709382
+        },
+        {
+          "label": "Medium",
+          "n_cells": 16128,
+          "dx": 0.0125,
+          "field": "rho",
+          "quantity": "max",
+          "description": "maximum density",
+          "n_samples_stat": 201,
+          "mean": 6.066751997349999,
+          "std": 0.10071163594003701,
+          "sem": 0.04535020823442237,
+          "tau_int": 40.75635414238495,
+          "n_eff": 4.931746330836992,
+          "kpss_stat": 0.9806068560504988,
+          "kpss_p": 0.01,
+          "kpss_stationary": false,
+          "loc_x": 0.54375,
+          "loc_y": 0.63125,
+          "loc_wander_cells": 54.451813560247935
+        },
+        {
+          "label": "Fine",
+          "n_cells": 64512,
+          "dx": 0.00625,
+          "field": "rho",
+          "quantity": "max",
+          "description": "maximum density",
+          "n_samples_stat": 201,
+          "mean": 6.0416112682000005,
+          "std": 0.06445501387173563,
+          "sem": 0.02482918393994877,
+          "tau_int": 29.8268600652879,
+          "n_eff": 6.7388923795542635,
+          "kpss_stat": 0.9420362893214502,
+          "kpss_p": 0.01,
+          "kpss_stationary": false,
+          "loc_x": 0.596875,
+          "loc_y": 0.003125,
+          "loc_wander_cells": 104.08650248711405
+        },
+        {
+          "label": "Extra-fine",
+          "n_cells": 258048,
+          "dx": 0.003125,
+          "field": "rho",
+          "quantity": "max",
+          "description": "maximum density",
+          "n_samples_stat": 201,
+          "mean": 6.0358689344,
+          "std": 0.04273820577992277,
+          "sem": 0.013645042754241193,
+          "tau_int": 20.488647346338258,
+          "n_eff": 9.810310881060815,
+          "kpss_stat": 0.7963803559407001,
+          "kpss_p": 0.01,
+          "kpss_stationary": false,
+          "loc_x": 0.5984375,
+          "loc_y": 0.0015625,
+          "loc_wander_cells": 203.69094236121543
+        }
+      ],
+      "triplet_A_CMF": {
+        "label": "A : C-M-F",
+        "phi1": 6.0416112682000005,
+        "phi2": 6.066751997349999,
+        "phi3": 6.12892555995,
+        "h1": 0.00625,
+        "h2": 0.0125,
+        "h3": 0.025,
+        "r": 2.0,
+        "eps21": -0.025140729149998542,
+        "eps32": -0.06217356260000084,
+        "R": 0.4043636571342013,
+        "regime": "monotonic",
+        "p_obs": 1.3062747564703254,
+        "phi_ext": 6.02454381201826,
+        "gci_fine_pct": 0.3531230209971968,
+        "gci_med_pct": 0.8696619160914952,
+        "asymptotic_ratio": 1.0,
+        "note": "monotonic convergence; GCI valid"
+      },
+      "triplet_B_MFXF": {
+        "label": "B : M-F-XF",
+        "phi1": 6.0358689344,
+        "phi2": 6.0416112682000005,
+        "phi3": 6.066751997349999,
+        "h1": 0.003125,
+        "h2": 0.00625,
+        "h3": 0.0125,
+        "r": 2.0,
+        "eps21": -0.005742333800000665,
+        "eps32": -0.025140729149998542,
+        "R": 0.2284076076608541,
+        "regime": "monotonic",
+        "p_obs": 2.130317390982571,
+        "phi_ext": 6.034169082588771,
+        "gci_fine_pct": 0.03520312960949784,
+        "gci_med_pct": 0.1539776659084635,
+        "asymptotic_ratio": 1.0,
+        "note": "monotonic convergence; GCI valid"
+      },
+      "order_consistency": {
+        "orders": [
+          1.3062747564703254,
+          2.130317390982571
+        ],
+        "triplet_labels": [
+          "Coarse-Medium-Fine",
+          "Medium-Fine-Extra-fine"
+        ],
+        "n_monotonic": 2,
+        "p_spread": 0.8240426345122456,
+        "p_rel_spread": 0.4795696429225693,
+        "rel_tol": 0.15,
+        "any_order_clipped": false,
+        "consistent": false,
+        "verdict": "inconsistent",
+        "note": "orders [1.306, 2.13]; spread 48.0% vs tol 15% (necessary, not sufficient)"
+      },
+      "across_grid_location_drift": {
+        "verdict": "converging",
+        "mesh_locked": false,
+        "finest_cell_disp": 0.7071067811865275,
+        "cell_displacements": [
+          5.700877125495694,
+          100.8588122079573,
+          0.7071067811865275
+        ],
+        "pair_labels": [
+          "Coarse->Medium",
+          "Medium->Fine",
+          "Fine->Extra-fine"
+        ],
+        "tol_cells": 2.0,
+        "shrinking": false,
+        "note": "converging: two finest grids agree to 0.7 cells (<= 2); per-pair [5.7, 100.9, 0.7]"
+      },
+      "phi_star": 6.034169082588771,
+      "phi_star_source": "B : M-F-XF",
+      "error_table_vs_phi_star": [
+        {
+          "label": "Coarse",
+          "dx": 0.025,
+          "mean": 6.12892555995,
+          "err": 0.09475647736122905,
+          "rel_pct": 1.5703318230614904
+        },
+        {
+          "label": "Medium",
+          "dx": 0.0125,
+          "mean": 6.066751997349999,
+          "err": 0.03258291476122821,
+          "rel_pct": 0.5399735127615869
+        },
+        {
+          "label": "Fine",
+          "dx": 0.00625,
+          "mean": 6.0416112682000005,
+          "err": 0.007442185611229668,
+          "rel_pct": 0.1233340582501018
+        },
+        {
+          "label": "Extra-fine",
+          "dx": 0.003125,
+          "mean": 6.0358689344,
+          "err": 0.0016998518112290029,
+          "rel_pct": 0.028170437188010232
+        }
+      ],
+      "reference_label": null,
+      "reference_value": null,
+      "error_table_vs_reference": null,
+      "loc_wander_cells_median": 79.26915802368099,
+      "quality_flags": [
+        "KPSS stationarity rejected on: Coarse, Medium, Fine, Extra-fine",
+        "extremum is not localized: median in-window wander 79 cells (> 5); the max relocates between distinct flow features, so its time-average is not a single-feature scalar"
+      ],
+      "diagnostic_only": true
+    }
+  },
+  "included_qois": [
+    "p_max",
+    "rho_max"
+  ],
+  "excluded_qois": {
+    "U_mag_max": "Excluded from the formal forward-step GCI table because the pointwise velocity maximum changes location across grids and did not produce a physically useful extrapolation."
+  },
+  "greenshields_2010": {
+    "rho_contour_min": 0.2568,
+    "rho_contour_max": 6.067,
+    "n_contours": 30,
+    "comparison_time": 4.0,
+    "M_inflow": 3.0,
+    "gamma": 1.4,
+    "Mesh1_cells": 16128,
+    "Mesh2_cells": 64512
+  }
+}
