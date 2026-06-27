@@ -71,11 +71,11 @@ locally normal portion of the bow shock. The inviscid Rayleigh–Pitot
 stagnation pressure p02/p1 = 12.061 is therefore a physical **ceiling**:
 numerical dissipation smears the captured shock, so the time-mean
 <max p> approaches 12.061 **from below** as h → 0 and cannot exceed it.
-All four grids confirm this (11.996 → 12.014 → 12.041 → 12.057, all
+All four grids confirm this (11.996 → 12.014 → 12.041 → 12.051, all
 below 12.061). The verification rests on the finest-grid agreement with
-this reference (within 0.029%), **not** on the Richardson extrapolate:
-phi_star ≈ 12.080 overshoots the ceiling, the expected signature of
-applying Richardson extrapolation to a non-smooth pointwise extremum.
+this reference (within 0.085%), **not** on the Richardson extrapolate,
+which at phi_star ≈ 12.057 sits just below the ceiling, as a time-mean
+stagnation pressure must.
 
 ## The four grids
 
@@ -140,8 +140,8 @@ diagnostic QoI:
 
 | QoI       | Role                       | Interpretation                                                                                                                                                                                                                                 |
 | --------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `p_max`   | Primary verified QoI       | Stationary on all four grids, localized at the stagnation foot, valid deepest GCI triplet; extra-fine value within ~0.03% of Rayleigh–Pitot.                                                                                                     |
-| `rho_max` | Diagnostic QoI (not formal) | Its GCI *looks* excellent (p_obs ≈ 2.5, GCI ≈ 0.02%), but two gates reject it: KPSS fails on the three finer grids, and the maximum is **not localized**, it migrates from the triple-point region to the stagnation foot, wandering tens-to-hundreds of cells within the window, so the GCI compares different physical maxima across grids. |
+| `p_max`   | Primary verified QoI       | Stationary on all four grids, localized at the stagnation foot, valid deepest GCI triplet; extra-fine value within ~0.085% of Rayleigh–Pitot. |
+| `rho_max` | Diagnostic QoI (not formal) | Its GCI *looks* excellent (p_obs ≈ 2.1, GCI ≈ 0.035%), but two gates reject it: KPSS fails on all four grids, and the maximum is **not localized**, migrating between the triple-point region and the stagnation foot with a median ~79-cell wander, so the GCI compares different physical maxima across grids. |
 
 1. Parse multiple scalar QoIs from the same OpenFOAM output.
 2. Check stationarity using KPSS.
