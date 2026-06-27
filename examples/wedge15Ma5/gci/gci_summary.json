@@ -1,0 +1,366 @@
+{
+  "case": "wedge15Ma5",
+  "qoi": {
+    "name": "p_wall_ratio",
+    "description": "area-averaged ramp-surface static pressure / p_inf",
+    "source": "surfaceFieldValue (areaAverage(p) on patch obstacle)"
+  },
+  "stationary_window": [
+    0.15,
+    0.2
+  ],
+  "reference": {
+    "kind": "analytical_oblique_shock",
+    "M_inflow": 5.0,
+    "theta_deg": 15.0,
+    "gamma": 1.4,
+    "beta_deg": 24.321707798501205,
+    "p2_p1": 4.7808271298506515,
+    "rho2_rho1": 2.7534958516225774,
+    "T2_T1": 1.7362754067827668,
+    "M2": 3.5040497818832788
+  },
+  "cases": [
+    {
+      "label": "Coarse",
+      "n_cells": 1200,
+      "dx": 0.00762,
+      "column": "areaAverage(p)",
+      "n_samples_stat": 201,
+      "mean": 4.76358226,
+      "std": 0.0018864129012572447,
+      "sem": 0.0005369306024158801,
+      "tau_int": 16.283916105635914,
+      "n_eff": 12.343468161840583,
+      "kpss_stat": 0.043897343390351194,
+      "kpss_p": 0.1,
+      "kpss_stationary": true
+    },
+    {
+      "label": "Medium",
+      "n_cells": 4800,
+      "dx": 0.00381,
+      "column": "areaAverage(p)",
+      "n_samples_stat": 201,
+      "mean": 4.7655193075,
+      "std": 0.00035536325651308885,
+      "sem": 7.533990758666685e-05,
+      "tau_int": 9.034438827667477,
+      "n_eff": 22.24819978684768,
+      "kpss_stat": 0.11198142279699719,
+      "kpss_p": 0.1,
+      "kpss_stationary": true
+    },
+    {
+      "label": "Fine",
+      "n_cells": 19200,
+      "dx": 0.001905,
+      "column": "areaAverage(p)",
+      "n_samples_stat": 201,
+      "mean": 4.7747630075,
+      "std": 0.00028602238874896003,
+      "sem": 4.4277656757197484e-05,
+      "tau_int": 4.816873678608225,
+      "n_eff": 41.72831039614815,
+      "kpss_stat": 0.10356217611972854,
+      "kpss_p": 0.1,
+      "kpss_stationary": true
+    },
+    {
+      "label": "Extra-fine",
+      "n_cells": 76800,
+      "dx": 0.0009525,
+      "column": "areaAverage(p)",
+      "n_samples_stat": 201,
+      "mean": 4.777923415,
+      "std": 0.00013377278649994622,
+      "sem": 1.3230747327909678e-05,
+      "tau_int": 1.9662071071805336,
+      "n_eff": 102.22727771960217,
+      "kpss_stat": 0.06907416910069208,
+      "kpss_p": 0.1,
+      "kpss_stationary": true
+    }
+  ],
+  "triplet_A_CMF": {
+    "label": "A : C-M-F",
+    "phi1": 4.7747630075,
+    "phi2": 4.7655193075,
+    "phi3": 4.76358226,
+    "h1": 0.001905,
+    "h2": 0.00381,
+    "h3": 0.00762,
+    "r": 2.0,
+    "regime": "divergent",
+    "p_obs": null,
+    "phi_ext": null,
+    "gci_fine_pct": null,
+    "gci_med_pct": null,
+    "asymptotic_ratio": null,
+    "note": "R=4.772 > 1: residual grows under refinement (pre-asymptotic)"
+  },
+  "triplet_B_MFXF": {
+    "label": "B : M-F-XF",
+    "phi1": 4.777923415,
+    "phi2": 4.7747630075,
+    "phi3": 4.7655193075,
+    "h1": 0.0009525,
+    "h2": 0.001905,
+    "h3": 0.00381,
+    "r": 2.0,
+    "regime": "monotonic",
+    "p_obs": 1.5483598484150618,
+    "phi_ext": 4.779565317894865,
+    "gci_fine_pct": 0.04295545240715853,
+    "gci_med_pct": 0.12572117158803525,
+    "asymptotic_ratio": 1.0000000000000002,
+    "note": "monotonic convergence; GCI valid"
+  },
+  "order_consistency": {
+    "orders": [
+      1.5483598484150618
+    ],
+    "triplet_labels": [
+      "Medium-Fine-Extra-fine"
+    ],
+    "n_monotonic": 1,
+    "p_spread": null,
+    "p_rel_spread": null,
+    "rel_tol": 0.15,
+    "any_order_clipped": false,
+    "consistent": null,
+    "verdict": "indeterminate",
+    "note": "need >=2 monotonic triplets; orders=[1.548]"
+  },
+  "phi_star": 4.779565317894865,
+  "phi_star_source": "B : M-F-XF",
+  "phi_star_rel_err_pct": 0.02639317259367168,
+  "fine_grid_rel_err_pct": 0.060773574593837226,
+  "reference_covered_by_gci": false,
+  "error_table_vs_reference": [
+    {
+      "label": "Coarse",
+      "dx": 0.00762,
+      "mean": 4.76358226,
+      "err": 0.017244869850651767,
+      "rel_pct": 0.36070891881820627
+    },
+    {
+      "label": "Medium",
+      "dx": 0.00381,
+      "mean": 4.7655193075,
+      "err": 0.015307822350651534,
+      "rel_pct": 0.32019192359146725
+    },
+    {
+      "label": "Fine",
+      "dx": 0.001905,
+      "mean": 4.7747630075,
+      "err": 0.0060641223506516795,
+      "rel_pct": 0.1268425355267158
+    },
+    {
+      "label": "Extra-fine",
+      "dx": 0.0009525,
+      "mean": 4.777923415,
+      "err": 0.00290371485065144,
+      "rel_pct": 0.060736662752793345
+    }
+  ],
+  "secondary_qoi_fieldminmax": {
+    "qoi": {
+      "name": "p_max",
+      "description": "global max(p) / p_inf",
+      "source": "fieldMinMax (max(p), magnitude mode)"
+    },
+    "cases": [
+      {
+        "label": "Coarse",
+        "n_cells": 1200,
+        "dx": 0.00762,
+        "field": "p",
+        "n_samples_stat": 201,
+        "mean": 7.001630985,
+        "std": 0.04572457188076725,
+        "sem": 0.010823516020329268,
+        "tau_int": 11.262465931953392,
+        "n_eff": 17.846890833181686,
+        "kpss_stat": 0.03073951341984207,
+        "kpss_p": 0.1,
+        "kpss_stationary": true,
+        "loc_x": 0.09523978,
+        "loc_y": 0.02869144,
+        "loc_wander_cells": 1.0335410820460638
+      },
+      {
+        "label": "Medium",
+        "n_cells": 4800,
+        "dx": 0.00381,
+        "field": "p",
+        "n_samples_stat": 201,
+        "mean": 6.8954377875,
+        "std": 0.04922051427372533,
+        "sem": 0.008578139128651243,
+        "tau_int": 6.105059976713452,
+        "n_eff": 32.92350947683968,
+        "kpss_stat": 0.1347666575736217,
+        "kpss_p": 0.1,
+        "kpss_stationary": true,
+        "loc_x": 0.04762268,
+        "loc_y": 0.01450595,
+        "loc_wander_cells": 2.0688178537092563
+      },
+      {
+        "label": "Fine",
+        "n_cells": 19200,
+        "dx": 0.001905,
+        "field": "p",
+        "n_samples_stat": 201,
+        "mean": 6.8258706425,
+        "std": 0.022438496399023827,
+        "sem": 0.0024387865657995006,
+        "tau_int": 2.374412349395734,
+        "n_eff": 84.65252467674902,
+        "kpss_stat": 0.040109394259344365,
+        "kpss_p": 0.1,
+        "kpss_stationary": true,
+        "loc_x": 0.02571694,
+        "loc_y": 0.007800266,
+        "loc_wander_cells": 1.0348388052264357
+      },
+      {
+        "label": "Extra-fine",
+        "n_cells": 76800,
+        "dx": 0.0009525,
+        "field": "p",
+        "n_samples_stat": 201,
+        "mean": 6.804862522500001,
+        "std": 0.03908257814727823,
+        "sem": 0.0038280865907806155,
+        "tau_int": 1.928382374299976,
+        "n_eff": 104.23243993451517,
+        "kpss_stat": 0.47046562140389653,
+        "kpss_p": 0.04831855373786115,
+        "kpss_stationary": false,
+        "loc_x": 0.01285861,
+        "loc_y": 0.003910938,
+        "loc_wander_cells": 2.0701195323829182
+      }
+    ],
+    "triplet_A_CMF": {
+      "label": "A : C-M-F",
+      "phi1": 6.8258706425,
+      "phi2": 6.8954377875,
+      "phi3": 7.001630985,
+      "h1": 0.001905,
+      "h2": 0.00381,
+      "h3": 0.00762,
+      "r": 2.0,
+      "regime": "monotonic",
+      "p_obs": 0.6102133336999161,
+      "phi_ext": 6.693735527380759,
+      "gci_fine_pct": 2.419748374231685,
+      "gci_med_pct": 3.656444056476106,
+      "asymptotic_ratio": 1.0,
+      "note": "monotonic convergence; GCI valid"
+    },
+    "triplet_B_MFXF": {
+      "label": "B : M-F-XF",
+      "phi1": 6.804862522500001,
+      "phi2": 6.8258706425,
+      "phi3": 6.8954377875,
+      "h1": 0.0009525,
+      "h2": 0.001905,
+      "h3": 0.00381,
+      "r": 2.0,
+      "regime": "monotonic",
+      "p_obs": 1.7274590523022366,
+      "phi_ext": 6.795773766991949,
+      "gci_fine_pct": 0.16695332708780206,
+      "gci_med_pct": 0.5511545172102044,
+      "asymptotic_ratio": 0.9999999999999997,
+      "note": "monotonic convergence; GCI valid"
+    },
+    "order_consistency": {
+      "orders": [
+        0.6102133336999161,
+        1.7274590523022366
+      ],
+      "triplet_labels": [
+        "Coarse-Medium-Fine",
+        "Medium-Fine-Extra-fine"
+      ],
+      "n_monotonic": 2,
+      "p_spread": 1.1172457186023204,
+      "p_rel_spread": 0.9558616727410763,
+      "rel_tol": 0.15,
+      "any_order_clipped": false,
+      "consistent": false,
+      "verdict": "inconsistent",
+      "note": "orders [0.61, 1.727]; spread 95.6% vs tol 15% (necessary, not sufficient)"
+    },
+    "phi_star": 6.795773766991949,
+    "phi_star_source": "B : M-F-XF",
+    "phi_star_rel_err_pct": 42.14640233612133,
+    "error_table_vs_reference": [
+      {
+        "label": "Coarse",
+        "dx": 0.00762,
+        "mean": 7.001630985,
+        "err": 2.2208038551493487,
+        "rel_pct": 46.452293605912594
+      },
+      {
+        "label": "Medium",
+        "dx": 0.00381,
+        "mean": 6.8954377875,
+        "err": 2.114610657649348,
+        "rel_pct": 44.231062956576864
+      },
+      {
+        "label": "Fine",
+        "dx": 0.001905,
+        "mean": 6.8258706425,
+        "err": 2.0450435126493485,
+        "rel_pct": 42.77593514897146
+      },
+      {
+        "label": "Extra-fine",
+        "dx": 0.0009525,
+        "mean": 6.804862522500001,
+        "err": 2.024035392649349,
+        "rel_pct": 42.3365107684322
+      }
+    ],
+    "localization": {
+      "median_wander_cells": 1.5518283294678459,
+      "wander_threshold_cells": 5.0,
+      "within_window_localized": true,
+      "localized": true,
+      "across_grid_drift": {
+        "verdict": "mesh_locked",
+        "mesh_locked": true,
+        "finest_cell_disp": 14.103591841142423,
+        "cell_displacements": [
+          13.040727617904711,
+          12.025783215112092,
+          14.103591841142423
+        ],
+        "pair_labels": [
+          "Coarse->Medium",
+          "Medium->Fine",
+          "Fine->Extra-fine"
+        ],
+        "tol_cells": 2.0,
+        "shrinking": false,
+        "note": "mesh-locked: two finest grids 14.1 cells apart (> 2); per-pair [13.0, 12.0, 14.1] -> location scales with h, tracks a mesh feature"
+      },
+      "well_posed_location": false,
+      "note": "max(p) is steady within each window but its location is NOT a convergent physical point: it tracks a mesh feature near the ramp tip at a roughly constant cell offset (location scales with h). max(p) value sits well above the analytical post-shock pressure, so it is not a valid verification QoI against the oblique-shock reference -- the monotone GCI on it notwithstanding."
+    }
+  },
+  "inputs_per_grid": {
+    "primary": "surfaceRegion.dat (area-averaged wall pressure; surfaceFieldValue.dat on OpenFOAM v5.0+)",
+    "secondary": "fieldMinMax.dat (global max p/rho)"
+  }
+}
