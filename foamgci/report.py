@@ -1,15 +1,4 @@
 """foamgci.report — end-to-end V&V report assembly.
-
-Given a mesh-refinement hierarchy of OpenFOAM cases, each producing a
-``fieldMinMax.dat`` file, this module reads them, computes per-window
-time-averaged statistics (mean, std, τ_int, autocorrelation-corrected
-SEM, KPSS stationarity), applies Roache GCI on every consecutive
-triplet, and emits a single :class:`ReportTable` containing everything
-needed to populate Table 1 of an unsteady-CFD verification section.
-
-Also provides the analytical :func:`rayleigh_pitot` reference value for
-comparison with the Richardson-extrapolated maximum pressure on a
-shock-dominated benchmark such as the Mach-3 forward-facing step.
 """
 from __future__ import annotations
 
@@ -39,23 +28,6 @@ def _fmt_kpss_p(p: float) -> str:
 # ---------------------------------------------------------------------------
 
 def rayleigh_pitot(M1: float, gamma: float = 1.4) -> float:
-    """Stagnation pressure behind a normal shock relative to upstream static.
-
-    Rayleigh-Pitot formula for an inviscid, calorically perfect gas:
-
-    .. math::
-        \\frac{p_{02}}{p_1}
-        = \\left[\\frac{(\\gamma+1)^2 M_1^2}
-                       {4\\gamma M_1^2 - 2(\\gamma-1)}\\right]^{\\gamma/(\\gamma-1)}
-          \\cdot
-          \\frac{1-\\gamma+2\\gamma M_1^2}{\\gamma+1}.
-
-    For the canonical Mach-3 forward-facing step (M=3, γ=1.4) with
-    upstream static pressure of unity, this returns p_02 ≈ 12.0610 —
-    the value Richardson-extrapolated maximum pressure should approach
-    as :math:`h \\to 0`, since the global pressure maximum lies at the
-    bow-shock stagnation point upstream of the obstacle.
-    """
     if M1 <= 1.0:
         raise ValueError("Rayleigh-Pitot requires supersonic upstream (M1 > 1).")
     g = float(gamma)
@@ -81,30 +53,6 @@ class GridCase:
 
 @dataclass
 class ReportTable:
-    """End-to-end V&V report bundle.
-
-    Attributes
-    ----------
-    cases : list[GridCase]
-        Input cases, coarse-to-fine.
-    field : str
-        Field name (e.g. ``'p'``).
-    quantity : {"max", "min"}
-        Which extremum of the field was tracked.
-    window : (float, float)
-        Time-averaging window applied to every case.
-    stats : list[WindowStats]
-        One per case, in the same order as ``cases``.
-    gcis : list[GCIResult]
-        One per consecutive triplet (coarse → medium → fine,
-        medium → fine → extra-fine, …).
-    reference_value : float | None
-        Analytical reference (e.g. Rayleigh-Pitot) for cross-checking the
-        Richardson-extrapolated value.
-    reference_label : str
-        Description of the analytical reference.
-    """
-
     cases: list[GridCase]
     field: str
     quantity: str
@@ -286,35 +234,6 @@ def full_report(
     reference_label: str = "",
     kpss_regression: str = "c",
 ) -> ReportTable:
-    """Build the V&V table for an ordered hierarchy of cases.
-
-    Cases must be supplied **coarse-to-fine** (``h`` strictly
-    decreasing).
-
-    Parameters
-    ----------
-    cases : sequence of GridCase
-        Each case points to a ``fieldMinMax.dat`` file.
-    field : str
-        Field name to extract from the file. The OpenFOAM
-        ``fieldMinMax`` function object can write multiple fields per
-        file; this selects one. Use ``'mag(U)'`` for velocity magnitude.
-    quantity : {"max", "min"}
-        Whether to track the max or min of the field over space.
-    window : (float, float)
-        Time-averaging window, inclusive.
-    reference_value : float, optional
-        Analytical reference (e.g. Rayleigh-Pitot) for the final-grid
-        Richardson-extrapolated value.
-    reference_label : str
-        Human-readable description of the reference.
-    kpss_regression : {"c", "ct"}
-        Passed to :func:`foamgci.stats.kpss_test`.
-
-    Returns
-    -------
-    ReportTable
-    """
     if quantity not in ("max", "min"):
         raise ValueError("quantity must be 'max' or 'min'.")
     if len(cases) < 2:
