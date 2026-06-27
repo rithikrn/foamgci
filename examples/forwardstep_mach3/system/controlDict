@@ -84,8 +84,8 @@ functions
         libs            ("libfieldFunctionObjects.so");
         mode            magnitude;
         location        true;
-        writeControl    timeStep;
-        writeInterval   100;
+        writeControl    runTime;
+        writeInterval   0.02;
         log             true;
         fields          (p rho);
     }
