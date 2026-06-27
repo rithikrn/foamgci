@@ -67,16 +67,17 @@ quickly whether it fits their workflow.
 
 ## Space-time error confounding (important)
 
-- **CFL-limited time stepping couples Δt to h.** With
-  `adjustTimeStep yes` and fixed `maxCo`, halving the mesh spacing
-  roughly halves the time step. The "apparent order" from the
-  refinement hierarchy therefore reflects a **mixture of spatial and
-  temporal discretization error** (rhoCentralFoam time integration is
-  first-order). Roache GCI formally quantifies spatial error only.
-  Mitigation: run at least one grid pair at a fixed, conservative Δt
-  (small enough for the finest grid) and compare the apparent order
-  against the CFL-limited result. `foamgci` does not do this for you
-  and does not warn about it.
+- **Space and time refine together under adaptive Δt.** With
+  `adjustTimeStep yes` and a fixed `maxCo`, halving the mesh roughly
+  halves the time step, so the apparent order mixes spatial and
+  temporal error (rhoCentralFoam time integration is first-order).
+  Roache GCI bounds spatial error only. The fix is a fixed Δt small
+  enough for the finest grid, which isolates the spatial rate; the
+  shipped forward-step example does this (fixed Δt, equal N=201 per
+  grid, p_obs ≈ 1.4 as a spatial order). A first-order, grid-independent
+  temporal bias still remains. `foamgci` reads whatever you give it and
+  does not detect or warn about adaptive-Δt coupling, so the fixed-Δt
+  setup is on you.
 
 ## QoI smoothness
 
