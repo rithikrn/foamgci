@@ -1,0 +1,158 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+// 2D supersonic diamond (double-wedge) airfoil, half-angle 10 deg, chord 1,
+// M=2 inviscid inflow.  UPPER HALF ONLY: the airfoil is symmetric about y=0,
+// so the lower half is recovered by symmetry and every reported airfoil
+// coefficient is doubled in post-processing.  This mirrors the wedge15Ma5
+// tutorial geometry (symmetryPlane bottom + slip airfoil surface) and reuses
+// its rhoCentralFoam configuration unchanged; only the geometry and the QoI
+// function objects are case-specific.
+//
+//   peak (0.5, 0.0881635)
+//          /\
+//         /  \                      upper surface:
+//        /    \                       front facet (0,0) -> (0.5, 0.0881635)
+//   ----o------o----                  rear  facet (0.5, 0.0881635) -> (1,0)
+//   LE(0,0)   TE(1,0)               half-thickness = 0.5*tan(10deg)=0.0881635
+//
+// Four columns in x, one block each, all spanning y in [0, 1.2]:
+//   col0  x[-1.0, 0.0]   bottom = symmetryPlane (upstream)
+//   col1  x[ 0.0, 0.5]   bottom = airfoilFront  (rising facet)
+//   col2  x[ 0.5, 1.0]   bottom = airfoilRear   (falling facet)
+//   col3  x[ 1.0, 2.5]   bottom = symmetryPlane (wake)
+// top is a supersonic-outflow patch so the leading-edge oblique shock and the
+// trailing expansion leave the domain without reflecting.
+//
+// SYSTEMATIC GRID-REFINEMENT FAMILY (the ONLY thing edited between runs):
+// every block count scales by the same factor, so refinement is geometrically
+// similar and the volume-averaged cell size halves each level.
+//   --------------------------------------------------------------------
+//   grid        col0    col1   col2   col3    ny     cells
+//   Coarse      (16 .)  (8 .)  (8 .)  (24 .)  20      1120
+//   Medium      (32 .)  (16 .) (16 .) (48 .)  40      4480
+//   Fine        (64 .)  (32 .) (32 .) (96 .)  80     17920   <-- as shipped
+//   Extra-fine  (128 .) (64 .) (64 .) (192 .) 160    71680
+//   Ultra-fine  (256 .) (128 .)(128 .)(384 .) 320   286720
+//   --------------------------------------------------------------------
+// Edit the four (nx ny 1) tuples below per the table; change nothing else.
+// foamgci reads the true cell count and volume from checkMesh and computes the
+// representative h itself, so the table is documentation, not an input.
+
+convertToMeters 1;
+
+// geometry parameters (kept explicit for readers)
+//   half-angle 10 deg -> peak half-thickness = 0.5*tan(10 deg) = 0.0881635
+
+vertices
+(
+    // z = -0.05 plane
+    (-1.0   0.0        -0.05)   //  0  upstream LE-level
+    ( 0.0   0.0        -0.05)   //  1  LE
+    ( 0.5   0.0881635  -0.05)   //  2  upper peak
+    ( 1.0   0.0        -0.05)   //  3  TE
+    ( 2.5   0.0        -0.05)   //  4  downstream
+    (-1.0   1.2        -0.05)   //  5  top
+    ( 0.0   1.2        -0.05)   //  6
+    ( 0.5   1.2        -0.05)   //  7
+    ( 1.0   1.2        -0.05)   //  8
+    ( 2.5   1.2        -0.05)   //  9
+    // z = +0.05 plane
+    (-1.0   0.0         0.05)   // 10
+    ( 0.0   0.0         0.05)   // 11
+    ( 0.5   0.0881635   0.05)   // 12
+    ( 1.0   0.0         0.05)   // 13
+    ( 2.5   0.0         0.05)   // 14
+    (-1.0   1.2         0.05)   // 15
+    ( 0.0   1.2         0.05)   // 16
+    ( 0.5   1.2         0.05)   // 17
+    ( 1.0   1.2         0.05)   // 18
+    ( 2.5   1.2         0.05)   // 19
+);
+
+blocks
+(
+    hex ( 0  1  6  5 10 11 16 15) ( 64 80 1) simpleGrading (1 1 1)  // col0
+    hex ( 1  2  7  6 11 12 17 16) ( 32 80 1) simpleGrading (1 1 1)  // col1
+    hex ( 2  3  8  7 12 13 18 17) ( 32 80 1) simpleGrading (1 1 1)  // col2
+    hex ( 3  4  9  8 13 14 19 18) ( 96 80 1) simpleGrading (1 1 1)  // col3
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 10 15 5)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (4 9 19 14)
+        );
+    }
+    top
+    {
+        type patch;          // supersonic outflow (see 0/ : zeroGradient)
+        faces
+        (
+            (5 15 16 6)
+            (6 16 17 7)
+            (7 17 18 8)
+            (8 18 19 9)
+        );
+    }
+    symmetry
+    {
+        type symmetryPlane;
+        faces
+        (
+            (0 1 11 10)      // upstream of LE
+            (3 4 14 13)      // wake, downstream of TE
+        );
+    }
+    airfoilFront
+    {
+        type patch;
+        faces
+        (
+            (1 2 12 11)      // rising facet, oblique shock above
+        );
+    }
+    airfoilRear
+    {
+        type patch;
+        faces
+        (
+            (2 3 13 12)      // falling facet, expansion above
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

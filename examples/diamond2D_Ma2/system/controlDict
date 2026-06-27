@@ -1,0 +1,178 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM rhoCentralFoam (4.x config from wedge) |
+|  \\    /   O peration     |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+// Steady Mach-2 diamond airfoil.  Fixed time step (as in wedge15Ma5): the flow
+// is steady, so the converged QoIs do not depend on dt, and a fixed dt with a
+// fixed-cadence sample gives an equal sample count on every grid.  The
+// function objects below produce one .dat per QoI per grid; copy each into
+// gci/data/<grid>_<qoi>.dat for the analysis.
+//
+// QoI hierarchy produced here:
+//   forceCoeffs  -> drag coefficient Cd        (surface force integral, smooth)
+//   pFront/pRear -> facet pressures            (surface averages, smooth)
+//   fieldMinMax  -> max(p) and its location    (pointwise diagnostic)
+//   sVol         -> domain entropy integral    (volume integral, smooth)
+// Cd is recoverable two independent ways (forceCoeffs, and from pFront-pRear),
+// which is the coupled-QoI cross-check in analyze.py.
+
+application     rhoCentralFoam;
+
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         10;
+
+deltaT          1e-4;          // Co < 0.2 on the finest grid; fixed
+adjustTimeStep  no;
+maxCo           0.2;           // documentation; not enforced when adjust=no
+
+writeControl    runTime;
+writeInterval   2;             // full-field writes (for contour figures)
+purgeWrite      2;
+writeFormat     ascii;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   8;
+runTimeModifiable true;
+
+functions
+{
+    // ---- Cd, Cl on the two facets (surface force integral) --------------
+    // NOTE: half-domain. The reported coefficients are the upper-surface
+    // contribution; full-airfoil Cd = 2 * (reported Cd).  For compressible
+    // rhoCentralFoam the pressure is static; verify the rho/rhoInf setting
+    // for your build (the analyze.py coupling check vs the facet pressures
+    // will catch a wrong normalisation).
+    forceCoeffs1
+    {
+        type            forceCoeffs;
+        libs            ("libforces.so");
+        writeControl    timeStep;
+        writeInterval   200;            // 200 steps * 1e-4 = every 0.02 time
+        patches         (airfoilFront airfoilRear);
+        rho             rhoInf;
+        rhoInf          1.4;            // freestream density (p/(R T)=1/0.7143)
+        magUInf         2;
+        lRef            1;              // chord
+        Aref            0.1;            // chord * span (1 * 0.1)
+        liftDir         (0 1 0);
+        dragDir         (1 0 0);
+        CofR            (0.25 0 0);
+        pitchAxis       (0 0 1);
+        log             true;
+    }
+
+    // ---- facet-averaged pressures (surface averages) --------------------
+    pFront
+    {
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    timeStep;
+        writeInterval   200;
+        regionType      patch;
+        name            airfoilFront;
+        operation       areaAverage;
+        fields          (p);
+        writeFields     false;
+        log             false;
+    }
+    pRear
+    {
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    timeStep;
+        writeInterval   200;
+        regionType      patch;
+        name            airfoilRear;
+        operation       areaAverage;
+        fields          (p);
+        writeFields     false;
+        log             false;
+    }
+
+    // ---- global pressure maximum + location (pointwise diagnostic) ------
+    fieldMinMax
+    {
+        type            fieldMinMax;
+        libs            ("libfieldFunctionObjects.so");
+        mode            magnitude;
+        location        true;
+        writeControl    timeStep;
+        writeInterval   200;
+        fields          (p);
+        log             true;
+    }
+
+    // ---- domain entropy integral (volume integral, coupled to wave drag)-
+    // deltaS = Cv*ln(p/pInf) - Cp*ln(rho/rhoInf), the specific-entropy rise.
+    // By Oswatitsch, the integrated entropy flux maps to wave drag, so sVol
+    // is physically coupled to Cd.  The coded object below is version
+    // sensitive: if it does not compile on your build, comment out
+    // entropyField and sVol; the other four QoIs are unaffected, and the
+    // README gives a post-processing fallback.
+    entropyField
+    {
+        type            coded;
+        libs            ("libutilityFunctionObjects.so");
+        name            entropyField;
+        writeControl    timeStep;
+        writeInterval   200;
+        codeExecute
+        #{
+            const volScalarField& p =
+                mesh().lookupObject<volScalarField>("p");
+            const volScalarField& rho =
+                mesh().lookupObject<volScalarField>("rho");
+            const scalar Cv = 1.78571, Cp = 2.5, pInf = 1.0, rhoInf = 1.4;
+            dimensionedScalar pI("pI", p.dimensions(), pInf);
+            dimensionedScalar rI("rI", rho.dimensions(), rhoInf);
+            if (!mesh().foundObject<volScalarField>("deltaS"))
+            {
+                volScalarField* sP = new volScalarField
+                (
+                    IOobject
+                    (
+                        "deltaS", mesh().time().timeName(), mesh(),
+                        IOobject::NO_READ, IOobject::AUTO_WRITE
+                    ),
+                    Cv*log(p/pI) - Cp*log(rho/rI)
+                );
+                sP->store();
+            }
+            else
+            {
+                volScalarField& s =
+                    const_cast<volScalarField&>
+                    (mesh().lookupObject<volScalarField>("deltaS"));
+                s = Cv*log(p/pI) - Cp*log(rho/rI);
+            }
+        #};
+    }
+    sVol
+    {
+        type            volFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    timeStep;
+        writeInterval   200;
+        regionType      all;
+        operation       volIntegrate;
+        fields          (deltaS);
+        writeFields     false;
+        log             false;
+    }
+}
+
+// ************************************************************************* //

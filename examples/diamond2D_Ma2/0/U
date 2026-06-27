@@ -1,0 +1,23 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+|  \\\\    /   O peration     | OpenFOAM rhoCentralFoam (4.x config from wedge) |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version 2.0; format ascii; class volVectorField; object U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+internalField   uniform (2 0 0);
+boundaryField
+{
+    inlet        { type fixedValue; value uniform (2 0 0); }
+    outlet       { type zeroGradient; }
+    top          { type zeroGradient; }
+    symmetry     { type symmetryPlane; }
+    airfoilFront { type slip; }
+    airfoilRear  { type slip; }
+    defaultFaces { type empty; }
+}
+// ************************************************************************* //
