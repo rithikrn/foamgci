@@ -1,27 +1,4 @@
 """foamgci CLI.
-
-Usage
------
-::
-
-    python -m foamgci report \\
-        --case coarse:path/to/coarse/fieldMinMax.dat:0.025:4032 \\
-        --case medium:path/to/medium/fieldMinMax.dat:0.0125:16128 \\
-        --case fine:path/to/fine/fieldMinMax.dat:0.00625:64512 \\
-        --case extra-fine:path/to/extra-fine/fieldMinMax.dat:0.003125:258048 \\
-        --field p --quantity max --window 3 10 \\
-        --reference rayleigh-pitot --mach 3 --gamma 1.4 \\
-        --latex out/table1.tex \\
-        --text  out/report.txt
-
-Each ``--case`` is a colon-separated ``label:path:h[:n_cells]`` tuple.
-``n_cells`` is optional and appears only in pretty-printed output.
-
-If ``--reference rayleigh-pitot`` is given, the analytical
-:math:`p_{02}/p_1` for a normal shock at the supplied Mach number is
-computed and the Richardson-extrapolated finest-grid value is compared
-against it. Pass ``--reference <number>`` to use any explicit reference
-value instead.
 """
 from __future__ import annotations
 
