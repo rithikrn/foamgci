@@ -1,11 +1,14 @@
-cff-version: 1.2.0
-message: "If you use foamgci, please cite it as below."
+abstract: <p>OpenFOAM verification toolkit for grid convergence, GCI, and autocorrelation-aware
+  uncertainty reporting in CFD studies.</p>
 authors:
-- family-names: "Nambiar"
-  given-names: "Rithik R"
-title: "foamgci"
-version: 3.5.1
+- family-names: Rithik R Nambiar
+cff-version: 1.2.0
+date-released: '2026-06-26'
 doi: 10.5281/zenodo.20778444
-date-released: 2026-06-26
-url: "https://github.com/rithikrn/foamgci/tree/v3.5.1"
-license: "MIT"
+license:
+- mit
+message: If you use this software, please cite it using the metadata from this file.
+repository-code: https://github.com/rithikrn/foamgci/tree/v3.5.1
+title: rithikrn/foamgci
+type: software
+version: v3.5.1
