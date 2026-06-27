@@ -1,8 +1,4 @@
-"""foamgci.plot — optional convergence plot.
-
-Importing this module requires matplotlib. The rest of foamgci does
-not, by design: plotting is a downstream concern and we keep core
-verification pure NumPy / standard-library to maximise portability.
+"""foamgci.plot — convergence plot.
 """
 from __future__ import annotations
 
@@ -11,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:  
     from .report import ReportTable
 
 
@@ -21,18 +17,6 @@ def plot_convergence(
     dpi: int = 150,
     show: bool = False,
 ):
-    """Two-panel convergence figure: ⟨φ⟩ vs h, and GCI vs h.
-
-    Left panel
-        Time-averaged mean at the bow-shock stagnation point vs cell
-        size, with autocorrelation-corrected SEM error bars and a
-        horizontal line at the analytical reference if available.
-    Right panel
-        Roache GCI on the fine grid of each consecutive triplet, on a
-        log-log scale, with a slope-:math:`\\hat p` reference line.
-
-    Returns the matplotlib Figure object so callers can post-process.
-    """
     try:
         import matplotlib.pyplot as plt
     except ImportError as exc:  # pragma: no cover
