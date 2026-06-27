@@ -7,7 +7,7 @@ authors:
 type: software
 version: 3.5.0
 date-released: '2026-06-23'
-doi: 10.5281/zenodo.20778444
+doi: 10.5281/zenodo.20946450
 license: MIT
 repository-code: "https://github.com/rithikrn/foamgci"
 url: "https://github.com/rithikrn/foamgci"
