@@ -108,6 +108,12 @@ class GridSpec:
         return DATA_DIR / f"{self.prefix}_sVol.dat"
 
     @property
+    def entropy_path(self) -> Path:
+        """Native-cell entropy volume integral written by compute_entropy.py
+        (one scalar per grid; generated locally from the t=10 field)."""
+        return DATA_DIR / f"{self.prefix}_entropy.dat"
+
+    @property
     def foam_path(self) -> Path:
         """`.foam` stub in this grid's run directory (sibling of gci/), read by
         pyvista in extract_snapshot.py. Run dir is <prefix>_grid/."""
