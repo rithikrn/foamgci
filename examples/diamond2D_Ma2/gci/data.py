@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from math import sqrt, tan, radians
 from pathlib import Path
 
+import numpy as np
+
 # gci/ directory (this file lives in gci/) and the example root above it.
 GCI_DIR = Path(__file__).resolve().parent
 DATA_DIR = GCI_DIR / "data"
@@ -34,6 +36,37 @@ T_OVER_C = tan(radians(EPS_DEG))   # diamond thickness ratio = tan(eps)
 DOMAIN_X = (-1.0, 2.5)
 DOMAIN_Y = (0.0, 1.2)
 PEAK_Y = 0.5 * tan(radians(EPS_DEG))   # 0.0881635 upper-surface peak
+
+
+def upper_surface(x):
+    """Upper-surface height of the diamond at station x; 0 outside the chord.
+    Front facet (0->0.5) and rear facet (0.5->1) both have slope tan(eps)."""
+    x = np.asarray(x, dtype=float)
+    t = np.tan(np.radians(EPS_DEG))
+    return np.where((x > 0.0) & (x < 1.0), t * np.minimum(x, 1.0 - x), 0.0)
+
+
+def in_airfoil_body(X, Y):
+    """True where (X, Y) lies inside the solid upper-half diamond body
+    (below the upper surface, chordwise 0<x<1). Masked out of snapshots."""
+    return (X > 0.0) & (X < 1.0) & (Y < upper_surface(X))
+
+# Upper-surface geometry, used by extract_snapshot.py to mask the solid body.
+LE_X, TE_X = 0.0, CHORD            # leading / trailing edge x
+_HALF_CHORD = 0.5 * CHORD          # peak sits at x = LE_X + half-chord
+
+
+def airfoil_y(x):
+    """Upper-surface height of the diamond for LE_X <= x <= TE_X, else 0."""
+    import numpy as np
+    x = np.asarray(x, dtype=float)
+    inside = (x >= LE_X) & (x <= TE_X)
+    return np.where(inside, PEAK_Y * (1.0 - np.abs(x - _HALF_CHORD) / _HALF_CHORD), 0.0)
+
+
+def in_airfoil_body(X, Y):
+    """True where (X, Y) lies inside the solid diamond (below the upper surface)."""
+    return (X >= LE_X) & (X <= TE_X) & (Y < airfoil_y(X))
 
 # Fluid area (half-domain) = box minus the upper-half airfoil triangle.
 # Used for the volume-averaged representative cell size h = sqrt(area / N).
@@ -73,6 +106,19 @@ class GridSpec:
     @property
     def svol_path(self) -> Path:
         return DATA_DIR / f"{self.prefix}_sVol.dat"
+
+    @property
+    def foam_path(self) -> Path:
+        """`.foam` stub in this grid's run directory (sibling of gci/), read by
+        pyvista in extract_snapshot.py. Run dir is <prefix>_grid/."""
+        return EXAMPLE_ROOT / f"{self.prefix}_grid" / "case.foam"
+
+    @property
+    def foam_path(self) -> Path:
+        """`.foam` stub inside this grid's run directory (sibling of the
+        example root), read by pyvista in extract_snapshot.py. Matches the
+        HPC run-dir naming <prefix>_grid used in submit.sh."""
+        return EXAMPLE_ROOT / f"{self.prefix}_grid" / "case.foam"
 
 
 # ----------------------------------------------------------------------
