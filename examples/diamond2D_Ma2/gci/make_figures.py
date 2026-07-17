@@ -111,6 +111,31 @@ def main() -> int:
         fig.savefig(FIG / "fig_meshlock.pdf")
         plt.close(fig)
 
+    # ---- entropy volume integral (smooth VOLUME QoI; convergence-only) --
+    sv = (out.get("volume_qoi") or {}).get("S_vol") or {}
+    if sv.get("cases") and sv.get("status") != "absent":
+        h = np.array([c["h"] for c in sv["cases"]])
+        m = np.array([c["mean"] for c in sv["cases"]])
+        fig, ax = plt.subplots(figsize=(5.0, 3.4))
+        ax.plot(h, m, "o-", color="#1f4e79", mfc="white", lw=1.4,
+                label=r"$S_{\rm vol}=\int \Delta s\,dV$")
+        deep = sv.get("deepest")
+        if deep and deep.get("phi_ext") is not None:
+            ax.plot(0.0, deep["phi_ext"], "s", color="#c0392b",
+                    label="Richardson")
+        ax.set_xlabel(r"representative $h$")
+        ax.set_ylabel(r"entropy integral $S_{\rm vol}$")
+        ax.set_xlim(left=-0.05 * h.max())
+        p_obs = None if not deep else deep.get("p_obs")
+        ttl = "Entropy volume integral (Oswatitsch wave-drag proxy)"
+        if p_obs is not None:
+            ttl += fr"; $p_{{\rm obs}}={p_obs:.2f}$"
+        ax.set_title(ttl, fontsize=9.5)
+        ax.legend(frameon=False, fontsize=8)
+        fig.tight_layout()
+        fig.savefig(FIG / "fig_entropy.pdf")
+        plt.close(fig)
+
     print("figures written to", FIG)
     return 0
 
