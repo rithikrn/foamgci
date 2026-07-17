@@ -184,6 +184,19 @@ def read_force_coeffs(path: Path, column: str = "Cd"):
     return arr[:, 0], arr[:, j]
 
 
+def read_entropy_dat(path: Path) -> float:
+    """Read a one-value <prefix>_entropy.dat written by compute_entropy.py."""
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"No such file: {path}")
+    with path.open(encoding="utf-8") as fh:
+        for raw in fh:
+            t = raw.strip()
+            if t and not t.startswith("#"):
+                return float(t.split()[0])
+    raise ValueError(f"no numeric value in {path}")
+
+
 def _scalar_stats(time, value, label, h, n_cells) -> dict:
     ws = window_stats(time, value, T_STAT[0], T_STAT[1])
     return dict(label=label, h=float(h), n_cells=int(n_cells),
@@ -250,14 +263,17 @@ def main() -> int:
                 bucket.append(_scalar_stats(d.time, d.value, g.label, g.h, g.n_cells))
             except FileNotFoundError:
                 missing.append(str(path))
-        # entropy volume integral (volFieldValue volIntegrate, same .dat format)
+        # entropy volume integral: one converged scalar per grid, produced by
+        # compute_entropy.py from the native t=10 cells (steady flow -> no time
+        # window needed). Missing file just means compute_entropy.py hasn't run.
         try:
-            d = read_surface_field_value(g.svol_path, column="deltaS")
-            sv_cases.append(_scalar_stats(d.time, d.value, g.label, g.h, g.n_cells))
+            s_val = read_entropy_dat(g.entropy_path)
+            sv_cases.append(dict(label=g.label, h=float(g.h),
+                                 n_cells=int(g.n_cells), mean=float(s_val),
+                                 sem=0.0, std=0.0, tau=float("nan"),
+                                 n_window=1, kpss_stationary=None))
         except FileNotFoundError:
-            pass  # optional QoI (coded FO); case still complete without it
-        except Exception:
-            pass
+            pass  # optional QoI; run compute_entropy.py on the t=10 fields
         # pointwise max(p) + location (diagnostic)
         try:
             d = read_fieldminmax(g.pmax_path, field="p")
@@ -353,9 +369,12 @@ def main() -> int:
         deep = _deepest_monotonic(gcis)
         lsq = _lsq_block(sv_cases) if len(sv_cases) >= 4 else None
         out["volume_qoi"]["S_vol"] = dict(
-            description="domain integral of specific-entropy rise deltaS "
-                        "(volFieldValue volIntegrate); smooth volume functional, "
-                        "physically tied to wave drag via Oswatitsch.",
+            description="domain integral of specific-entropy rise "
+                        "deltaS = Cv*ln(p/pInf) - Cp*ln(rho/rhoInf), computed "
+                        "by compute_entropy.py from the native t=10 cells "
+                        "(half-domain, volume-weighted). Smooth volume "
+                        "functional tied to wave drag via Oswatitsch; "
+                        "convergence-only (no closed-form reference).",
             cases=[dict(label=c["label"], h=c["h"], mean=c["mean"],
                         sem=c["sem"], tau=c["tau"]) for c in sv_cases],
             triplets=tri, least_squares=lsq,
@@ -366,8 +385,9 @@ def main() -> int:
     else:
         out["volume_qoi"]["S_vol"] = {
             "status": "absent",
-            "note": "no sVol .dat found; the coded entropy FO may not have run. "
-                    "The other QoIs are unaffected (see README fallback)."}
+            "note": "no <prefix>_entropy.dat found; run compute_entropy.py on "
+                    "the reconstructed t=10 fields (Bundle B) to generate them. "
+                    "The other QoIs are unaffected."}
 
     # --- diagnostic: pointwise max(p), expected mesh-locked at the tip ---
     if len(pmax_cases) >= 3:
