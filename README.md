@@ -32,7 +32,7 @@ Then open `gci_summary.json` and the case README.
 - **`wedge15Ma5`** -- Mach-5 wedge. Adds a surface average, checked against exact
   oblique-shock theory.
 - **`diamond2D_Ma2`** -- Mach-2 diamond. Five grids, and a volume QoI (entropy)
-  that shows the convergence is really first order. Needs your own runs.
+  that shows the convergence is really first order. 
 ## How it's split
  
 Two things, kept apart:
