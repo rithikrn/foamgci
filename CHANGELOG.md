@@ -3,6 +3,28 @@
 All notable changes to **foamgci** are documented here. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-07-21
+
+**Diamond case, plus an entropy QoI that tells the truth.**
+
+The diamond airfoil finally runs on all five grids. It adds a *volume* QoI
+(entropy) the other two cases never had, and that's the one that keeps us
+honest: the surface pressures match theory to ~0.01%, but the entropy integral
+shows the convergence is really first order, with ~11% numerical entropy still
+left at 287k cells. We report it as-is.
+
+### Added
+- `diamond2D_Ma2` example, five grids (1120 -> 286720). QoIs: `Cd`, both facet
+  pressures, the entropy volume integral, and `max(p)` as a mesh-lock diagnostic.
+- `compute_entropy.py` -- entropy integral straight from the native `t=10`
+  cells. No in-solver function object, so nothing to compile.
+- `extract_snapshot.py`, `make_contour_figure.py`, `make_aux_figures.py`.
+- Figures now also write `.png`, straight from matplotlib (no `pdftoppm`).
+
+### Changed
+- Diamond `controlDict` drops the coded entropy FO (didn't build on ESI v2306)
+  and sets `rho rho` on `forceCoeffs`, so the two drag routes agree to ~1e-5%.
+
 ## [3.5.0] - 2026-06-23
 
 **Honesty check additions.**
