@@ -1,11 +1,13 @@
 """Figures for the diamond example, read from gci_summary.json.
 
-Produces, in figures/:
-  fig_convergence.pdf   smooth QoIs (Cd, p_front, p_rear) vs h with references
-  fig_coupling.pdf      Cd from forceCoeffs vs Cd from facet pressures
-  fig_meshlock.pdf      max(p) peak location vs h (mesh-locking, slope 1)
+Produces, in figures/ (both .pdf and .png at 300 dpi):
+  fig_convergence   smooth QoIs (Cd, p_front, p_rear) vs h with references
+  fig_coupling      Cd from forceCoeffs vs Cd from facet pressures
+  fig_meshlock      max(p) value vs h (mesh-locking diagnostic)
+  fig_entropy       entropy volume integral vs h (Oswatitsch proxy)
 
-Skips quietly if matplotlib or the summary is missing.
+Skips quietly if matplotlib or the summary is missing. No external tools:
+PNGs are written directly by matplotlib (portable to Windows).
 """
 from __future__ import annotations
 
@@ -40,6 +42,12 @@ def main() -> int:
                          "mathtext.fontset": "cm", "figure.dpi": 150})
     FIG.mkdir(exist_ok=True)
 
+    def _save(fig, stem):
+        fig.savefig(FIG / f"{stem}.pdf")
+        fig.savefig(FIG / f"{stem}.png", dpi=300)
+        plt.close(fig)
+        print(f"  wrote {stem}.pdf + {stem}.png")
+
     # ---- smooth-QoI convergence ----------------------------------------
     sq = out["smooth_qois"]
     fig, axs = plt.subplots(1, len(sq), figsize=(4.2 * len(sq), 3.4))
@@ -61,8 +69,7 @@ def main() -> int:
         ax.set_xlim(left=-0.05 * h.max())
         ax.legend(frameon=False, fontsize=7.8)
     fig.tight_layout()
-    fig.savefig(FIG / "fig_convergence.pdf")
-    plt.close(fig)
+    _save(fig, "fig_convergence")
 
     # ---- coupling: Cd two ways -----------------------------------------
     cp = out.get("coupling")
@@ -74,26 +81,24 @@ def main() -> int:
             cpr = [r["cd_pressure"] for r in rows]
             x = np.arange(len(lab))
             fig, ax = plt.subplots(figsize=(5.0, 3.4))
-            ax.plot(x, cf, "o-", color="#1f4e79", mfc="white", label="from forceCoeffs")
+            ax.plot(x, cf, "o-", color="#1f4e79", mfc="white",
+                    label="from forceCoeffs")
             ax.plot(x, cpr, "s--", color="#c0392b", mfc="white",
                     label="from facet pressures")
-            ax.axhline(out["reference"]["Cd_shock_expansion"], color="0.4", ls=":",
-                       lw=1.0, label="shock-expansion")
+            ax.axhline(out["reference"]["Cd_shock_expansion"], color="0.4",
+                       ls=":", lw=1.0, label="shock-expansion")
             ax.set_xticks(x)
             ax.set_xticklabels(lab, rotation=20, ha="right", fontsize=8)
             ax.set_ylabel(r"$C_d$ (full airfoil)")
             ax.set_title("Coupled cross-check: two routes to drag", fontsize=10)
             ax.legend(frameon=False, fontsize=8)
             fig.tight_layout()
-            fig.savefig(FIG / "fig_coupling.pdf")
-            plt.close(fig)
+            _save(fig, "fig_coupling")
 
-    # ---- mesh-lock: max(p) location ------------------------------------
+    # ---- mesh-lock: max(p) value ---------------------------------------
     dp = out.get("diagnostic_pmax")
     if dp and dp.get("cases"):
         cases = dp["cases"]
-        # location wander is per-grid; reconstruct loc_x from across_grid note is
-        # not available, so plot value and annotate the across-grid verdict.
         h = np.array([c["h"] for c in cases])
         m = np.array([c["mean"] for c in cases])
         fig, ax = plt.subplots(figsize=(5.0, 3.4))
@@ -108,8 +113,7 @@ def main() -> int:
                      f"({verdict})", fontsize=10)
         ax.legend(frameon=False, fontsize=8)
         fig.tight_layout()
-        fig.savefig(FIG / "fig_meshlock.pdf")
-        plt.close(fig)
+        _save(fig, "fig_meshlock")
 
     # ---- entropy volume integral (smooth VOLUME QoI; convergence-only) --
     sv = (out.get("volume_qoi") or {}).get("S_vol") or {}
@@ -133,8 +137,7 @@ def main() -> int:
         ax.set_title(ttl, fontsize=9.5)
         ax.legend(frameon=False, fontsize=8)
         fig.tight_layout()
-        fig.savefig(FIG / "fig_entropy.pdf")
-        plt.close(fig)
+        _save(fig, "fig_entropy")
 
     print("figures written to", FIG)
     return 0
