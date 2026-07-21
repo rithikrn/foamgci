@@ -1,6 +1,6 @@
-# Grid-convergence inputs (`fieldMinMax.dat`)
+# gci/data
 
-`analyze.py` expects four files in this folder, one per grid:
+`analyze.py` reads one `fieldMinMax.dat` per grid:
 
 | file | grid |
 |---|---|
@@ -9,15 +9,12 @@
 | `fine.dat` | Fine |
 | `extrafine.dat` | Extra-fine |
 
-Each file is the OpenFOAM `fieldMinMax` function-object output from one grid-refinement run.
+Each is the `fieldMinMax` output from one run
+(`postProcessing/fieldMinMax/0/fieldMinMax.dat`).
 
-## Current status
-
-The four `.dat` files are committed, so the forward-step GCI workflow can be reproduced from a fresh clone without rerunning OpenFOAM.
-
-From the repository root:
+These four are committed, so the study runs from a clone:
 
 ```bash
 pip install -e ".[dev]"
-cd examples/forwardstep_mach3/gci
-bash run_all.sh
+cd examples/forwardstep_mach3/gci && bash run_all.sh
+```
