@@ -1,0 +1,434 @@
+{
+  "case": "diamond2D_Ma2",
+  "M_inflow": 2.0,
+  "eps_deg": 10.0,
+  "gamma": 1.4,
+  "window": [
+    6.0,
+    10.0
+  ],
+  "reference": {
+    "beta_deg": 39.31393184482571,
+    "p_front": 1.7065786040005793,
+    "p_rear": 0.5507844887318907,
+    "Cd_shock_expansion": 0.07278488809497836,
+    "Cd_linear": 0.07034837972548218,
+    "M2": 1.6405222290005284,
+    "M3": 2.371700943607048,
+    "t_over_c": 0.17632698070846498
+  },
+  "smooth_qois": {
+    "Cd": {
+      "reference": 0.07278488809497836,
+      "cases": [
+        {
+          "label": "Coarse",
+          "h": 0.06091503343961163,
+          "n_cells": 1120,
+          "mean": 0.07261264354899999,
+          "sem": 5.8293578832332104e-06,
+          "tau": 2.5733208310805846,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Medium",
+          "h": 0.030457516719805816,
+          "n_cells": 4480,
+          "mean": 0.07219842574749999,
+          "sem": 2.2937828787475446e-06,
+          "tau": 1.874145472330543,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Fine",
+          "h": 0.015228758359902908,
+          "n_cells": 17920,
+          "mean": 0.07247119295599999,
+          "sem": 6.429057767328113e-07,
+          "tau": 1.0,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Extra-fine",
+          "h": 0.007614379179951454,
+          "n_cells": 71680,
+          "mean": 0.0726192485535,
+          "sem": 4.2040170018247515e-07,
+          "tau": 1.0,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Ultra-fine",
+          "h": 0.003807189589975727,
+          "n_cells": 286720,
+          "mean": 0.072697920879,
+          "sem": 3.3875979889551304e-07,
+          "tau": 1.818869942309628,
+          "kpss_stationary": true
+        }
+      ],
+      "triplets": [
+        {
+          "triplet": "Coarse-Medium-Fine",
+          "regime": "oscillatory",
+          "p_obs": null,
+          "phi_ext": null,
+          "gci_fine_pct": null,
+          "R_fit": null
+        },
+        {
+          "triplet": "Medium-Fine-Extra-fine",
+          "regime": "monotonic",
+          "p_obs": 0.8815311818755831,
+          "phi_ext": 0.07279501775233652,
+          "gci_fine_pct": 0.3025527018277978,
+          "R_fit": 1.0000000000000002
+        },
+        {
+          "triplet": "Fine-Extra-fine-Ultra-fine",
+          "regime": "monotonic",
+          "p_obs": 0.9122109007247141,
+          "phi_ext": 0.07278712587930006,
+          "gci_fine_pct": 0.15338299778980014,
+          "R_fit": 1.0
+        }
+      ],
+      "deepest": {
+        "triplet": "Fine-Extra-fine-Ultra-fine",
+        "p_obs": 0.9122109007247141,
+        "phi_ext": 0.07278712587930006,
+        "gci_fine_pct": 0.15338299778980014
+      },
+      "order_consistency": {
+        "verdict": "consistent",
+        "note": "orders [0.882, 0.912]; spread 3.4% vs tol 15% (necessary, not sufficient)"
+      },
+      "least_squares": {
+        "phi_ext": 0.07264449813124879,
+        "p": 0.5,
+        "sigma": 0.0002147179010885132,
+        "fs": 1.25,
+        "u_pct": 0.36946690150673306,
+        "well_behaved": true,
+        "reliable": true,
+        "n_grids": 5,
+        "note": "p=0.50, Fs=1.25, sigma=2.147e-04, u=0.369% of phi_ext (reliable)"
+      },
+      "finest_mean": 0.072697920879,
+      "finest_err_pct": 0.11948526439290842,
+      "phi_ext_err_pct": 0.0030745177745866077
+    },
+    "p_front": {
+      "reference": 1.7065786040005793,
+      "cases": [
+        {
+          "label": "Coarse",
+          "h": 0.06091503343961163,
+          "n_cells": 1120,
+          "mean": 1.7133706455750002,
+          "sem": 4.650595972910847e-06,
+          "tau": 3.7011541571500306,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Medium",
+          "h": 0.030457516719805816,
+          "n_cells": 4480,
+          "mean": 1.704027208675,
+          "sem": 2.221718669263488e-05,
+          "tau": 2.110775146725872,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Fine",
+          "h": 0.015228758359902908,
+          "n_cells": 17920,
+          "mean": 1.705951934175,
+          "sem": 9.720085153697011e-06,
+          "tau": 1.216736961537761,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Extra-fine",
+          "h": 0.007614379179951454,
+          "n_cells": 71680,
+          "mean": 1.706361729475,
+          "sem": 5.668064335715113e-06,
+          "tau": 1.0,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Ultra-fine",
+          "h": 0.003807189589975727,
+          "n_cells": 286720,
+          "mean": 1.706468701025,
+          "sem": 5.001847329363288e-06,
+          "tau": 1.8740383485401146,
+          "kpss_stationary": true
+        }
+      ],
+      "triplets": [
+        {
+          "triplet": "Coarse-Medium-Fine",
+          "regime": "oscillatory",
+          "p_obs": null,
+          "phi_ext": null,
+          "gci_fine_pct": null,
+          "R_fit": null
+        },
+        {
+          "triplet": "Medium-Fine-Extra-fine",
+          "regime": "monotonic",
+          "p_obs": 2.231677363488795,
+          "phi_ext": 1.706472580910863,
+          "gci_fine_pct": 0.008120452564957172,
+          "R_fit": 0.9999999999999999
+        },
+        {
+          "triplet": "Fine-Extra-fine-Ultra-fine",
+          "regime": "monotonic",
+          "p_obs": 1.9376762874346198,
+          "phi_ext": 1.7065064883930956,
+          "gci_fine_pct": 0.0027679505689929495,
+          "R_fit": 1.0
+        }
+      ],
+      "deepest": {
+        "triplet": "Fine-Extra-fine-Ultra-fine",
+        "p_obs": 1.9376762874346198,
+        "phi_ext": 1.7065064883930956,
+        "gci_fine_pct": 0.0027679505689929495
+      },
+      "order_consistency": {
+        "verdict": "consistent",
+        "note": "orders [2.232, 1.938]; spread 14.1% vs tol 15% (necessary, not sufficient)"
+      },
+      "least_squares": {
+        "phi_ext": 1.705506196071066,
+        "p": 3.000000000000002,
+        "sigma": 0.001602645850357176,
+        "fs": 3.0,
+        "u_pct": 0.2819067771285416,
+        "well_behaved": false,
+        "reliable": false,
+        "n_grids": 5,
+        "note": "p=3.00, Fs=3.0, sigma=1.603e-03, u=0.282% of phi_ext (treat as indicative)"
+      },
+      "finest_mean": 1.706468701025,
+      "finest_err_pct": 0.0064399597722424795,
+      "phi_ext_err_pct": 0.004225741920975925
+    },
+    "p_rear": {
+      "reference": 0.5507844887318907,
+      "cases": [
+        {
+          "label": "Coarse",
+          "h": 0.06091503343961163,
+          "n_cells": 1120,
+          "mean": 0.5603118292975,
+          "sem": 8.934626639876108e-05,
+          "tau": 2.5724109408589104,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Medium",
+          "h": 0.030457516719805816,
+          "n_cells": 4480,
+          "mean": 0.5575459999425,
+          "sem": 2.7077922953275047e-05,
+          "tau": 1.7175314576827145,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Fine",
+          "h": 0.015228758359902908,
+          "n_cells": 17920,
+          "mean": 0.5551392945175,
+          "sem": 8.88379613205509e-06,
+          "tau": 2.210085941780254,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Extra-fine",
+          "h": 0.007614379179951454,
+          "n_cells": 71680,
+          "mean": 0.5531980280600001,
+          "sem": 3.909935776358956e-06,
+          "tau": 2.1267039640108116,
+          "kpss_stationary": true
+        },
+        {
+          "label": "Ultra-fine",
+          "h": 0.003807189589975727,
+          "n_cells": 286720,
+          "mean": 0.5520557158625,
+          "sem": 2.072327559791424e-06,
+          "tau": 2.3788460495077475,
+          "kpss_stationary": true
+        }
+      ],
+      "triplets": [
+        {
+          "triplet": "Coarse-Medium-Fine",
+          "regime": "monotonic",
+          "p_obs": 0.20065257824156144,
+          "phi_ext": 0.5390105141192576,
+          "gci_fine_pct": 3.631696710521252,
+          "R_fit": 1.0
+        },
+        {
+          "triplet": "Medium-Fine-Extra-fine",
+          "regime": "monotonic",
+          "p_obs": 0.3100614147694379,
+          "phi_ext": 0.5451013371463546,
+          "gci_fine_pct": 1.8295191104620356,
+          "R_fit": 1.0
+        },
+        {
+          "triplet": "Fine-Extra-fine-Ultra-fine",
+          "regime": "monotonic",
+          "p_obs": 0.7650411577559947,
+          "phi_ext": 0.5504224844975936,
+          "gci_fine_pct": 0.36980673281200355,
+          "R_fit": 1.0
+        }
+      ],
+      "deepest": {
+        "triplet": "Fine-Extra-fine-Ultra-fine",
+        "p_obs": 0.7650411577559947,
+        "phi_ext": 0.5504224844975936,
+        "gci_fine_pct": 0.36980673281200355
+      },
+      "order_consistency": {
+        "verdict": "inconsistent",
+        "note": "orders [0.201, 0.31, 0.765]; spread 132.7% vs tol 15% (necessary, not sufficient)"
+      },
+      "least_squares": {
+        "phi_ext": 0.5493908256239602,
+        "p": 0.5,
+        "sigma": 0.0002508231070972017,
+        "fs": 1.25,
+        "u_pct": 0.05706846005581138,
+        "well_behaved": true,
+        "reliable": true,
+        "n_grids": 5,
+        "note": "p=0.50, Fs=1.25, sigma=2.508e-04, u=0.057% of phi_ext (reliable)"
+      },
+      "finest_mean": 0.5520557158625,
+      "finest_err_pct": 0.2308030012857074,
+      "phi_ext_err_pct": 0.0657252049945299
+    }
+  },
+  "coupling": {
+    "definition": "Cd_pressure = (p_front - p_rear)*(t/c)/(0.5*gamma*M^2); Cd_force = 2 * forceCoeffs Cd (half-domain). The two independent routes to drag should agree.",
+    "per_grid": [
+      {
+        "label": "Coarse",
+        "cd_pressure": 0.07261263559053151,
+        "cd_force": 0.07261264354899999,
+        "rel_diff_pct": 1.096017024685466e-05
+      },
+      {
+        "label": "Medium",
+        "cd_pressure": 0.0721984178481404,
+        "cd_force": 0.07219842574749999,
+        "rel_diff_pct": 1.094118100999688e-05
+      },
+      {
+        "label": "Fine",
+        "cd_pressure": 0.0724711850399806,
+        "cd_force": 0.07247119295599999,
+        "rel_diff_pct": 1.0922988759146627e-05
+      },
+      {
+        "label": "Extra-fine",
+        "cd_pressure": 0.07261924061896599,
+        "cd_force": 0.0726192485535,
+        "rel_diff_pct": 1.0926214505167592e-05
+      },
+      {
+        "label": "Ultra-fine",
+        "cd_pressure": 0.07269791291583914,
+        "cd_force": 0.072697920879,
+        "rel_diff_pct": 1.0953768180608682e-05
+      }
+    ],
+    "finest_rel_diff_pct": 1.0953768180608682e-05
+  },
+  "volume_qoi": {
+    "S_vol": {
+      "status": "absent",
+      "note": "no <prefix>_entropy.dat found; run compute_entropy.py on the reconstructed t=10 fields (Bundle B) to generate them. The other QoIs are unaffected."
+    }
+  },
+  "diagnostic_pmax": {
+    "reference_p2": 1.7065786040005793,
+    "cases": [
+      {
+        "label": "Coarse",
+        "h": 0.06091503343961163,
+        "mean": 1.9513757527250002,
+        "loc_wander_cells": 0.0
+      },
+      {
+        "label": "Medium",
+        "h": 0.030457516719805816,
+        "mean": 1.948511407775,
+        "loc_wander_cells": 0.0
+      },
+      {
+        "label": "Fine",
+        "h": 0.015228758359902908,
+        "mean": 1.9464762961250002,
+        "loc_wander_cells": 0.0
+      },
+      {
+        "label": "Extra-fine",
+        "h": 0.007614379179951454,
+        "mean": 1.9454270573999999,
+        "loc_wander_cells": 0.0
+      },
+      {
+        "label": "Ultra-fine",
+        "h": 0.003807189589975727,
+        "mean": 1.94487337805,
+        "loc_wander_cells": 0.0
+      }
+    ],
+    "triplets": [
+      {
+        "triplet": "Coarse-Medium-Fine",
+        "regime": "monotonic",
+        "p_obs": 0.4930972996975748,
+        "phi_ext": 1.9414817072343171,
+        "gci_fine_pct": 0.32074555060253324,
+        "R_fit": 1.0
+      },
+      {
+        "triplet": "Medium-Fine-Extra-fine",
+        "regime": "monotonic",
+        "p_obs": 0.9557649853179407,
+        "phi_ext": 1.9443103801141919,
+        "gci_fine_pct": 0.07175013845677511,
+        "R_fit": 1.0
+      },
+      {
+        "triplet": "Fine-Extra-fine-Ultra-fine",
+        "regime": "monotonic",
+        "p_obs": 0.9222203389758236,
+        "phi_ext": 1.9442547623238502,
+        "gci_fine_pct": 0.0397593831256276,
+        "R_fit": 1.0
+      }
+    ],
+    "finest_value": 1.94487337805,
+    "pct_above_post_shock": 13.963304912578167,
+    "within_window_localized": true,
+    "across_grid": {
+      "verdict": "mesh_locked",
+      "finest_cell_disp": 3.762333448075141,
+      "note": "mesh-locked: two finest grids 3.8 cells apart (> 2); per-pair [3.8, 3.8, 3.8, 3.8] -> location scales with h, tracks a mesh feature"
+    },
+    "lesson": "A clean monotone GCI on a pointwise extremum can be junk; the analytical reference and across-grid location drift expose it."
+  }
+}
