@@ -1,189 +1,53 @@
 
 ![foamgci_logo](media/images/foamgci_logo.png)
 
-# foamgci - Autocorrelation-aware grid-convergence verification for OpenFOAM CFD studies.
-
-`foamgci` reads OpenFOAM output and produces a complete
-grid-convergence-index (GCI) report: Roache GCI on every refinement
-triplet, an autocorrelation-corrected standard error of the mean, a KPSS
-stationarity check, an analytical cross-check, and a LaTeX table.
-
----
-
-## Where to start
-
-If you just want to see it work, you do not need OpenFOAM. The worked
-examples ship with their input data committed, so you can reproduce a full
-report from a clone in under a minute.
-
-1. Install the library: `pip install -e .` from the repo root (see
-   [Installation](#installation)).
-2. Reproduce the forward-step study: `cd examples/forwardstep_mach3/gci`
-   then `bash run_all.sh`. This reads the committed `.dat` files, writes
-   `gci_summary.json`, and renders the figures. Open the summary to see the
-   numbers and read `examples/forwardstep_mach3/README.md` for what they mean.
-3. Read the second example, `examples/wedge15Ma5/`, to see the same engine
-   applied to a different OpenFOAM output and checked against exact
-   oblique-shock theory.
-
-When you want to run it on your own case, the path is:
-
-1. Add the right function object to your `system/controlDict` (a `fieldMinMax`
-   for a pointwise extremum, or a surface area-average for an integrated
-   quantity). The two examples show both.
-2. Run your mesh-refinement hierarchy (three or four grids) and collect one
-   output file per grid.
-3. Copy the per-case driver from an example's `gci/` folder, edit `data.py` to
-   point at your files and grids, and run `analyze.py`.
-
-The library code in `foamgci/` never changes between cases. You only edit the
-small `data.py` in your case's `gci/` folder. The next section explains that
-split.
-
----
-
-## How this repository is organised (read this first)
-
-There are two things in this repo, and keeping them straight removes
-most of the confusion:
-
-| | what it is | analogy |
-|---|---|---|
-| **`foamgci/`** (repo root) | The **library**. Generic, case-agnostic, pip-installable. All the reusable math lives here: read a scalar QoI time series, compute tau_int / SEM / KPSS, run Roache GCI, classify convergence, and render text & LaTeX reports. The built-in readers support OpenFOAM `fieldMinMax.dat` (pointwise extrema), the surface-region area-average (`surfaceRegion.dat` in OpenFOAM-4.x, `surfaceFieldValue.dat` in v5.0+), and generic scalar time-series files, so the same verification core can be used with solver-independent QoI histories. | this is `numpy` |
-| **`examples/<case>/gci/`** | A **per-case driver** that *imports* the library and applies it to one case. Holds that case's grid metadata, the analysis script, and the figure scripts. | this is your `analysis.py` that does `import foamgci` |
-
-Rule of thumb: anything reusable across cases belongs in `foamgci/`;
-anything specific to one case (paths, mesh spacing, reference value,
-figure styling) belongs in that example's `gci/` folder. The package
-directory shares the repo name on purpose, `foamgci/` is exactly what
-you `import foamgci`, which is the standard Python convention.
-
-To add your own case later, copy `examples/forwardstep_mach3/`, swap the
-mesh and boundary conditions, and edit only that example's `gci/data.py`.
-The library stays untouched.
-
----
-
-## What the library computes
-
-- **Roache GCI** on every consecutive refinement triplet, using the
-  Celik et al. (2008) iterative apparent-order solve, with an explicit
-  convergence-regime classification (monotonic / oscillatory /
-  divergent / degenerate) and the asymptotic-range diagnostic
-  $R_{\mathrm{asym}}$. GCI is returned as `NaN` outside the asymptotic
-  range rather than as a misleading finite number.
-- **Geyer's integrated autocorrelation time $\tau_{\mathrm{int}}$**
-  (initial-positive-sequence estimator) and the autocorrelation-corrected
-  standard error of the mean
-  $\mathrm{SEM} = \sigma\sqrt{\tau_{\mathrm{int}}/N}$,
-  using the convention $\tau_{\mathrm{int}} = 1 + 2\sum_{k\ge1}\rho_k$
-  (so iid data give $\tau_{\mathrm{int}}=1$ and recover $\sigma/\sqrt N$).
-- **KPSS test** for stationarity of the time-averaging window (level and
-  trend variants), implemented from first principles, no `statsmodels`
-  dependency.
-- **Extremum-localization check** for pointwise QoIs: the in-window
-  spread of the extremum *location* (5th–95th percentile, in cell
-  widths). A localized QoI stays within a few cells; a maximum that
-  migrates between flow features is flagged as not pointwise-localized
-  and demoted to a diagnostic, independent of the KPSS value check.
-- **Analytical Rayleigh-Pitot reference** for cross-checking the
-  Richardson-extrapolated maximum pressure independently of the GCI
-  machinery.
-- **LaTeX `tabular` output**
-
-The motivating finding: unsteady shock-dominated CFD needs more than a single GCI number. The naive $\sigma/\sqrt N$ standard error can understate temporal sampling uncertainty when samples are serially correlated, and different extrema can behave differently under refinement. In the forward-step example, maximum pressure is the primary reference-anchored QoI, while maximum density is retained as a diagnostic QoI because its stationarity and localization behavior reveal additional shock/contact-line dynamics.
-
-Two caveats apply when interpreting GCI on unsteady, CFL-limited runs,
-spelled out in `LIMITATIONS.md`: (1) refining the mesh also refines the
-time step, so the apparent order mixes spatial and temporal error
-unless a fixed-Δt control run is performed; (2) a spatial extremum is a
-non-smooth functional, so the Richardson expansion is heuristic for
-`fieldMinMax` QoIs. An integrated QoI (a force or a surface average) is
-better posed, it has a definite continuum value and is insensitive to per-cell
-grid noise, but its order of convergence is still set by the shock-capturing
-scheme, so it must be measured, not assumed. The `wedge15Ma5` example uses one:
-an area-averaged ramp-surface pressure from the `surfaceRegion` area-average.
-
-## Installation
-
+# foamgci
+ 
+Grid-convergence (GCI) checks for OpenFOAM, with the statistics done properly:
+Roache GCI on every refinement triplet, an autocorrelation-aware standard error,
+a KPSS stationarity test, and an analytical cross-check where one exists.
+ 
+## Install
+ 
 ```bash
-pip install git+https://github.com/rithikrn/foamgci.git
-```
-
-Or, for development:
-
-```bash
-git clone https://github.com/rithikrn/foamgci.git
-cd foamgci
 pip install -e ".[dev]"
-pytest -v
+pytest -q
 ```
-
-Dependencies: NumPy (Python >= 3.10). Optional matplotlib for plotting.
-
-## Quick start (CLI)
-
+ 
+Needs NumPy (Python >= 3.10). matplotlib is optional, for figures.
+ 
+## See it work
+ 
+No OpenFOAM needed for the first two, their inputs are committed:
+ 
 ```bash
-foamgci report \
-    --case coarse:case_C/postProcessing/fieldMinMax/0/fieldMinMax.dat:0.025:4032 \
-    --case medium:case_M/postProcessing/fieldMinMax/0/fieldMinMax.dat:0.0125:16128 \
-    --case fine:case_F/postProcessing/fieldMinMax/0/fieldMinMax.dat:0.00625:64512 \
-    --case extra-fine:case_XF/postProcessing/fieldMinMax/0/fieldMinMax.dat:0.003125:258048 \
-    --field p --quantity max --window 3 10 \
-    --reference rayleigh-pitot --mach 3 --gamma 1.4 \
-    --text out/report.txt --latex out/table1.tex
+cd examples/forwardstep_mach3/gci && bash run_all.sh   # writes gci_summary.json + figures
 ```
-
-Each `--case` is `label:path:h[:n_cells]`. List cases coarse-to-fine
-(`h` strictly decreasing). `--text` / `--latex` are optional; without
-them the report just prints to the terminal. (The CLI does not draw
-figures, use the Python API or an example's figure scripts for that.)
-
-## Quick start (Python API)
-
-```python
-from foamgci import GridCase, full_report, rayleigh_pitot
-
-rep = full_report(
-    cases=[
-        GridCase("coarse",     "case_C/.../fieldMinMax.dat", h=0.025,    n_cells=4032),
-        GridCase("medium",     "case_M/.../fieldMinMax.dat", h=0.0125,   n_cells=16128),
-        GridCase("fine",       "case_F/.../fieldMinMax.dat", h=0.00625,  n_cells=64512),
-        GridCase("extra-fine", "case_XF/.../fieldMinMax.dat",h=0.003125, n_cells=258048),
-    ],
-    field="p", quantity="max", window=(3.0, 10.0),
-    reference_value=rayleigh_pitot(3.0, 1.4),
-    reference_label="Rayleigh-Pitot M=3",
-)
-print(rep.as_text())
-print(rep.as_latex())
-```
-
-## The `fieldMinMax` function object
-
-Add this block to each case's `system/controlDict`. The function-object
-name (`fieldMinMax`) sets the output folder, so the file lands at
-`postProcessing/fieldMinMax/0/fieldMinMax.dat`:
-
-```cpp
-functions
-{
-    fieldMinMax
-    {
-        type            fieldMinMax;
-        libs            ("libfieldFunctionObjects.so");
-        mode            magnitude;
-        location        true;        // record (x y z) of each extremum
-        writeControl    timeStep;
-        writeInterval   100;
-        fields          (p rho);
-    }
-}
-```
-
-This writes one row per sampled timestep with the spatial min/max of each
-field and the location of each extremum. `foamgci.reader.read_fieldminmax`
-handles both OpenFOAM dialects (combined multi-field and per-field).
+ 
+Then open `gci_summary.json` and the case README.
+ 
+## The three cases
+ 
+- **`forwardstep_mach3`** -- Mach-3 step. The template. A pointwise `max(p)` QoI.
+- **`wedge15Ma5`** -- Mach-5 wedge. Adds a surface average, checked against exact
+  oblique-shock theory.
+- **`diamond2D_Ma2`** -- Mach-2 diamond. Five grids, and a volume QoI (entropy)
+  that shows the convergence is really first order. Needs your own runs.
+## How it's split
+ 
+Two things, kept apart:
+ 
+- `foamgci/` is the **library** (case-agnostic, the thing you `import`). Don't edit it.
+- `examples/<case>/gci/` is the **driver** for one case. Edit `data.py` there.
+To add a case, copy an example folder and point its `data.py` at your files.
+ 
+## Run on your own case
+ 
+1. Add the right function object to `system/controlDict` (see the examples).
+2. Run your grids, collect one output file per grid.
+3. Copy an example's `gci/`, edit `data.py`, run `analyze.py`.
+The Python API and CLI live behind `from foamgci import full_report` and
+`foamgci report --help`. The examples show both in context.
 
 ## Repository layout
 
@@ -200,80 +64,12 @@ foamgci/
 │   └── plot.py                    #   optional matplotlib figure
 ├── tests/                         # pytest suite, anchored to Celik (2008)
 ├── examples/
-│   ├── forwardstep_mach3/         # ONE worked case (the template)
-│   │   ├── 0/ constant/ system/   #   the committed OpenFOAM case (fine grid)
-│   │   ├── submit.sh              #   SLURM runner
-│   │   ├── README.md              #   how to run THIS case end-to-end
-│   │   └── gci/                   #   THIS case's analysis driver
-│   │       ├── data.py            #     grid metadata (edit this per case)
-│   │       ├── analyze.py         #     reads gci/data/*.dat -> gci_summary.json
-│   │       ├── make_*.py          #     make figures
-│   │       ├── run_all.sh         #     analyze + figures
-│   │       └── data/              #     expected coarse/medium/fine/extrafine QoI inputs
-│   └── wedge15Ma5/                # SECOND case: Mach-5 15-deg wedge oblique shock
-│       ├── 0/ constant/ system/   #   committed case (fine grid); controlDict writes
-│       │                          #   surfaceFieldValue AND fieldMinMax
-│       ├── README.md              #   dual-output (two QoI) walkthrough
-│       └── gci/                   #   driver + gci/oblique_shock.py analytical reference
-│           └── data/              #     eight inputs (surfaceFieldValue + fieldMinMax / grid)
+│   ├── forwardstep_mach3/         
+|   ├── wedge15Ma5/                
+│   └── diamond2D_Ma2/             
 ├── README.md  LIMITATIONS.md  CONTRIBUTING.md  CHANGELOG.md  LICENSE
 ├── pyproject.toml
 └── .github/workflows/tests.yml    # CI: Linux + macOS, Py 3.10-3.12
-```
-
-## Worked example
-
-### First example: `forwardstep_mach3`
-
-`examples/forwardstep_mach3/` is the Mach-3 Woodward-Colella
-forward-facing step, used as the template for every future case. It
-ships the full OpenFOAM case (the fine grid) and the analysis driver.
-The four `fieldMinMax.dat` inputs under `gci/data/` are committed, so the analysis can be reproduced from a fresh clone without rerunning OpenFOAM. Running the OpenFOAM cases is only needed if you want to regenerate the input data.
-
-See **`examples/forwardstep_mach3/README.md`** for step-by-step run
-instructions. 
-
-### Second example: `wedge15Ma5`
-
-`examples/wedge15Ma5/` is a Mach-5, 15-degree wedge oblique shock. It exists to
-show the workflow transferring to a different OpenFOAM output and to more than
-one output at once. Its `controlDict` writes both a surface-region area-average
-(`surfaceRegion` in OpenFOAM-4.x; `surfaceFieldValue` in v5.0+) of the ramp
-wall pressure, the primary, reference-anchored QoI, compared to the exact
-oblique-shock `p2/p1`, and a `fieldMinMax` (`max(p)`, the secondary
-diagnostic, the same output the forward step used). The analysis reads both per
-grid and reports the contrast: the surface integral is a better-posed GCI target,
-while the pointwise extremum sits on the post-shock plateau and is flagged
-non-localized. See **`examples/wedge15Ma5/README.md`**.
-
-## Output format
-
-`foamgci report` prints a per-grid statistics table and the GCI block.
-The numbers below are a synthetic illustration (not solver output); your
-run's exact values depend on the solver, scheme, and time step you used.
-Note that `N` roughly doubles per refinement level: with
-`writeControl timeStep` the sampling cadence follows the CFL-limited
-time step, which halves with `h`.
-
-```
-========================================================================
-foamgci V&V report — field 'p', quantity 'max', window [3, 10]
-========================================================================
-
-Per-grid time-averaged statistics:
-  label        N_cells       h     N    mean     std  tau_int     SEM  N_eff   KPSS_p
-  coarse          4032   0.025   110  11.986  0.0205     3.37  0.0036     33  >=0.100
-  medium         16128  0.0125   210  12.045  0.0205     2.21  0.0021     95  >=0.100
-  fine           64512 0.00625   420  12.074  0.0192     2.13  0.0014    197  >=0.100
-  extra-fine    258048 0.003125  840  12.083  0.0203     3.70  0.0013    227  >=0.100
-
-Roache GCI (triplet medium, fine, extra-fine):
-      regime                   = monotonic
-      apparent order p-hat     = 1.72
-      Richardson phi_exact     = 12.0871
-      GCI_fine_21              = 0.0401 %
-      asymptotic ratio (~1)    = 1.000
-========================================================================
 ```
 
 ## Citing
