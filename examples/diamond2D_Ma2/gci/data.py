@@ -89,7 +89,7 @@ class GridSpec:
     # one .dat per QoI per grid (see system/controlDict function objects)
     @property
     def force_path(self) -> Path:
-        return DATA_DIR / f"{self.prefix}_forceCoeffs.dat"
+        return DATA_DIR / f"{self.prefix}_coefficient.dat"
 
     @property
     def pfront_path(self) -> Path:
