@@ -1,0 +1,4 @@
+# specific-entropy volume integral (half-domain), native-cell volume-weighted
+# deltaS = Cv*ln(p/pInf) - Cp*ln(rho/rhoInf); Cv=1.78571 Cp=2.5 pInf=1 rhoInf=1.4
+# t=10  n_cells=1120
+0.005790894472
