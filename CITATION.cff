@@ -1,13 +1,14 @@
-cff-version: 1.2.0
-message: "If you use this software, please cite it using the metadata from this file."
-title: foamgci
+abstract: '<p><strong>Full Changelog</strong>: https://github.com/rithikrn/foamgci/compare/v3.5.0...v3.6.0</p>'
 authors:
-  - given-names: "Rithik R"
-    family-names: Nambiar
+- family-names: Nambiar
+  given-names: Rithik R
+cff-version: 1.2.0
+date-released: '2026-07-21'
+doi: 10.5281/zenodo.21468148
+license:
+- mit
+message: If you use this software, please cite it using the metadata from this file.
+repository-code: https://github.com/rithikrn/foamgci/tree/v3.6.0
+title: foamgci
 type: software
-version: 3.5.0
-date-released: '2026-06-23'
-doi: 10.5281/zenodo.20946450
-license: MIT
-repository-code: "https://github.com/rithikrn/foamgci"
-url: "https://github.com/rithikrn/foamgci"
+version: v3.6.0
