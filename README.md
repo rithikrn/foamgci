@@ -83,15 +83,15 @@ acknowledgement:
 Or as BibTeX:
 
 ```bibtex
-@software{nambiar_2026_20946450,
+@software{nambiar_2026_21468148,
   author       = {Nambiar, Rithik R},
   title        = {foamgci},
-  month        = jun,
+  month        = jul,
   year         = 2026,
   publisher    = {Zenodo},
-  version      = {v3.5.0},
-  doi          = {10.5281/zenodo.20946450},
-  url          = {https://doi.org/10.5281/zenodo.20946450},
+  version      = {v3.6.0},
+  doi          = {10.5281/zenodo.21468148},
+  url          = {https://doi.org/10.5281/zenodo.21468148},
 }
 ```
 
