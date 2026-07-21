@@ -1,52 +1,30 @@
 # Contributing
 
-Bug reports and PRs welcome. The project is deliberately small, so
-new functionality should be argued from a concrete CFD V&V use
-case, not from generality.
+PRs and bug reports welcome. It's a small tool on purpose, so new features
+should come from a real CFD V&V need, not from "it'd be more general."
 
-## Development setup
-
-```bash
-git clone https://github.com/rithikrn/foamgci.git
-cd foamgci
-python -m pip install -e ".[dev]"
-pytest -v
-```
-
-## Running tests locally
-
-The suite is pure-Python NumPy and runs in a few seconds:
+## Setup
 
 ```bash
-pytest -v                # full suite
-pytest tests/test_gci.py # one file
-pytest -k celik          # by keyword
+pip install -e ".[dev]"
+pytest -q
 ```
-
-CI runs on Linux + macOS, Python 3.10–3.12, on every push and PR.
 
 ## Style
 
-- PEP 8 with line length 88 (Black-compatible).
-- Type-annotated public APIs.
-- Docstrings cite the V&V or statistics literature for every
-  non-obvious formula. If you are adding a new method, also add a
-  reference in the relevant module docstring at the top of the file.
-- Tests anchored to a published numerical benchmark whenever
-  possible (e.g. Celik et al. 2008 Example 1 for GCI).
+- PEP 8, line length 88 (Black-friendly).
+- Type-annotate public functions.
+- If a formula isn't obvious, cite the paper in the module docstring.
+- New methods get a test anchored to a published benchmark where possible
+  (e.g. Celik 2008 for GCI).
 
 ## Filing an issue
 
-Include:
-- A short `fieldMinMax.dat` excerpt (the first ~20 lines is plenty)
-- The command line you ran
-- The OpenFOAM version, solver name, and `system/controlDict` excerpt
-  (`startTime`, `endTime`, `deltaT`, `writeControl`, `writeInterval`,
-  and the `fieldMinMax` function-object block)
+Paste the first ~20 lines of your `.dat`, the command you ran, and your
+OpenFOAM version + the relevant `controlDict` block.
 
-## Pull-request checklist
+## PR checklist
 
-- [ ] Tests added or updated and the suite passes locally.
-- [ ] `CHANGELOG.md` entry under an `## [Unreleased]` heading.
-- [ ] No new runtime dependencies without discussion (the
-      `numpy`-only core is a deliberate design choice).
+- [ ] Tests pass locally.
+- [ ] `CHANGELOG.md` entry.
+- [ ] No new runtime deps without discussing it (NumPy-only core is deliberate).
