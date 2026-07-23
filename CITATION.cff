@@ -1,7 +1,9 @@
 abstract: '<p><strong>Full Changelog</strong>: https://github.com/rithikrn/foamgci/compare/v3.5.0...v3.6.0</p>'
+title: "foamgci: gated grid-convergence and time-averaging uncertainty analysis for CFD"
 authors:
 - family-names: Nambiar
   given-names: Rithik R
+  orcid: "https://orcid.org/0009-0002-9722-5136"
 cff-version: 1.2.0
 date-released: '2026-07-21'
 doi: 10.5281/zenodo.21468148
@@ -12,3 +14,9 @@ repository-code: https://github.com/rithikrn/foamgci/tree/v3.6.0
 title: foamgci
 type: software
 version: v3.6.0
+keywords:
+  - computational fluid dynamics
+  - solution verification
+  - grid convergence index
+  - Richardson extrapolation
+  - uncertainty quantification
